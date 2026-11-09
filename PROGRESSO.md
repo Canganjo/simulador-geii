@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-09 — Tarefa 4.
+Última atualização: 2026-11-09 — tarefa extra: licença.
 
 | #   | Tarefa                                             | Etapa | Estado   | Ramo                          | PR / issue                         |
 | --- | -------------------------------------------------- | ----- | -------- | ----------------------------- | ---------------------------------- |
@@ -14,6 +14,12 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | 6   | Biblioteca MVP em `src/core/library`               | E4    | em curso | `feature/biblioteca-mvp`      | issue #3 (rascunho em `git stash`) |
 | 7   | Grafo do circuito em `src/core/graph`              | E5    | a fazer  | `feature/grafo`               | —                                  |
 
+### Tarefas extra
+
+| Tarefa                                           | Estado     | Ramo            | PR     |
+| ------------------------------------------------ | ---------- | --------------- | ------ |
+| Licença "todos os direitos reservados" (LICENSE) | em revisão | `chore/licenca` | PR #11 |
+
 ## Já integrado no `main`
 
 | Commit    | O quê                                                               | PR  |
@@ -22,4 +28,4 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `66b7a66` | Layout E1: barra, menu recolhível, cena ortográfica, botão de conta | #2  |
 | `7ff0fcd` | `.gitignore` + PROGRESSO.md → tag `v0.1` (fim da E0)                | #8  |
 | `d175b3a` | Painéis de propriedades e resultados recolhíveis (Tarefa 3)         | #9  |
-| (squash)  | Testes de referência 1 a 5 com tolerância de 0,1 % (Tarefa 4)       | #10 |
+| `e18e08f` | Testes de referência 1 a 5 com tolerância de 0,1 % (Tarefa 4)       | #10 |
