@@ -26,6 +26,58 @@ test('o menu de componentes recolhe e volta a abrir', async ({ page }) => {
   await expect(menu.getByText('Resistência')).toBeVisible()
 })
 
+test('o painel de propriedades recolhe e volta a abrir', async ({ page }) => {
+  await page.goto('/')
+  const panel = page.getByRole('complementary', { name: 'Propriedades' })
+  const text = panel.getByText('Seleciona um componente')
+  await expect(text).toBeVisible()
+
+  await panel.getByRole('button', { name: 'Recolher propriedades' }).click()
+  await expect(text).toBeHidden()
+
+  await panel.getByRole('button', { name: 'Abrir propriedades' }).click()
+  await expect(text).toBeVisible()
+})
+
+test('o painel de resultados recolhe e volta a abrir', async ({ page }) => {
+  await page.goto('/')
+  const panel = page.getByRole('region', { name: 'Resultados' })
+  const text = panel.getByText('para ver a tensão (U)')
+  await expect(text).toBeVisible()
+
+  await panel.getByRole('button', { name: 'Recolher resultados' }).click()
+  await expect(text).toBeHidden()
+  await expect(panel.getByRole('heading', { name: 'Resultados' })).toBeVisible() // o cabeçalho fica
+
+  await panel.getByRole('button', { name: 'Abrir resultados' }).click()
+  await expect(text).toBeVisible()
+})
+
+test('a cena ocupa o espaço libertado pelos painéis recolhidos', async ({ page }) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  const before = await scene.boundingBox()
+
+  await page.getByRole('button', { name: 'Recolher menu' }).click()
+  await page.getByRole('button', { name: 'Recolher propriedades' }).click()
+  await page.getByRole('button', { name: 'Recolher resultados' }).click()
+
+  // Os painéis têm uma pequena animação: espera até a cena crescer.
+  await expect
+    .poll(async () => (await scene.boundingBox())?.width ?? 0)
+    .toBeGreaterThan((before?.width ?? 0) + 300) // menu 240→48 + propriedades 256→48 ≈ +400 px
+  await expect
+    .poll(async () => (await scene.boundingBox())?.height ?? 0)
+    .toBeGreaterThan((before?.height ?? 0) + 100) // resultados 160→36 ≈ +124 px
+})
+
+test('o estado dos painéis mantém-se ao recarregar a página', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Recolher propriedades' }).click()
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Abrir propriedades' })).toBeVisible()
+})
+
 test('o botão de conta mostra as iniciais e permite mudar o nome', async ({ page }) => {
   await page.goto('/')
   const account = page.getByRole('button', { name: 'Conta: Convidado' })
