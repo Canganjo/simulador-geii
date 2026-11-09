@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-10 — issue #17 (LED).
+Última atualização: 2026-11-10 — painéis redimensionáveis.
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -24,9 +24,10 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas extra
 
-| Tarefa                                           | Estado | Ramo            | PR     |
-| ------------------------------------------------ | ------ | --------------- | ------ |
-| Licença "todos os direitos reservados" (LICENSE) | feito  | `chore/licenca` | PR #11 |
+| Tarefa                                                    | Estado | Ramo                               | PR     |
+| --------------------------------------------------------- | ------ | ---------------------------------- | ------ |
+| Licença "todos os direitos reservados" (LICENSE)          | feito  | `chore/licenca`                    | PR #11 |
+| Painéis redimensionáveis (puxar a borda, como no VS Code) | feito  | `feature/paineis-redimensionaveis` | PR #21 |
 
 ## Já integrado no `main`
 
@@ -43,4 +44,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `ad6ec46` | Grafo: terminais ligados → nós elétricos (Tarefa 7)                 | #14 |
 | `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)       | #18 |
 | `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)             | #19 |
-| (squash)  | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17) | #20 |
+| `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17) | #20 |
+| (squash)  | Painéis redimensionáveis (tarefa extra)                             | #21 |

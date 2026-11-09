@@ -6,3 +6,17 @@ body,
   height: 100%;
   margin: 0;
 }
+
+/* Enquanto se puxa a borda de um painel (ResizeHandle): o painel segue o rato sem animação,
+   o texto não fica selecionado e o cursor mantém-se, mesmo fora da borda. */
+.is-resizing,
+.is-resizing * {
+  transition: none !important;
+  user-select: none;
+}
+.is-resizing.cursor-col * {
+  cursor: col-resize !important;
+}
+.is-resizing.cursor-row * {
+  cursor: row-resize !important;
+}
