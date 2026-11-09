@@ -105,6 +105,62 @@ test('a pesquisa filtra os componentes', async ({ page }) => {
   await expect(menu.getByText('Resistência')).toBeHidden()
 })
 
+test('puxar a borda do menu muda a largura, que se mantém ao recarregar', async ({ page }) => {
+  await page.goto('/')
+  const menu = page.getByRole('complementary', { name: 'Menu de componentes' })
+  const handle = page.getByRole('separator', { name: 'Redimensionar menu' })
+  const before = (await menu.boundingBox())?.width ?? 0
+  expect(before).toBeCloseTo(240, 0)
+
+  // Puxar a borda 100 px para a direita
+  const box = await handle.boundingBox()
+  if (!box) throw new Error('borda do menu não encontrada')
+  const y = box.y + box.height / 2
+  await page.mouse.move(box.x + box.width / 2, y)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2 + 100, y, { steps: 5 })
+  await page.mouse.up()
+  await expect.poll(async () => (await menu.boundingBox())?.width ?? 0).toBeCloseTo(340, 0)
+
+  await page.reload()
+  await expect.poll(async () => (await menu.boundingBox())?.width ?? 0).toBeCloseTo(340, 0)
+
+  // Duplo clique → tamanho por defeito
+  await page.getByRole('separator', { name: 'Redimensionar menu' }).dblclick()
+  await expect.poll(async () => (await menu.boundingBox())?.width ?? 0).toBeCloseTo(240, 0)
+})
+
+test('as setas do teclado mudam o tamanho dos resultados e das propriedades', async ({ page }) => {
+  await page.goto('/')
+  const results = page.getByRole('region', { name: 'Resultados' })
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+
+  // Resultados: seta para cima → mais alto (16 px por tecla)
+  await page.getByRole('separator', { name: 'Redimensionar resultados' }).focus()
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('ArrowUp')
+  await expect.poll(async () => (await results.boundingBox())?.height ?? 0).toBeCloseTo(192, 0)
+
+  // Propriedades (à direita): seta para a esquerda → mais largo
+  await page.getByRole('separator', { name: 'Redimensionar propriedades' }).focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect.poll(async () => (await props.boundingBox())?.width ?? 0).toBeCloseTo(272, 0)
+})
+
+test('com o painel recolhido a borda desaparece e o tamanho volta ao reabrir', async ({ page }) => {
+  await page.goto('/')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  await page.getByRole('separator', { name: 'Redimensionar propriedades' }).focus()
+  await page.keyboard.press('End') // máximo: 520 px
+  await expect.poll(async () => (await props.boundingBox())?.width ?? 0).toBeCloseTo(520, 0)
+
+  await page.getByRole('button', { name: 'Recolher propriedades' }).click()
+  await expect(page.getByRole('separator', { name: 'Redimensionar propriedades' })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Abrir propriedades' }).click()
+  await expect.poll(async () => (await props.boundingBox())?.width ?? 0).toBeCloseTo(520, 0)
+})
+
 test('Desfazer e Refazer estão desativados no início', async ({ page }) => {
   await page.goto('/')
   const actions = page.getByRole('navigation', { name: 'Ações' })

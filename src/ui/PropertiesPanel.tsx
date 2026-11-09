@@ -1,20 +1,22 @@
 import { PanelRightClose, PanelRightOpen, SlidersHorizontal } from 'lucide-react'
+import { COLLAPSED_SIZE } from '../store/panelSizes'
 
 interface Props {
   open: boolean
   onToggle: () => void
+  /** Largura quando aberto, em px (puxa-se a borda da esquerda para mudar). */
+  width: number
 }
 
 /** Painel de propriedades (direita). Recolhe para uma faixa estreita, como o menu da esquerda. */
-export function PropertiesPanel({ open, onToggle }: Props) {
+export function PropertiesPanel({ open, onToggle, width }: Props) {
   const label = open ? 'Recolher propriedades' : 'Abrir propriedades'
 
   return (
     <aside
       aria-label="Propriedades"
-      className={`flex shrink-0 flex-col border-l border-slate-700 bg-slate-800 transition-[width] ${
-        open ? 'w-64' : 'w-12'
-      }`}
+      style={{ width: open ? width : COLLAPSED_SIZE.properties }}
+      className="flex shrink-0 flex-col overflow-hidden border-l border-slate-700 bg-slate-800 transition-[width]"
     >
       <div className="flex h-10 items-center justify-between px-2">
         <button
