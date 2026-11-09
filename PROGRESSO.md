@@ -16,9 +16,9 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas extra
 
-| Tarefa                                           | Estado     | Ramo            | PR     |
-| ------------------------------------------------ | ---------- | --------------- | ------ |
-| Licença "todos os direitos reservados" (LICENSE) | em revisão | `chore/licenca` | PR #11 |
+| Tarefa                                           | Estado | Ramo            | PR     |
+| ------------------------------------------------ | ------ | --------------- | ------ |
+| Licença "todos os direitos reservados" (LICENSE) | feito  | `chore/licenca` | PR #11 |
 
 ## Já integrado no `main`
 
