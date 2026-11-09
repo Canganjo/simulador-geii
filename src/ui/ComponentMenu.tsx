@@ -1,6 +1,7 @@
 import { PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
 import { useState } from 'react'
 import { catalogByCategory } from '../core/library'
+import { COMPONENT_DRAG_TYPE, requestPlaceComponent } from '../scene/componentDrag'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
 import { IecSymbol } from './IecSymbol'
 
@@ -64,10 +65,18 @@ export function ComponentMenu({ open, onToggle, width }: Props) {
                 <ul>
                   {category.items.map((item) => (
                     <li key={item.kind}>
-                      {/* Arrastar para a zona livre chega na etapa E2. */}
+                      {/* Arrastar para a zona livre cria o componente onde se larga;
+                          um clique cria-o no centro da vista. */}
                       <button
                         type="button"
-                        className="flex w-full items-center gap-3 rounded px-2 py-1.5 text-left text-sm text-slate-200 hover:bg-slate-700"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData(COMPONENT_DRAG_TYPE, item.kind)
+                          e.dataTransfer.effectAllowed = 'copy'
+                        }}
+                        onClick={() => requestPlaceComponent(item.kind)}
+                        title={`Arrasta para a zona livre (ou clica) para adicionar: ${item.label}`}
+                        className="flex w-full cursor-grab items-center gap-3 rounded px-2 py-1.5 text-left text-sm text-slate-200 hover:bg-slate-700 active:cursor-grabbing"
                       >
                         <IecSymbol kind={item.kind} className="h-5 w-8 text-amber-300" />
                         {item.label}
