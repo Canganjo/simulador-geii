@@ -166,3 +166,79 @@ describe('solveDc — erros', () => {
     expect(s.error.code).toBe('invalid-netlist')
   })
 })
+
+/**
+ * Tolerância relativa aceite na folha "Testes de referência" da planilha (célula C2 = 0,001 = 0,1 %).
+ * Verifica |valor − teórico| / |teórico| ≤ tolerância.
+ */
+const REFERENCE_TOLERANCE = 0.001
+
+function expectRelative(actual: number, theoretical: number, tolerance = REFERENCE_TOLERANCE) {
+  const relativeError = Math.abs(actual - theoretical) / Math.abs(theoretical)
+  expect(
+    relativeError,
+    `valor ${actual}, teórico ${theoretical}, erro relativo ${(relativeError * 100).toFixed(4)} %`,
+  ).toBeLessThanOrEqual(tolerance)
+}
+
+describe('Testes de referência (folha "Testes de referência" da planilha)', () => {
+  // Circuitos 1, 2 e 5: divisor de tensão 12 V, R1 = 1 kΩ (em cima), R2 = 2 kΩ (em baixo)
+  const divider: Netlist = {
+    nodeCount: 2,
+    elements: [
+      { type: 'voltage-source', id: 'V1', plus: 1, minus: 0, voltage: 12 },
+      { type: 'resistor', id: 'R1', nodeA: 1, nodeB: 2, resistance: 1000 },
+      { type: 'resistor', id: 'R2', nodeA: 2, nodeB: 0, resistance: 2000 },
+    ],
+  }
+
+  // Circuitos 3 e 4: duas resistências de 1 kΩ em paralelo sob 10 V
+  const parallel: Netlist = {
+    nodeCount: 1,
+    elements: [
+      { type: 'voltage-source', id: 'V1', plus: 1, minus: 0, voltage: 10 },
+      { type: 'resistor', id: 'R1', nodeA: 1, nodeB: 0, resistance: 1000 },
+      { type: 'resistor', id: 'R2', nodeA: 1, nodeB: 0, resistance: 1000 },
+    ],
+  }
+
+  it('1 — divisor 12 V: tensão no nó do meio = 8 V', () => {
+    // V(N2) = U · R2 / (R1 + R2) = 12 · 2000 / 3000 = 8 V
+    const s = expectOk(solveDc(divider))
+    expectRelative(s.nodeVoltages[2], 8)
+  })
+
+  it('2 — divisor 12 V: corrente = 4 mA', () => {
+    // I = U / (R1 + R2) = 12 / 3000 = 0,004 A
+    const s = expectOk(solveDc(divider))
+    expectRelative(result(s, 'R1').current, 0.004)
+    expectRelative(result(s, 'V1').current, 0.004) // a mesma corrente sai da fonte
+  })
+
+  it('3 — paralelo 1 kΩ ∥ 1 kΩ sob 10 V: corrente total = 20 mA', () => {
+    // I_total = I_R1 + I_R2 = 10/1000 + 10/1000 = 0,02 A (lei dos nós)
+    const s = expectOk(solveDc(parallel))
+    expectRelative(result(s, 'V1').current, 0.02)
+  })
+
+  it('4 — paralelo 1 kΩ ∥ 1 kΩ sob 10 V: resistência equivalente = 500 Ω', () => {
+    // À mão:  1/Req = 1/R1 + 1/R2 = 1/1000 + 1/1000 = 2/1000  →  Req = 500 Ω
+    //         (ou Req = R1·R2 / (R1 + R2) = 1 000 000 / 2000 = 500 Ω)
+    // Simulador: Req = V / I_total, com I_total = corrente fornecida pela fonte
+    //         = 10 V / 0,02 A = 500 Ω
+    const s = expectOk(solveDc(parallel))
+    const v = result(s, 'V1').voltage
+    const iTotal = result(s, 'V1').current
+    expectRelative(v / iTotal, 500)
+  })
+
+  it('5 — série 12 V, R1 + R2: potência em R2 = 32 mW', () => {
+    // P_R2 = R2 · I² = 2000 · 0,004² = 0,032 W   (ou U_R2 · I = 8 · 0,004)
+    const s = expectOk(solveDc(divider))
+    expectRelative(result(s, 'R2').power, 0.032)
+  })
+
+  // Ainda não testáveis: o solver ainda não tem LED nem interruptor (etapa E6).
+  it.todo('6 — demo 12 V + R1 = 470 Ω + LED (Vf = 2 V): corrente no LED = 21,28 mA')
+  it.todo('7 — circuito aberto (interruptor aberto), 12 V + 1 kΩ: corrente = 0 A')
+})
