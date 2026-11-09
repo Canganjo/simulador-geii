@@ -1,6 +1,7 @@
 {
   "name": "simulador-geii",
   "private": true,
+  "license": "UNLICENSED",
   "version": "0.0.0",
   "description": "Simulador 2.5D de Circuitos GEII — simulador pedagógico de circuitos elétricos (MVP DC).",
   "type": "module",

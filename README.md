@@ -115,6 +115,11 @@ Resumo (detalhes em [CONTRIBUTING.md](CONTRIBUTING.md)):
 
 Ninguém faz push direto para o `main`.
 
+## Licença
+
+Todos os direitos reservados: o código pode ser consultado para avaliação, mas não pode ser copiado,
+modificado nem redistribuído sem autorização escrita do autor. Ver [LICENSE](LICENSE).
+
 ## Documentação
 
 - [Plano do projeto](docs/plano-simulador-geii.md)
