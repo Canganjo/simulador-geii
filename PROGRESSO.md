@@ -16,11 +16,11 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas seguintes (issues da E5)
 
-| Issue | Tarefa                                         | Etapa | Estado  | Ramo              | PR     |
-| ----- | ---------------------------------------------- | ----- | ------- | ----------------- | ------ |
-| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito   | `feature/netlist` | PR #18 |
-| #16   | Validações antes do cálculo                    | E5    | a fazer | —                 | —      |
-| #17   | LED no modelo simples (Vf + Rs)                | E5    | a fazer | —                 | —      |
+| Issue | Tarefa                                         | Etapa | Estado  | Ramo                 | PR     |
+| ----- | ---------------------------------------------- | ----- | ------- | -------------------- | ------ |
+| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito   | `feature/netlist`    | PR #18 |
+| #16   | Validações antes do cálculo (erros e avisos)   | E5    | feito   | `feature/validacoes` | PR #19 |
+| #17   | LED no modelo simples (Vf + Rs)                | E5    | a fazer | —                    | —      |
 
 ### Tarefas extra
 
