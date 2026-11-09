@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-10 — issue #5 (arrastar componentes).
+Última atualização: 2026-11-10 — issue #6 (selecionar, mover, rodar, apagar).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -23,6 +23,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #17   | LED no modelo simples (Vf + Rs) · teste 6 OK       | E5    | feito  | `feature/led-simples`          | PR #20 |
 | #4    | Estado do circuito com Zustand + zundo             | E2    | feito  | `feature/estado-circuito`      | PR #22 |
 | #5    | Arrastar do menu para a zona livre (snap à grelha) | E2    | feito  | `feature/arrastar-componentes` | PR #23 |
+| #6    | Selecionar, mover, rodar, duplicar e apagar        | E2    | feito  | `feature/selecao-edicao`       | PR #24 |
 
 ### Tarefas extra
 
@@ -49,4 +50,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17) | #20 |
 | `2d4617e` | Painéis redimensionáveis (tarefa extra)                             | #21 |
 | `44e3b7e` | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)    | #22 |
-| (squash)  | Arrastar componentes do menu para a zona livre (issue #5)           | #23 |
+| `207fe51` | Arrastar componentes do menu para a zona livre (issue #5)           | #23 |
+| (squash)  | Selecionar, mover, rodar, duplicar e apagar (issue #6)              | #24 |
