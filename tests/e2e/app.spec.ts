@@ -104,3 +104,10 @@ test('a pesquisa filtra os componentes', async ({ page }) => {
   await expect(menu.getByText('Lâmpada')).toBeVisible()
   await expect(menu.getByText('Resistência')).toBeHidden()
 })
+
+test('Desfazer e Refazer estão desativados no início', async ({ page }) => {
+  await page.goto('/')
+  const actions = page.getByRole('navigation', { name: 'Ações' })
+  await expect(actions.getByRole('button', { name: 'Desfazer' })).toBeDisabled()
+  await expect(actions.getByRole('button', { name: 'Refazer' })).toBeDisabled()
+})
