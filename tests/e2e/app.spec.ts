@@ -26,6 +26,25 @@ test('o menu de componentes recolhe e volta a abrir', async ({ page }) => {
   await expect(menu.getByText('Resistência')).toBeVisible()
 })
 
+test('o botão de conta mostra as iniciais e permite mudar o nome', async ({ page }) => {
+  await page.goto('/')
+  const account = page.getByRole('button', { name: 'Conta: Convidado' })
+  await expect(account).toContainText('CO')
+
+  await account.click()
+  const menu = page.getByRole('menu', { name: 'Menu da conta' })
+  await expect(menu).toBeVisible()
+  await expect(menu).toContainText('@Convidado')
+  await expect(menu.getByRole('menuitem', { name: 'Terminar sessão' })).toBeVisible()
+  await menu.getByRole('button', { name: 'Mudar o nome' }).click()
+  await menu.getByLabel('Nome').fill('Ana Maria Silva')
+  await menu.getByRole('button', { name: 'Guardar' }).click()
+
+  await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Conta: Ana Maria Silva' })).toContainText('AS')
+})
+
 test('a pesquisa filtra os componentes', async ({ page }) => {
   await page.goto('/')
   const menu = page.getByRole('complementary', { name: 'Menu de componentes' })

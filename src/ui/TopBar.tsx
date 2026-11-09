@@ -10,6 +10,7 @@ import {
   Undo2,
   type LucideIcon,
 } from 'lucide-react'
+import { AccountMenu } from './AccountMenu'
 
 interface Action {
   label: string
@@ -36,7 +37,7 @@ const GROUPS: Action[][] = [
 
 export function TopBar() {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-slate-700 bg-slate-800 px-3">
+    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-700 bg-slate-800 px-3">
       <span className="font-semibold tracking-tight text-slate-100">Simulador 2.5D GEII</span>
 
       <nav aria-label="Ações" className="flex items-center gap-1">
@@ -61,14 +62,17 @@ export function TopBar() {
         ))}
       </nav>
 
-      <button
-        type="button"
-        title="Ajuda"
-        className="ml-auto rounded p-1.5 text-slate-300 hover:bg-slate-700"
-      >
-        <CircleHelp className="size-5" aria-hidden />
-        <span className="sr-only">Ajuda</span>
-      </button>
+      <div className="ml-auto flex items-center gap-2">
+        <button
+          type="button"
+          title="Ajuda"
+          className="rounded p-1.5 text-slate-300 hover:bg-slate-700"
+        >
+          <CircleHelp className="size-5" aria-hidden />
+          <span className="sr-only">Ajuda</span>
+        </button>
+        <AccountMenu />
+      </div>
     </header>
   )
 }
