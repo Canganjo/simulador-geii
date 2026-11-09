@@ -160,3 +160,10 @@ test('com o painel recolhido a borda desaparece e o tamanho volta ao reabrir', a
   await page.getByRole('button', { name: 'Abrir propriedades' }).click()
   await expect.poll(async () => (await props.boundingBox())?.width ?? 0).toBeCloseTo(520, 0)
 })
+
+test('Desfazer e Refazer estão desativados no início', async ({ page }) => {
+  await page.goto('/')
+  const actions = page.getByRole('navigation', { name: 'Ações' })
+  await expect(actions.getByRole('button', { name: 'Desfazer' })).toBeDisabled()
+  await expect(actions.getByRole('button', { name: 'Refazer' })).toBeDisabled()
+})

@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-10 — painéis redimensionáveis.
+Última atualização: 2026-11-10 — issue #4 (estado do circuito) e painéis redimensionáveis.
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -16,11 +16,12 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas seguintes (issues da E5)
 
-| Issue | Tarefa                                         | Etapa | Estado | Ramo                  | PR     |
-| ----- | ---------------------------------------------- | ----- | ------ | --------------------- | ------ |
-| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito  | `feature/netlist`     | PR #18 |
-| #16   | Validações antes do cálculo (erros e avisos)   | E5    | feito  | `feature/validacoes`  | PR #19 |
-| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK   | E5    | feito  | `feature/led-simples` | PR #20 |
+| Issue | Tarefa                                         | Etapa | Estado | Ramo                      | PR     |
+| ----- | ---------------------------------------------- | ----- | ------ | ------------------------- | ------ |
+| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito  | `feature/netlist`         | PR #18 |
+| #16   | Validações antes do cálculo (erros e avisos)   | E5    | feito  | `feature/validacoes`      | PR #19 |
+| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK   | E5    | feito  | `feature/led-simples`     | PR #20 |
+| #4    | Estado do circuito com Zustand + zundo         | E2    | feito  | `feature/estado-circuito` | PR #22 |
 
 ### Tarefas extra
 
@@ -46,3 +47,4 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)             | #19 |
 | `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17) | #20 |
 | (squash)  | Painéis redimensionáveis (tarefa extra)                             | #21 |
+| (squash)  | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)    | #22 |
