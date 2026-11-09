@@ -9,7 +9,7 @@
  */
 
 import type { Project, Terminal, TerminalId, Wire } from '../model'
-import { GROUND_NODE, type NodeIndex } from '../netlist'
+import { GROUND_NODE, type NodeIndex } from '../netlist/types'
 
 export interface CircuitNodes {
   /** Nó de cada terminal: "c3:+" → 2. Todos os terminais do projeto estão aqui. */
