@@ -7,6 +7,41 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-008 · 2026-11-09 · Formatos de ficheiro, exportações e distribuição 🟡 (a validar em reunião)
+
+Detalha e alarga a D-004.
+
+- **Projeto guardado em JSON**, com a extensão **`.geii.json`** (ex.: `divisor-12V.geii.json`):
+  - campo **`version`** no topo (hoje `1`), para conseguir abrir ficheiros antigos depois de o formato
+    mudar (migração);
+  - **validado com Zod** ao abrir: um ficheiro estragado ou de outra versão dá uma mensagem clara, em vez
+    de "partir" a aplicação.
+- **Guarda só o circuito, não os resultados:**
+  - componentes (tipo, nome, valores elétricos, posição, rotação) e fios **pelos IDs dos terminais**
+    (`"c3:+"`), nunca por posições;
+  - os resultados (U, I, P) **não se guardam**: recalculam-se ao carregar em Simular.
+- **Exportações futuras, por prioridade:**
+  1. **netlist SPICE `.cir`** — abrir o mesmo circuito no LTspice e comparar os resultados com o nosso
+     solver (verificação independente);
+  2. **CSV dos resultados** — tabela U, I, R, P por componente, para o Excel ou um relatório;
+  3. **PNG / SVG do esquema** — imagem para relatórios e apresentações;
+  4. **PDF** — relatório completo (esquema + resultados).
+- **Distribuição:**
+  - **agora:** aplicação **web** em GitHub Pages (um link, nada a instalar);
+  - **mais tarde (opcional):** programa **`.exe`** para Windows com **Tauri**, a partir do mesmo código.
+- **Porquê:**
+  - `.geii.json` é texto: abre-se em qualquer editor, vê-se bem num diff do Git e a extensão dupla diz
+    logo que é um projeto deste simulador (sem deixar de ser JSON);
+  - não guardar resultados evita ficheiros com números desatualizados (alguém muda uma resistência e o
+    resultado guardado já não corresponde ao circuito);
+  - o `.cir` primeiro porque serve para **validar o motor de cálculo** contra uma referência da indústria;
+  - Tauri gera um instalador pequeno (alguns MB) porque usa o browser do sistema.
+- **Alternativas consideradas:**
+  - formato binário próprio — mais pequeno, mas ilegível e difícil de depurar;
+  - guardar também os resultados — rápido a reabrir, mas arrisca resultados errados;
+  - `.json` simples — funciona, mas não se distingue de outros ficheiros JSON;
+  - Electron em vez de Tauri — mais conhecido, mas instaladores de ~100 MB.
+
 ## D-007 · 2026-11-09 · TypeScript fixado em 6.0 (não 7.0) ✅
 
 - **Decisão:** usar `typescript ~6.0` em vez do 7.0 que o modelo do Vite instala.
@@ -35,6 +70,7 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 - **Decisão:** projetos guardados em `.json` com campo `version`; validados com Zod ao abrir.
 - **Porquê:** legível, fácil de testar, e o campo `version` permite migrar ficheiros antigos.
+- **Detalhado e alargado em D-008** (extensão `.geii.json`, o que se guarda, exportações, distribuição).
 
 ## D-003 · 2026-11-09 · O núcleo (`src/core`) não depende da interface ✅
 
@@ -66,5 +102,9 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 | Posição exata do menu de componentes   | Esquerda, recolhível                            |
 | Lista final do MVP                     | Fonte DC, GND, R, interruptor, LED, lâmpada     |
 | Fios ortogonais ou curvos              | Ortogonais                                      |
-| Convenções de nomes                    | R1, R2…, V1…, D1…, L1… (lâmpada), S1… (interr.) |
+| Convenções de nomes                    | V1…, GND1…, R1…, S1… (interr.), D1… (LED), L1… (lâmpada) |
+| Formato de gravação e exportações      | Ver D-008 (`.geii.json`, sem resultados, `.cir` primeiro) |
 | Distribuição de funções e calendário   | Pessoa 1/2/3 conforme README; plano de 14 sem. |
+
+Nota sobre os nomes: no SPICE, `L` é a letra das bobinas. Se o simulador ganhar bobinas (fase futura),
+será preciso escolher outro prefixo para uma delas (ex.: `LP` para a lâmpada).
