@@ -1,27 +1,10 @@
 import { PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
 import { useState } from 'react'
-import type { ComponentKind } from '../core/model'
+import { catalogByCategory } from '../core/library'
 import { IecSymbol } from './IecSymbol'
 
-interface MenuItem {
-  kind: ComponentKind
-  label: string
-}
-
-// Lista provisória do MVP. Na etapa E4 passa a vir do catálogo em src/core/library.
-const CATEGORIES: { name: string; items: MenuItem[] }[] = [
-  {
-    name: 'Fontes',
-    items: [
-      { kind: 'dc-source', label: 'Fonte DC' },
-      { kind: 'ground', label: 'GND' },
-    ],
-  },
-  { name: 'Passivos', items: [{ kind: 'resistor', label: 'Resistência' }] },
-  { name: 'Comando', items: [{ kind: 'switch', label: 'Interruptor' }] },
-  { name: 'Semicondutores', items: [{ kind: 'led', label: 'LED' }] },
-  { name: 'Cargas', items: [{ kind: 'lamp', label: 'Lâmpada' }] },
-]
+// A lista vem do catálogo (src/core/library): um componente novo no catálogo aparece aqui sozinho.
+const CATEGORIES = catalogByCategory().map(({ category, items }) => ({ name: category, items }))
 
 interface Props {
   open: boolean
