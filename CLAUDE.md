@@ -108,6 +108,9 @@ Antes de dar uma tarefa por terminada: `pnpm lint && pnpm test && pnpm build` t�
 7. Unidades SI em todo o core (V, A, Ω, W). Formatação com prefixos (mA, kΩ) só na interface.
 8. Primeiro funcional com caixas simples, depois bonito com modelos 3D.
 9. Terminar o MVP DC antes de AC, 3D completo ou VR.
+10. **No fim de cada tarefa, atualizar o `PROGRESSO.md`** (estado, ramo e PR de cada tarefa) e fazer
+    commit dele no ramo da tarefa.
+11. Não alterar a planilha `docs/Acompanhamento_Simulador_GEII.xlsx` nem os PDF de `docs/`.
 
 ## Notas para o Claude Code
 
