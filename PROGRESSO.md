@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-09 — issue #15 (netlist).
+Última atualização: 2026-11-09 — issue #16 (validações).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -16,11 +16,11 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas seguintes (issues da E5)
 
-| Issue | Tarefa                                         | Etapa | Estado  | Ramo              | PR     |
-| ----- | ---------------------------------------------- | ----- | ------- | ----------------- | ------ |
-| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito   | `feature/netlist` | PR #18 |
-| #16   | Validações antes do cálculo                    | E5    | a fazer | —                 | —      |
-| #17   | LED no modelo simples (Vf + Rs)                | E5    | a fazer | —                 | —      |
+| Issue | Tarefa                                         | Etapa | Estado  | Ramo                 | PR     |
+| ----- | ---------------------------------------------- | ----- | ------- | -------------------- | ------ |
+| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito   | `feature/netlist`    | PR #18 |
+| #16   | Validações antes do cálculo (erros e avisos)   | E5    | feito   | `feature/validacoes` | PR #19 |
+| #17   | LED no modelo simples (Vf + Rs)                | E5    | a fazer | —                    | —      |
 
 ### Tarefas extra
 
@@ -41,4 +41,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `ba0a3de` | Decisão D-008: formatos de ficheiro e distribuição (Tarefa 5)       | #12 |
 | `8c622d7` | Biblioteca MVP: catálogo, createComponent, validateParams (T6)      | #13 |
 | `ad6ec46` | Grafo: terminais ligados → nós elétricos (Tarefa 7)                 | #14 |
-| (squash)  | Netlist: projeto → netlist, teste de referência 7 (issue #15)       | #18 |
+| `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)       | #18 |
+| (squash)  | Validações: erros e avisos antes do cálculo (issue #16)             | #19 |
