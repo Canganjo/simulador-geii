@@ -1,14 +1,23 @@
-import { Grid, MapControls } from '@react-three/drei'
+import { Grid, Line, MapControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useEffect, useRef, type DragEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { MOUSE } from 'three'
-import type { Component } from '../core/model'
+import type { Component, TerminalId, Vec2 } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
 import { ComponentBox } from './ComponentBox'
 import { COMPONENT_DRAG_TYPE, isComponentKind, PLACE_COMPONENT_EVENT } from './componentDrag'
-import { findFreeCell, snapToGrid } from './coordinates'
+import {
+  findFreeCell,
+  modelToScene,
+  orthogonalRoute,
+  snapToGrid,
+  terminalPosition,
+  terminalPositionById,
+} from './coordinates'
 import { startComponentDrag } from './dragComponent'
 import { GroundPicker, type ScreenToModel } from './GroundPicker'
+import { AnchorProjector } from './ScreenAnchors'
+import { WireView } from './WireView'
 
 /**
  * Zona livre 2.5D.
@@ -24,14 +33,25 @@ import { GroundPicker, type ScreenToModel } from './GroundPicker'
  *   mais próximo), ou clicar no item (fica no centro da vista, numa célula livre).
  * - Editar: clique num componente = selecionar (clique no vazio tira a seleção); arrastá-lo
  *   move-o de ponto em ponto da grelha (um arrasto = um só passo de Desfazer).
+ * - Fios: clique num terminal e depois noutro → fio ortogonal ("L"). Esc, botão direito ou
+ *   clique no vazio cancelam. Clique num fio seleciona-o (Delete apaga).
  */
 export function Workspace() {
   const components = useCircuitStore((s) => s.components)
   const selectedId = useCircuitStore((s) => s.selectedId)
   const addComponent = useCircuitStore((s) => s.addComponent)
   const select = useCircuitStore((s) => s.select)
+  const wires = useCircuitStore((s) => s.wires)
+  const selectedWireId = useCircuitStore((s) => s.selectedWireId)
+  const selectWire = useCircuitStore((s) => s.selectWire)
+  const addWire = useCircuitStore((s) => s.addWire)
+  /** Terminal de onde parte o fio que se está a desenhar. */
+  const [wiringFrom, setWiringFrom] = useState<TerminalId | null>(null)
+  /** Ponto da grelha debaixo do rato, para desenhar o fio "fantasma". */
+  const [pointer, setPointer] = useState<Vec2 | null>(null)
   const container = useRef<HTMLDivElement>(null)
   const picker = useRef<ScreenToModel | null>(null)
+  const anchorLayer = useRef<HTMLDivElement>(null)
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes(COMPONENT_DRAG_TYPE)) return
@@ -47,8 +67,52 @@ export function Workspace() {
     if (point) addComponent(kind, snapToGrid(point))
   }
 
+  const connected = useMemo(() => new Set(wires.flatMap((w) => [w.from, w.to])), [wires])
+
+  const cancelWiring = () => {
+    setWiringFrom(null)
+    setPointer(null)
+  }
+
+  // 1.º clique num terminal: começa o fio. 2.º clique noutro terminal: cria-o.
+  const onTerminalClick = (terminal: TerminalId) => {
+    if (wiringFrom === null) {
+      setWiringFrom(terminal)
+      return
+    }
+    if (terminal !== wiringFrom) addWire(wiringFrom, terminal)
+    cancelWiring()
+  }
+
+  // Enquanto se liga um fio: o fantasma segue o rato e Esc cancela (antes do Esc "normal").
+  useEffect(() => {
+    if (wiringFrom === null) return
+    const onMove = (e: PointerEvent) => {
+      const point = picker.current?.(e.clientX, e.clientY)
+      if (point) setPointer(snapToGrid(point))
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.stopImmediatePropagation()
+      setWiringFrom(null)
+      setPointer(null)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('keydown', onKey, { capture: true })
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('keydown', onKey, { capture: true })
+    }
+  }, [wiringFrom])
+
+  const wiringStart = wiringFrom ? terminalPositionById(components, wiringFrom) : null
+  const wiringLabel = wiringFrom
+    ? `${components.find((c) => wiringFrom.startsWith(`${c.id}:`))?.name ?? '?'}:${wiringFrom.split(':')[1] ?? ''}`
+    : ''
+
   // Botão esquerdo num componente: seleciona-o e começa a arrastá-lo até se largar o botão.
   const onGrab = (component: Component, clientX: number, clientY: number) => {
+    if (wiringFrom !== null) cancelWiring()
     select(component.id)
     const grab = picker.current?.(clientX, clientY)
     const drag = grab ? startComponentDrag(component.id, grab) : null
@@ -92,14 +156,23 @@ export function Workspace() {
       onDragOver={onDragOver}
       onDrop={onDrop}
       data-component-count={components.length}
+      data-wire-count={wires.length}
+      // Botão direito a meio de um fio → cancela (e não abre o menu do browser).
+      onContextMenu={(e) => {
+        if (wiringFrom === null) return
+        e.preventDefault()
+        cancelWiring()
+      }}
     >
       <Canvas
         orthographic
         camera={{ position: [0, 20, 12], zoom: 40, near: 0.1, far: 1000 }}
         aria-label="Zona livre"
-        // Clique (botão esquerdo) que não acertou em nenhum componente → tira a seleção.
+        // Clique (botão esquerdo) que não acertou em nada → cancela o fio e tira a seleção.
         onPointerMissed={(e) => {
-          if (e.button === 0) select(null)
+          if (e.button !== 0) return
+          if (wiringFrom !== null) cancelWiring()
+          select(null)
         }}
       >
         <color attach="background" args={['#0f172a']} />
@@ -119,11 +192,47 @@ export function Workspace() {
           fadeStrength={1}
         />
 
+        {wires.map((w) => {
+          const a = terminalPositionById(components, w.from)
+          const b = terminalPositionById(components, w.to)
+          if (!a || !b) return null
+          return (
+            <WireView
+              key={w.id}
+              id={w.id}
+              points={orthogonalRoute(a, b)}
+              selected={w.id === selectedWireId}
+              onSelect={selectWire}
+            />
+          )
+        })}
+
+        {/* Fio "fantasma" enquanto se escolhe o 2.º terminal. */}
+        {wiringStart && pointer && (
+          <Line
+            points={orthogonalRoute(wiringStart, pointer).map((p) => modelToScene(p, 0.05))}
+            color="#38bdf8"
+            lineWidth={2}
+            dashed
+            dashSize={0.25}
+            gapSize={0.15}
+          />
+        )}
+
         {components.map((c) => (
-          <ComponentBox key={c.id} component={c} selected={c.id === selectedId} onGrab={onGrab} />
+          <ComponentBox
+            key={c.id}
+            component={c}
+            selected={c.id === selectedId}
+            onGrab={onGrab}
+            connected={connected}
+            wiringFrom={wiringFrom}
+            onTerminalClick={onTerminalClick}
+          />
         ))}
 
         <GroundPicker pickerRef={picker} />
+        <AnchorProjector layer={anchorLayer} />
 
         <MapControls
           makeDefault
@@ -133,6 +242,53 @@ export function Workspace() {
           mouseButtons={{ MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
         />
       </Canvas>
+
+      {/* Âncoras invisíveis por cima dos terminais e dos fios (ver ScreenAnchors.tsx). */}
+      <div
+        ref={anchorLayer}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        {components.flatMap((c) =>
+          c.terminals.map((t, i) => (
+            <span
+              key={t.id}
+              data-anchor={modelToScene(terminalPosition(c, i), 0.06).join(',')}
+              data-terminal={`${c.name}:${t.name}`}
+              data-terminal-state={
+                t.id === wiringFrom ? 'active' : connected.has(t.id) ? 'connected' : 'loose'
+              }
+              className="absolute top-0 left-0 size-1"
+            />
+          )),
+        )}
+        {wires.map((w) => {
+          const a = terminalPositionById(components, w.from)
+          const b = terminalPositionById(components, w.to)
+          if (!a || !b) return null
+          const [p0, p1] = orthogonalRoute(a, b)
+          if (!p0 || !p1) return null
+          const middle = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 }
+          return (
+            <span
+              key={w.id}
+              data-anchor={modelToScene(middle, 0.05).join(',')}
+              data-wire={w.id}
+              data-selected={w.id === selectedWireId}
+              className="absolute top-0 left-0 size-1"
+            />
+          )
+        })}
+      </div>
+
+      {wiringFrom && (
+        <p
+          role="status"
+          className="pointer-events-none absolute top-2 left-2 rounded bg-slate-900/85 px-2 py-1 text-xs text-slate-200"
+        >
+          A ligar <strong>{wiringLabel}</strong> — clica noutro terminal (Esc para cancelar)
+        </p>
+      )}
     </div>
   )
 }

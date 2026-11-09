@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest'
 import {
   findFreeCell,
   modelToScene,
+  orthogonalRoute,
   rotateOffset,
   sceneToModel,
   snapToGrid,
   terminalOffsets,
+  terminalPosition,
+  terminalPositionById,
 } from './coordinates'
+import { createComponent } from '../core/library'
 
 describe('snapToGrid', () => {
   it('arredonda para o ponto da grelha mais próximo', () => {
@@ -77,5 +81,44 @@ describe('findFreeCell', () => {
     const placed: { x: number; y: number }[] = []
     for (let i = 0; i < 12; i++) placed.push(findFreeCell({ x: 0, y: 0 }, placed))
     expect(new Set(placed.map((p) => `${p.x},${p.y}`)).size).toBe(12)
+  })
+})
+
+describe('terminalPosition', () => {
+  // Resistência em (5, 2): terminal a a 1 célula à esquerda, b a 1 à direita (rotação 0°).
+  const r = createComponent('resistor', { x: 5, y: 2 }, { newId: () => 'R1' })
+
+  it.each([
+    [0, { x: 4, y: 2 }, { x: 6, y: 2 }],
+    [90, { x: 5, y: 1 }, { x: 5, y: 3 }], // rodada: a em baixo, b em cima
+    [180, { x: 6, y: 2 }, { x: 4, y: 2 }],
+    [270, { x: 5, y: 3 }, { x: 5, y: 1 }],
+  ] as const)('rotação %s°: a = %j, b = %j', (rotation, a, b) => {
+    const rotated = { ...r, rotation }
+    expect(terminalPosition(rotated, 0)).toEqual(a)
+    expect(terminalPosition(rotated, 1)).toEqual(b)
+  })
+
+  it('procura pelo ID do terminal', () => {
+    expect(terminalPositionById([r], 'R1:b')).toEqual({ x: 6, y: 2 })
+    expect(terminalPositionById([r], 'X9:a')).toBeNull()
+  })
+})
+
+describe('orthogonalRoute', () => {
+  it('pontos alinhados → uma linha reta', () => {
+    expect(orthogonalRoute({ x: 0, y: 0 }, { x: 4, y: 0 })).toEqual([
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+    ])
+    expect(orthogonalRoute({ x: 1, y: -2 }, { x: 1, y: 3 })).toHaveLength(2)
+  })
+
+  it('pontos não alinhados → "L": horizontal e depois vertical', () => {
+    expect(orthogonalRoute({ x: 0, y: 0 }, { x: 3, y: 2 })).toEqual([
+      { x: 0, y: 0 },
+      { x: 3, y: 0 },
+      { x: 3, y: 2 },
+    ])
   })
 })

@@ -19,6 +19,8 @@ export interface CircuitState {
   wires: Wire[]
   /** ID do componente selecionado (ou null). */
   selectedId: string | null
+  /** ID do fio selecionado (ou null). Só há uma coisa selecionada de cada vez. */
+  selectedWireId: string | null
 
   /** Cria um componente do catálogo (nome livre: R1, R2…), seleciona-o e devolve o seu ID. */
   addComponent: (kind: ComponentKind, position: Vec2) => string
@@ -32,7 +34,10 @@ export interface CircuitState {
   /** Liga dois terminais. Devolve o ID do fio, ou null se o fio for recusado. */
   addWire: (from: TerminalId, to: TerminalId) => string | null
   removeWire: (id: string) => void
+  /** Seleciona um componente (e tira a seleção do fio); null tira tudo. */
   select: (id: string | null) => void
+  /** Seleciona um fio (e tira a seleção do componente). */
+  selectWire: (id: string | null) => void
 }
 
 /** A parte do estado que entra no histórico de desfazer/refazer. */
@@ -46,12 +51,17 @@ export const useCircuitStore = create<CircuitState>()(
       components: [],
       wires: [],
       selectedId: null,
+      selectedWireId: null,
 
       addComponent: (kind, position) => {
         const component: Component = createComponent(kind, position, {
           existing: get().components,
         })
-        set((s) => ({ components: [...s.components, component], selectedId: component.id }))
+        set((s) => ({
+          components: [...s.components, component],
+          selectedId: component.id,
+          selectedWireId: null,
+        }))
         return component.id
       },
 
@@ -80,17 +90,25 @@ export const useCircuitStore = create<CircuitState>()(
         )
         // Mesmo tipo → os parâmetros do original servem à cópia (copiados, não partilhados).
         const copy = { ...fresh, params: { ...source.params } } as Component
-        set((s) => ({ components: [...s.components, copy], selectedId: copy.id }))
+        set((s) => ({
+          components: [...s.components, copy],
+          selectedId: copy.id,
+          selectedWireId: null,
+        }))
         return copy.id
       },
 
       removeComponent: (id) =>
         set((s) => {
           const prefix = `${id}:`
+          const wires = s.wires.filter(
+            (w) => !w.from.startsWith(prefix) && !w.to.startsWith(prefix),
+          )
           return {
             components: s.components.filter((c) => c.id !== id),
-            wires: s.wires.filter((w) => !w.from.startsWith(prefix) && !w.to.startsWith(prefix)),
+            wires,
             selectedId: s.selectedId === id ? null : s.selectedId,
+            selectedWireId: wires.some((w) => w.id === s.selectedWireId) ? s.selectedWireId : null,
           }
         }),
 
@@ -109,9 +127,14 @@ export const useCircuitStore = create<CircuitState>()(
         return wire.id
       },
 
-      removeWire: (id) => set((s) => ({ wires: s.wires.filter((w) => w.id !== id) })),
+      removeWire: (id) =>
+        set((s) => ({
+          wires: s.wires.filter((w) => w.id !== id),
+          selectedWireId: s.selectedWireId === id ? null : s.selectedWireId,
+        })),
 
-      select: (id) => set({ selectedId: id }),
+      select: (id) => set({ selectedId: id, selectedWireId: null }),
+      selectWire: (id) => set({ selectedWireId: id, selectedId: null }),
     }),
     {
       partialize: ({ components, wires }): CircuitHistory => ({ components, wires }),
@@ -123,11 +146,14 @@ export const useCircuitStore = create<CircuitState>()(
   ),
 )
 
-// Se desfazer/refazer fizer desaparecer o componente selecionado, limpa a seleção.
+// Se desfazer/refazer fizer desaparecer o componente ou o fio selecionado, limpa a seleção.
 // (Este `set` não mexe em componentes nem fios, por isso não grava nenhum passo no histórico.)
 useCircuitStore.subscribe((state) => {
-  const { selectedId, components } = state
+  const { selectedId, selectedWireId, components, wires } = state
   if (selectedId !== null && !components.some((c) => c.id === selectedId)) {
     useCircuitStore.setState({ selectedId: null })
+  }
+  if (selectedWireId !== null && !wires.some((w) => w.id === selectedWireId)) {
+    useCircuitStore.setState({ selectedWireId: null })
   }
 })
