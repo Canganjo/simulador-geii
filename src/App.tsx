@@ -5,6 +5,7 @@ import { PropertiesPanel } from './ui/PropertiesPanel'
 import { ResizeHandle } from './ui/ResizeHandle'
 import { ResultsPanel } from './ui/ResultsPanel'
 import { TopBar } from './ui/TopBar'
+import { useEditShortcuts } from './ui/keyboard'
 
 /**
  * Layout principal (etapa E1):
@@ -18,6 +19,7 @@ import { TopBar } from './ui/TopBar'
  */
 export default function App() {
   const ui = useUiStore()
+  useEditShortcuts() // R, Ctrl+D, Delete, Escape no componente selecionado
 
   return (
     <div className="flex h-full flex-col bg-slate-900 text-slate-100">

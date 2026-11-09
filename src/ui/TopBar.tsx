@@ -14,6 +14,7 @@ import {
 import { useStore } from 'zustand'
 import { useCircuitStore } from '../store/circuitStore'
 import { AccountMenu } from './AccountMenu'
+import { isTyping } from './keyboard'
 
 interface Action {
   label: string
@@ -26,16 +27,6 @@ interface Action {
 
 const undo = () => useCircuitStore.temporal.getState().undo()
 const redo = () => useCircuitStore.temporal.getState().redo()
-
-/** Verdadeiro se o foco está num campo de texto (aí Ctrl+Z pertence ao campo, não ao circuito). */
-function isTyping(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target.isContentEditable
-  )
-}
 
 /** Atalhos: Ctrl+Z desfaz; Ctrl+Y e Ctrl+Shift+Z refazem (Cmd em vez de Ctrl no macOS). */
 function useUndoShortcuts() {
