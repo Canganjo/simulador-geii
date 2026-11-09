@@ -201,3 +201,78 @@ test('clicar num item do menu cria o componente no centro da vista', async ({ pa
   await expect(scene.locator('[data-component-label="V1"]')).toBeVisible()
   await expect(scene.locator('[data-component-label="V2"]')).toBeVisible()
 })
+
+/** Cria um componente com um clique no menu: fica no centro da cena, em (0, 0). */
+async function addAtCenter(page: import('@playwright/test').Page, item: string) {
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: item })
+    .click()
+}
+
+/** Centro da zona livre, em píxeis do ecrã. */
+async function sceneCenter(page: import('@playwright/test').Page) {
+  const box = await page.getByTestId('workspace').boundingBox()
+  if (!box) throw new Error('zona livre não encontrada')
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2, box }
+}
+
+test('selecionar: clique no componente mostra-o nas propriedades; clique no vazio tira', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await addAtCenter(page, 'Resistência')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  const { x, y, box } = await sceneCenter(page)
+
+  await page.mouse.click(box.x + 20, box.y + 20) // vazio
+  await expect(props.getByText('Seleciona um componente')).toBeVisible()
+
+  await page.mouse.click(x, y) // em cima do R1
+  await expect(props.getByTestId('selected-name')).toHaveText('R1')
+  await expect(props).toContainText('Resistência')
+  await expect(props).toContainText('1 kΩ')
+})
+
+test('mover: arrastar o componente muda a posição; Ctrl+Z volta atrás num só passo', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await addAtCenter(page, 'Resistência')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  const position = props.getByTestId('selected-position')
+  await expect(position).toHaveText('(0, 0)')
+
+  const { x, y } = await sceneCenter(page)
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + 80, y, { steps: 8 }) // 80 px com zoom 40 = 2 células
+  await page.mouse.up()
+  await expect(position).toHaveText('(2, 0)')
+
+  await page.keyboard.press('Control+z')
+  await expect(position).toHaveText('(0, 0)')
+})
+
+test('apagar com Delete e voltar com Ctrl+Z; rodar com R; duplicar com Ctrl+D', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await addAtCenter(page, 'Resistência')
+  const scene = page.getByTestId('workspace')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+
+  await page.keyboard.press('r')
+  await expect(props.getByTestId('selected-rotation')).toHaveText('90°')
+
+  await page.keyboard.press('Control+d')
+  await expect(scene.locator('[data-component-label="R2"]')).toBeVisible()
+  await expect(props.getByTestId('selected-name')).toHaveText('R2')
+
+  await page.keyboard.press('Delete')
+  await expect(scene.locator('[data-component-label="R2"]')).toHaveCount(0)
+  await expect(props.getByText('Seleciona um componente')).toBeVisible()
+
+  await page.keyboard.press('Control+z')
+  await expect(scene.locator('[data-component-label="R2"]')).toBeVisible()
+})
