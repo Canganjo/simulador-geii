@@ -112,14 +112,40 @@ describe('buildNetlist — tradução dos componentes', () => {
     expect(built.skipped).toEqual([{ componentId: 'S2', name: 'S2', reason: 'open-switch' }])
   })
 
-  it('o LED ainda não entra (issue #17) e fica listado em skipped', () => {
+  it('LED a conduzir com Rs = 0 → só uma fonte Vf do ânodo para o cátodo', () => {
+    //   D1:ânodo (nó 1) ── (+ 2 V −) ── D1:cátodo ── GND1 (nó 0)
     const c: Component[] = []
     part(c, 'led')
     part(c, 'ground')
-    const built = buildNetlist({ components: c, wires: [] })
+    const built = buildNetlist({ components: c, wires: [wire('D1:catodo', 'GND1:gnd')] })
+    if (!built.ok) throw new Error('falhou')
+    expect(built.netlist.elements).toEqual([
+      { type: 'voltage-source', id: 'D1#vf', plus: 1, minus: 0, voltage: 2 },
+    ])
+  })
+
+  it('LED a conduzir com Rs = 10 Ω → resistência + fonte, com um nó interno', () => {
+    //   D1:ânodo (nó 1) ── Rs 10 Ω ── nó interno (2) ── (+ 2 V −) ── D1:cátodo ── GND1 (nó 0)
+    const c: Component[] = []
+    part(c, 'led', { seriesResistance: 10 })
+    part(c, 'ground')
+    const built = buildNetlist({ components: c, wires: [wire('D1:catodo', 'GND1:gnd')] })
+    if (!built.ok) throw new Error('falhou')
+    expect(built.netlist.nodeCount).toBe(2)
+    expect(built.netlist.elements).toEqual([
+      { type: 'resistor', id: 'D1#rs', nodeA: 1, nodeB: 2, resistance: 10 },
+      { type: 'voltage-source', id: 'D1#vf', plus: 2, minus: 0, voltage: 2 },
+    ])
+  })
+
+  it('LED bloqueado (ledOff) → fica de fora, como um interruptor aberto', () => {
+    const c: Component[] = []
+    part(c, 'led')
+    part(c, 'ground')
+    const built = buildNetlist({ components: c, wires: [] }, { ledOff: new Set(['D1']) })
     if (!built.ok) throw new Error('falhou')
     expect(built.netlist.elements).toEqual([])
-    expect(built.skipped).toEqual([{ componentId: 'D1', name: 'D1', reason: 'not-supported-yet' }])
+    expect(built.skipped).toEqual([{ componentId: 'D1', name: 'D1', reason: 'led-off' }])
   })
 
   it('sem GND → erro "no-ground"', () => {

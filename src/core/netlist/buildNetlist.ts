@@ -10,7 +10,11 @@
  *   Interruptor fechado → resistência muito pequena (CLOSED_SWITCH_RESISTANCE)
  *   Interruptor aberto  → não entra (é um corte no circuito)
  *   GND                 → não é um elemento: é o nó 0
- *   LED                 → ainda não entra (issue #17); fica em `skipped`
+ *   LED a conduzir      → fonte Vf (ânodo → cátodo) + resistência Rs em série (se Rs > 0)
+ *   LED bloqueado       → não entra (como um interruptor aberto)
+ *
+ * Quem decide se cada LED conduz é o `simulateDc` (supõe e verifica); aqui só se recebe a lista
+ * dos LED bloqueados em `options.ledOff`.
  */
 
 import { buildNodes } from '../graph'
@@ -20,11 +24,20 @@ import { GROUND_NODE, type Netlist, type NetlistElement, type NodeIndex } from '
 /** Resistência de um interruptor fechado: 1 mΩ (o mínimo aceite para uma resistência). */
 export const CLOSED_SWITCH_RESISTANCE = 1e-3
 
+/** IDs dos elementos de um LED a conduzir: "D1#vf" (fonte Vf) e "D1#rs" (resistência série). */
+export const ledSourceId = (componentId: string) => `${componentId}#vf`
+export const ledResistorId = (componentId: string) => `${componentId}#rs`
+
+export interface BuildNetlistOptions {
+  /** IDs dos LED bloqueados (não conduzem). Os outros são tratados como a conduzir. */
+  ledOff?: ReadonlySet<string>
+}
+
 /** Componente que ficou fora da netlist, e porquê. */
 export interface SkippedComponent {
   componentId: string
   name: string
-  reason: 'open-switch' | 'not-supported-yet'
+  reason: 'open-switch' | 'led-off'
 }
 
 export type NetlistResult =
@@ -37,9 +50,14 @@ export type NetlistResult =
     }
   | { ok: false; reason: 'no-ground' }
 
-export function buildNetlist(project: Pick<Project, 'components' | 'wires'>): NetlistResult {
+export function buildNetlist(
+  project: Pick<Project, 'components' | 'wires'>,
+  options: BuildNetlistOptions = {},
+): NetlistResult {
   const graph = buildNodes(project)
   if (!graph.hasGround) return { ok: false, reason: 'no-ground' }
+  // Nós internos (entre Rs e Vf de um LED) ficam depois dos nós do grafo.
+  let nextInternalNode = graph.nodeCount
 
   // Nó (do grafo) de um terminal de um componente.
   const nodeAt = (c: Component, name: string): NodeIndex => {
@@ -78,9 +96,35 @@ export function buildNetlist(project: Pick<Project, 'components' | 'wires'>): Ne
           skipped.push({ componentId: c.id, name: c.name, reason: 'open-switch' })
         }
         break
-      case 'led':
-        skipped.push({ componentId: c.id, name: c.name, reason: 'not-supported-yet' })
+      case 'led': {
+        if (options.ledOff?.has(c.id)) {
+          skipped.push({ componentId: c.id, name: c.name, reason: 'led-off' })
+          break
+        }
+        //   ânodo ── Rs ──●── (+ Vf −) ── cátodo      (sem Rs: ânodo ── (+ Vf −) ── cátodo)
+        const anode = nodeAt(c, 'anodo')
+        const cathode = nodeAt(c, 'catodo')
+        const { forwardVoltage, seriesResistance } = c.params
+        let plus = anode
+        if (seriesResistance > 0) {
+          plus = nextInternalNode++
+          elements.push({
+            type: 'resistor',
+            id: ledResistorId(c.id),
+            nodeA: anode,
+            nodeB: plus,
+            resistance: seriesResistance,
+          })
+        }
+        elements.push({
+          type: 'voltage-source',
+          id: ledSourceId(c.id),
+          plus,
+          minus: cathode,
+          voltage: forwardVoltage,
+        })
         break
+      }
       case 'ground':
         break // o GND é o nó 0
     }
