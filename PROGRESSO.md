@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-10 — issue #17 (LED).
+Última atualização: 2026-11-10 — issue #4 (estado do circuito).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -21,6 +21,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito  | `feature/netlist`     | PR #18 |
 | #16   | Validações antes do cálculo (erros e avisos)   | E5    | feito  | `feature/validacoes`  | PR #19 |
 | #17   | LED no modelo simples (Vf + Rs) · teste 6 OK   | E5    | feito  | `feature/led-simples` | PR #20 |
+| #4    | Estado do circuito com Zustand + zundo         | E2    | feito  | `feature/estado-circuito` | PR #22 |
 
 ### Tarefas extra
 
