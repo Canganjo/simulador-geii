@@ -38,3 +38,7 @@ desktop.ini
 # Blender: cópias de segurança automáticas
 *.blend1
 *.blend2
+
+# Temporários
+~$*
+.claude/settings.local.json
