@@ -238,8 +238,6 @@ describe('Testes de referência (folha "Testes de referência" da planilha)', ()
     expectRelative(result(s, 'R2').power, 0.032)
   })
 
-  // O teste 7 (interruptor aberto → 0 A) está em src/core/netlist/buildNetlist.test.ts,
-  // porque o interruptor é traduzido na passagem projeto → netlist.
-  // Ainda não testável: o LED chega com a issue #17.
-  it.todo('6 — demo 12 V + R1 = 470 Ω + LED (Vf = 2 V): corrente no LED = 21,28 mA')
+  // Os testes 6 (LED) e 7 (interruptor aberto) partem de um projeto completo: estão em
+  // src/core/solver/simulateDc.test.ts e src/core/netlist/buildNetlist.test.ts.
 })
