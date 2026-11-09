@@ -1,0 +1,65 @@
+name: Tarefa
+description: Uma tarefa pequena (1 a 3 horas) com objetivo, pasta e critério de "feito".
+title: '[Tarefa] '
+labels: ['tarefa']
+body:
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: O que se quer conseguir, em 1 a 3 frases.
+      placeholder: 'Ex.: Calcular a tensão em cada nó de um circuito só com resistências e fontes DC.'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pasta
+    attributes:
+      label: Pasta
+      description: Onde fica o trabalho principal (o responsável da pasta deve rever).
+      multiple: true
+      options:
+        - src/core/model
+        - src/core/library
+        - src/core/graph
+        - src/core/netlist
+        - src/core/validation
+        - src/core/solver
+        - src/store
+        - src/scene
+        - src/ui
+        - src/persistence
+        - public/models + assets-src
+        - tests/e2e
+        - docs
+        - .github (CI / deploy)
+    validations:
+      required: true
+
+  - type: textarea
+    id: feito
+    attributes:
+      label: Critério de "feito"
+      description: Lista verificável. A tarefa só fecha quando tudo estiver marcado.
+      value: |
+        - [ ] ...
+        - [ ] Testes escritos e a passar (`pnpm test`)
+        - [ ] `pnpm lint` e `pnpm build` sem erros
+    validations:
+      required: true
+
+  - type: dropdown
+    id: etapa
+    attributes:
+      label: Etapa do plano
+      options: [E0, E1, E2, E3, E4, E5, E6, E7, E8, E9, E10]
+    validations:
+      required: false
+
+  - type: textarea
+    id: notas
+    attributes:
+      label: Notas
+      description: Ligações, cálculos à mão, capturas de ecrã, dependências de outras issues.
+    validations:
+      required: false

@@ -1,0 +1,40 @@
+# Dependências
+node_modules/
+
+# Builds
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Testes
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Variáveis de ambiente locais (nunca enviar segredos)
+.env
+.env.*
+!.env.example
+*.local
+
+# Editores e sistema
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.sw?
+
+# Blender: cópias de segurança automáticas
+*.blend1
+*.blend2

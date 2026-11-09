@@ -1,0 +1,13 @@
+# Fins de linha: LF no repositório para todos (Windows, macOS, Linux)
+* text=auto eol=lf
+
+# Binários (não converter)
+*.png binary
+*.jpg binary
+*.pdf binary
+*.xlsx binary
+*.ico binary
+
+# Git LFS: ficheiros 3D pesados
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.glb filter=lfs diff=lfs merge=lfs -text

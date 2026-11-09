@@ -1,0 +1,44 @@
+# CI: corre em cada pull request e em cada push para o main.
+# Se algum passo falhar, o PR fica com uma cruz vermelha e não pode entrar no main.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Lint + testes + build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter o código
+        uses: actions/checkout@v5
+
+      - name: Instalar pnpm (versão do campo packageManager)
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Formatação (Prettier)
+        run: pnpm format:check
+
+      - name: Lint (ESLint)
+        run: pnpm lint
+
+      - name: Testes unitários (Vitest)
+        run: pnpm test
+
+      - name: Build (TypeScript + Vite)
+        run: pnpm build

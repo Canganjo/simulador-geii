@@ -1,0 +1,59 @@
+# Deploy: publica a versão do main em GitHub Pages.
+# A app fica em https://<utilizador>.github.io/<repositorio>/
+# Antes da primeira vez: Settings → Pages → Source = "GitHub Actions".
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permite lançar à mão no separador Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter o código (com os ficheiros Git LFS, como os modelos .glb)
+        uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build com o caminho base do GitHub Pages
+        run: pnpm build
+        env:
+          # O Vite precisa de saber que a app não está na raiz do site,
+          # mas em /<nome-do-repositorio>/ (ver vite.config.ts).
+          BASE_PATH: /${{ github.event.repository.name }}/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
