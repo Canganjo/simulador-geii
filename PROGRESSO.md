@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-10 — issue #4 (estado do circuito) e painéis redimensionáveis.
+Última atualização: 2026-11-10 — issue #5 (arrastar componentes).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -14,14 +14,15 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | 6   | Biblioteca MVP em `src/core/library`               | E4    | feito  | `feature/biblioteca-mvp`      | PR #13 · fecha issue #3          |
 | 7   | Grafo do circuito em `src/core/graph`              | E5    | feito  | `feature/grafo`               | PR #14                           |
 
-### Tarefas seguintes (issues da E5)
+### Tarefas seguintes (issues da E5 e da E2)
 
-| Issue | Tarefa                                         | Etapa | Estado | Ramo                      | PR     |
-| ----- | ---------------------------------------------- | ----- | ------ | ------------------------- | ------ |
-| #15   | Netlist: do projeto para o solver (teste 7 OK) | E5    | feito  | `feature/netlist`         | PR #18 |
-| #16   | Validações antes do cálculo (erros e avisos)   | E5    | feito  | `feature/validacoes`      | PR #19 |
-| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK   | E5    | feito  | `feature/led-simples`     | PR #20 |
-| #4    | Estado do circuito com Zustand + zundo         | E2    | feito  | `feature/estado-circuito` | PR #22 |
+| Issue | Tarefa                                             | Etapa | Estado | Ramo                           | PR     |
+| ----- | -------------------------------------------------- | ----- | ------ | ------------------------------ | ------ |
+| #15   | Netlist: do projeto para o solver (teste 7 OK)     | E5    | feito  | `feature/netlist`              | PR #18 |
+| #16   | Validações antes do cálculo (erros e avisos)       | E5    | feito  | `feature/validacoes`           | PR #19 |
+| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK       | E5    | feito  | `feature/led-simples`          | PR #20 |
+| #4    | Estado do circuito com Zustand + zundo             | E2    | feito  | `feature/estado-circuito`      | PR #22 |
+| #5    | Arrastar do menu para a zona livre (snap à grelha) | E2    | feito  | `feature/arrastar-componentes` | PR #23 |
 
 ### Tarefas extra
 
@@ -46,5 +47,6 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)       | #18 |
 | `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)             | #19 |
 | `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17) | #20 |
-| (squash)  | Painéis redimensionáveis (tarefa extra)                             | #21 |
-| (squash)  | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)    | #22 |
+| `2d4617e` | Painéis redimensionáveis (tarefa extra)                             | #21 |
+| `44e3b7e` | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)    | #22 |
+| (squash)  | Arrastar componentes do menu para a zona livre (issue #5)           | #23 |

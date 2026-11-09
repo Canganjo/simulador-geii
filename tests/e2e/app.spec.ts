@@ -167,3 +167,37 @@ test('Desfazer e Refazer estão desativados no início', async ({ page }) => {
   await expect(actions.getByRole('button', { name: 'Desfazer' })).toBeDisabled()
   await expect(actions.getByRole('button', { name: 'Refazer' })).toBeDisabled()
 })
+
+test('arrastar uma resistência para a zona livre cria 1 componente (R1)', async ({ page }) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  const menu = page.getByRole('complementary', { name: 'Menu de componentes' })
+  const labels = scene.locator('[data-component-label]')
+  await expect(labels).toHaveCount(0)
+
+  await menu.getByRole('button', { name: 'Resistência' }).dragTo(scene)
+  await expect(labels).toHaveCount(1)
+  await expect(scene.locator('[data-component-label="R1"]')).toBeVisible()
+
+  // Criação ilimitada: outra resistência → R2
+  await menu
+    .getByRole('button', { name: 'Resistência' })
+    .dragTo(scene, { targetPosition: { x: 120, y: 120 } })
+  await expect(labels).toHaveCount(2)
+  await expect(scene.locator('[data-component-label="R2"]')).toBeVisible()
+
+  // Desfazer (#4) → o R2 desaparece
+  await page.getByRole('button', { name: 'Desfazer' }).click()
+  await expect(labels).toHaveCount(1)
+  await expect(scene.locator('[data-component-label="R2"]')).toHaveCount(0)
+})
+
+test('clicar num item do menu cria o componente no centro da vista', async ({ page }) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  const menu = page.getByRole('complementary', { name: 'Menu de componentes' })
+  await menu.getByRole('button', { name: 'Fonte DC' }).click()
+  await menu.getByRole('button', { name: 'Fonte DC' }).click()
+  await expect(scene.locator('[data-component-label="V1"]')).toBeVisible()
+  await expect(scene.locator('[data-component-label="V2"]')).toBeVisible()
+})
