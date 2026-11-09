@@ -1,6 +1,7 @@
 import { PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
 import { useState } from 'react'
 import { catalogByCategory } from '../core/library'
+import { COLLAPSED_SIZE } from '../store/panelSizes'
 import { IecSymbol } from './IecSymbol'
 
 // A lista vem do catálogo (src/core/library): um componente novo no catálogo aparece aqui sozinho.
@@ -9,9 +10,11 @@ const CATEGORIES = catalogByCategory().map(({ category, items }) => ({ name: cat
 interface Props {
   open: boolean
   onToggle: () => void
+  /** Largura quando aberto, em px (puxa-se a borda da direita para mudar). */
+  width: number
 }
 
-export function ComponentMenu({ open, onToggle }: Props) {
+export function ComponentMenu({ open, onToggle, width }: Props) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
   const visible = CATEGORIES.map((c) => ({
@@ -22,9 +25,8 @@ export function ComponentMenu({ open, onToggle }: Props) {
   return (
     <aside
       aria-label="Menu de componentes"
-      className={`flex shrink-0 flex-col border-r border-slate-700 bg-slate-800 transition-[width] ${
-        open ? 'w-60' : 'w-12'
-      }`}
+      style={{ width: open ? width : COLLAPSED_SIZE.menu }}
+      className="flex shrink-0 flex-col overflow-hidden border-r border-slate-700 bg-slate-800 transition-[width]"
     >
       <div className="flex h-10 items-center justify-between px-2">
         {open && <h2 className="px-1 text-sm font-semibold text-slate-200">Componentes</h2>}
