@@ -13,9 +13,11 @@ interface Props {
   onToggle: () => void
   /** Largura quando aberto, em px (puxa-se a borda da direita para mudar). */
   width: number
+  /** Chamado depois de escolher um componente com um clique/toque (no telemóvel fecha a gaveta). */
+  onPicked?: () => void
 }
 
-export function ComponentMenu({ open, onToggle, width }: Props) {
+export function ComponentMenu({ open, onToggle, width, onPicked }: Props) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
   const visible = CATEGORIES.map((c) => ({
@@ -52,7 +54,7 @@ export function ComponentMenu({ open, onToggle, width }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Pesquisar…"
-              className="w-full bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-500"
+              className="w-full bg-transparent text-base text-slate-100 outline-none placeholder:text-slate-500 md:text-sm"
             />
           </label>
 
@@ -74,9 +76,12 @@ export function ComponentMenu({ open, onToggle, width }: Props) {
                           e.dataTransfer.setData(COMPONENT_DRAG_TYPE, item.kind)
                           e.dataTransfer.effectAllowed = 'copy'
                         }}
-                        onClick={() => requestPlaceComponent(item.kind)}
+                        onClick={() => {
+                          requestPlaceComponent(item.kind)
+                          onPicked?.()
+                        }}
                         title={`Arrasta para a zona livre (ou clica) para adicionar: ${item.label}`}
-                        className="flex w-full cursor-grab items-center gap-3 rounded px-2 py-1.5 text-left text-sm text-slate-200 hover:bg-slate-700 active:cursor-grabbing"
+                        className="flex w-full cursor-grab items-center gap-3 rounded px-2 py-2.5 text-left text-sm text-slate-200 hover:bg-slate-700 active:cursor-grabbing md:py-1.5"
                       >
                         <IecSymbol kind={item.kind} className="h-5 w-8 text-amber-300" />
                         {item.label}

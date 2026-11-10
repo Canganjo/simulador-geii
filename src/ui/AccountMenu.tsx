@@ -73,9 +73,9 @@ export function AccountMenu() {
         >
           {initials(name)}
         </span>
-        <span className="truncate">{name}</span>
+        <span className="hidden truncate md:inline">{name}</span>
         <ChevronDown
-          className={`size-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`hidden size-4 shrink-0 text-slate-400 transition-transform md:block ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>

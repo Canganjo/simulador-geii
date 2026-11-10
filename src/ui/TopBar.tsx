@@ -71,14 +71,21 @@ export function TopBar() {
   ]
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-700 bg-slate-800 px-3">
-      <span className="font-semibold tracking-tight text-slate-100">Simulador 2.5D GEII</span>
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-700 bg-slate-800 px-2 md:gap-4 md:px-3">
+      {/* No telemóvel só "GEII": o resto do espaço é para os botões. */}
+      <span className="shrink-0 font-semibold tracking-tight text-slate-100">
+        <span className="hidden md:inline">Simulador 2.5D </span>GEII
+      </span>
 
-      <nav aria-label="Ações" className="flex items-center gap-1">
+      {/* Se não couber (telemóvel), a barra de ações desliza para o lado com o dedo. */}
+      <nav
+        aria-label="Ações"
+        className="flex min-w-0 flex-1 [scrollbar-width:none] items-center gap-1 overflow-x-auto"
+      >
         {groups.map((group, i) => (
           <div
             key={i}
-            className="flex items-center gap-1 border-l border-slate-700 pl-2 first:border-0"
+            className="flex shrink-0 items-center gap-1 border-l border-slate-700 pl-2 first:border-0"
           >
             {group.map(({ label, icon: Icon, shortcut, onClick, disabled }) => (
               <button
@@ -98,7 +105,7 @@ export function TopBar() {
         ))}
       </nav>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-1 md:gap-2">
         <button
           type="button"
           title="Ajuda"
