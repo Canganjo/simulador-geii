@@ -370,3 +370,31 @@ test('fios: Esc a meio cancela sem criar fio', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveCount(0)
   await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '0')
 })
+
+test('idioma: o interruptor PT · FR · EN do menu da conta muda a app e fica guardado', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: /^Conta:/ }).click()
+  const languages = page.getByRole('radiogroup', { name: 'Idioma' })
+  await expect(languages.getByRole('radio', { name: 'Português' })).toBeChecked()
+
+  // English
+  await languages.getByRole('radio', { name: 'English' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await expect(page.getByRole('complementary', { name: 'Components menu' })).toContainText(
+    'Resistor',
+  )
+  await expect(page.getByRole('button', { name: 'Simulate' })).toBeVisible()
+
+  // Français — e continua depois de recarregar a página
+  await page
+    .getByRole('radiogroup', { name: 'Language' })
+    .getByRole('radio', { name: 'Français' })
+    .click()
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
+  await expect(page.getByRole('complementary', { name: 'Menu des composants' })).toContainText(
+    'Résistance',
+  )
+})

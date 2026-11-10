@@ -9,7 +9,9 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { LANGUAGES, useLanguageStore } from '../store/languageStore'
 import { useProfileStore } from '../store/profileStore'
+import { LANGUAGE_NAMES, useT } from './i18n'
 import { initials, username } from './initials'
 
 const REPO_URL = 'https://github.com/Canganjo/simulador-geii'
@@ -24,6 +26,7 @@ const REPO_URL = 'https://github.com/Canganjo/simulador-geii'
  * ficam ligadas quando essas funcionalidades existirem.
  */
 export function AccountMenu() {
+  const t = useT()
   const name = useProfileStore((s) => s.name)
   const setName = useProfileStore((s) => s.setName)
   const [open, setOpen] = useState(false)
@@ -64,7 +67,7 @@ export function AccountMenu() {
         onClick={() => (open ? close() : setOpen(true))}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Conta: ${name}`}
+        aria-label={t('account.label', { name })}
         className="flex h-11 max-w-72 items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-sm font-semibold text-slate-100 hover:bg-slate-700"
       >
         <span
@@ -83,7 +86,7 @@ export function AccountMenu() {
       {open && (
         <div
           role="menu"
-          aria-label="Menu da conta"
+          aria-label={t('account.menu')}
           className="absolute top-full right-0 z-20 mt-1 w-64 border border-slate-600 bg-slate-800 py-1.5 shadow-xl shadow-black/40"
         >
           {/* Cabeçalho: nome + @utilizador */}
@@ -100,7 +103,7 @@ export function AccountMenu() {
                 autoFocus
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                aria-label="Nome"
+                aria-label={t('account.name')}
                 maxLength={60}
                 className="min-w-0 flex-1 rounded bg-slate-900 px-2 py-1 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-amber-400"
               />
@@ -108,7 +111,7 @@ export function AccountMenu() {
                 type="submit"
                 className="rounded bg-emerald-600 px-2.5 py-1 text-sm font-medium text-white hover:bg-emerald-500"
               >
-                Guardar
+                {t('account.save')}
               </button>
             </form>
           ) : (
@@ -118,8 +121,8 @@ export function AccountMenu() {
                 setDraft(name)
                 setEditing(true)
               }}
-              aria-label="Mudar o nome"
-              title="Clica para mudar o nome"
+              aria-label={t('account.rename')}
+              title={t('account.renameHint')}
               className="group flex w-full items-start justify-between px-3 py-1 text-left hover:bg-slate-700/60"
             >
               <span className="min-w-0">
@@ -134,21 +137,62 @@ export function AccountMenu() {
           )}
 
           <Separator />
-          <MenuItem icon={LockKeyhole} label="Alterar a minha password" onClick={close} />
-          <MenuItem icon={Globe} label="Idioma: Português" onClick={close} />
-          <MenuItem icon={Palette} label="Aparência" onClick={close} />
+          <MenuItem icon={LockKeyhole} label={t('account.password')} onClick={close} />
+          <LanguageSwitch />
+          <MenuItem icon={Palette} label={t('account.appearance')} onClick={close} />
           <MenuItem
             icon={Info}
-            label="Sobre o Simulador"
+            label={t('account.about')}
             onClick={() => {
               window.open(REPO_URL, '_blank', 'noopener')
               close()
             }}
           />
           <Separator />
-          <MenuItem icon={Power} label="Terminar sessão" danger onClick={close} />
+          <MenuItem icon={Power} label={t('account.logout')} danger onClick={close} />
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Linha "Idioma" com um interruptor de 3 posições: PT · FR · EN.
+ * Um toque muda a língua da app toda na hora (e fica guardada). O menu continua aberto,
+ * para se ver logo o resultado.
+ */
+function LanguageSwitch() {
+  const t = useT()
+  const language = useLanguageStore((s) => s.language)
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+
+  return (
+    <div className="flex items-center gap-3 px-3 py-1.5 text-sm text-slate-200">
+      <Globe className="size-4 shrink-0" aria-hidden />
+      <span id="account-language">{t('account.language')}</span>
+      <div
+        role="radiogroup"
+        aria-labelledby="account-language"
+        className="ml-auto flex rounded-md border border-slate-600 p-0.5"
+      >
+        {LANGUAGES.map((code) => (
+          <button
+            key={code}
+            type="button"
+            role="radio"
+            aria-checked={language === code}
+            aria-label={LANGUAGE_NAMES[code]}
+            title={LANGUAGE_NAMES[code]}
+            lang={code}
+            onClick={() => setLanguage(code)}
+            className={`rounded px-2 py-0.5 text-xs font-semibold uppercase ${
+              language === code ? 'bg-sky-600 text-white' : 'text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            {code}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

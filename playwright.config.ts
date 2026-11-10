@@ -11,6 +11,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
+    // A app escolhe a língua do browser na 1.ª visita: os testes correm em português.
+    locale: 'pt-PT',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // Faz o build e serve a versão de produção antes dos testes.

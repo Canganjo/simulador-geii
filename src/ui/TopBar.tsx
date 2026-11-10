@@ -14,6 +14,7 @@ import {
 import { useStore } from 'zustand'
 import { useCircuitStore } from '../store/circuitStore'
 import { AccountMenu } from './AccountMenu'
+import { useT } from './i18n'
 import { isTyping } from './keyboard'
 
 interface Action {
@@ -51,22 +52,35 @@ export function TopBar() {
   const canUndo = useStore(useCircuitStore.temporal, (s) => s.pastStates.length > 0)
   const canRedo = useStore(useCircuitStore.temporal, (s) => s.futureStates.length > 0)
   useUndoShortcuts()
+  const t = useT()
 
   // Ações do dossier (secção 6). Desfazer/Refazer já funcionam; as outras serão ligadas depois.
   const groups: Action[][] = [
     [
-      { label: 'Novo', icon: FilePlus, disabled: true },
-      { label: 'Abrir', icon: FolderOpen, disabled: true },
-      { label: 'Guardar', icon: Save, disabled: true },
+      { label: t('action.new'), icon: FilePlus, disabled: true },
+      { label: t('action.open'), icon: FolderOpen, disabled: true },
+      { label: t('action.save'), icon: Save, disabled: true },
     ],
     [
-      { label: 'Desfazer', icon: Undo2, shortcut: 'Ctrl+Z', onClick: undo, disabled: !canUndo },
-      { label: 'Refazer', icon: Redo2, shortcut: 'Ctrl+Y', onClick: redo, disabled: !canRedo },
+      {
+        label: t('action.undo'),
+        icon: Undo2,
+        shortcut: 'Ctrl+Z',
+        onClick: undo,
+        disabled: !canUndo,
+      },
+      {
+        label: t('action.redo'),
+        icon: Redo2,
+        shortcut: 'Ctrl+Y',
+        onClick: redo,
+        disabled: !canRedo,
+      },
     ],
     [
-      { label: 'Simular', icon: Play, disabled: true },
-      { label: 'Parar', icon: Square, disabled: true },
-      { label: 'Reset', icon: RotateCcw, disabled: true },
+      { label: t('action.simulate'), icon: Play, disabled: true },
+      { label: t('action.stop'), icon: Square, disabled: true },
+      { label: t('action.reset'), icon: RotateCcw, disabled: true },
     ],
   ]
 
@@ -74,12 +88,12 @@ export function TopBar() {
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-700 bg-slate-800 px-2 md:gap-4 md:px-3">
       {/* No telemóvel só "GEII": o resto do espaço é para os botões. */}
       <span className="shrink-0 font-semibold tracking-tight text-slate-100">
-        <span className="hidden md:inline">Simulador 2.5D </span>GEII
+        <span className="hidden md:inline">{t('app.title')} </span>GEII
       </span>
 
       {/* Se não couber (telemóvel), a barra de ações desliza para o lado com o dedo. */}
       <nav
-        aria-label="Ações"
+        aria-label={t('topbar.actions')}
         className="flex min-w-0 flex-1 [scrollbar-width:none] items-center gap-1 overflow-x-auto"
       >
         {groups.map((group, i) => (
@@ -108,11 +122,11 @@ export function TopBar() {
       <div className="ml-auto flex shrink-0 items-center gap-1 md:gap-2">
         <button
           type="button"
-          title="Ajuda"
+          title={t('topbar.help')}
           className="rounded p-1.5 text-slate-300 hover:bg-slate-700"
         >
           <CircleHelp className="size-5" aria-hidden />
-          <span className="sr-only">Ajuda</span>
+          <span className="sr-only">{t('topbar.help')}</span>
         </button>
         <AccountMenu />
       </div>

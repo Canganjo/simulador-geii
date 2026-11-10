@@ -1,5 +1,6 @@
 import { Activity, PanelBottomClose, PanelBottomOpen } from 'lucide-react'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
+import { useT } from './i18n'
 
 interface Props {
   open: boolean
@@ -10,18 +11,19 @@ interface Props {
 
 /** Painel de resultados (em baixo). Recolhido, fica só o cabeçalho com o botão para abrir. */
 export function ResultsPanel({ open, onToggle, height }: Props) {
-  const label = open ? 'Recolher resultados' : 'Abrir resultados'
+  const t = useT()
+  const label = open ? t('results.collapse') : t('results.expand')
 
   return (
     <section
-      aria-label="Resultados"
+      aria-label={t('results.label')}
       style={{ height: open ? height : COLLAPSED_SIZE.results }}
       className="shrink-0 overflow-hidden border-t border-slate-700 bg-slate-800 transition-[height]"
     >
       <div className="flex h-9 items-center justify-between px-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-200">
           <Activity className="size-4" aria-hidden />
-          Resultados
+          {t('results.label')}
         </h2>
         <button
           type="button"
@@ -37,8 +39,9 @@ export function ResultsPanel({ open, onToggle, height }: Props) {
 
       {open && (
         <p className="px-3 text-sm text-slate-400">
-          Carrega em <strong className="text-slate-200">Simular</strong> para ver a tensão (U), a
-          corrente (I), a resistência (R) e a potência (P) de cada componente.
+          {t('results.hintBefore')}{' '}
+          <strong className="text-slate-200">{t('action.simulate')}</strong>{' '}
+          {t('results.hintAfter')}
         </p>
       )}
     </section>

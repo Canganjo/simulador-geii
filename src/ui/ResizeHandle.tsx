@@ -1,6 +1,7 @@
 import { useRef, type KeyboardEvent, type PointerEvent } from 'react'
 import { PANEL_LIMITS, type ResizablePanel } from '../store/panelSizes'
 import { useUiStore } from '../store/uiStore'
+import { useT } from './i18n'
 
 /** Quanto muda o tamanho por cada tecla de seta. */
 const KEYBOARD_STEP = 16
@@ -23,6 +24,7 @@ interface Props {
  * Duplo clique → tamanho por defeito. Com o foco (Tab), as setas também funcionam.
  */
 export function ResizeHandle({ panel, label, grows }: Props) {
+  const t = useT()
   const size = useUiStore((s) => s.sizes[panel])
   const setPanelSize = useUiStore((s) => s.setPanelSize)
   const resetPanelSize = useUiStore((s) => s.resetPanelSize)
@@ -82,7 +84,7 @@ export function ResizeHandle({ panel, label, grows }: Props) {
       aria-valuemin={min}
       aria-valuemax={max}
       tabIndex={0}
-      title={`${label} (duplo clique: tamanho por defeito)`}
+      title={`${label} (${t('resize.hint')})`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={stop}

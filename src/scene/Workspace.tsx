@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { MOUSE } from 'three'
 import type { Component, TerminalId, Vec2 } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
+import { useT } from '../ui/i18n'
 import { ComponentBox } from './ComponentBox'
 import { COMPONENT_DRAG_TYPE, isComponentKind, PLACE_COMPONENT_EVENT } from './componentDrag'
 import {
@@ -37,6 +38,7 @@ import { WireView } from './WireView'
  *   clique no vazio cancelam. Clique num fio seleciona-o (Delete apaga).
  */
 export function Workspace() {
+  const t = useT()
   const components = useCircuitStore((s) => s.components)
   const selectedId = useCircuitStore((s) => s.selectedId)
   const addComponent = useCircuitStore((s) => s.addComponent)
@@ -168,7 +170,7 @@ export function Workspace() {
       <Canvas
         orthographic
         camera={{ position: [0, 20, 12], zoom: 40, near: 0.1, far: 1000 }}
-        aria-label="Zona livre"
+        aria-label={t('workspace.label')}
         // Clique (botão esquerdo) que não acertou em nada → cancela o fio e tira a seleção.
         onPointerMissed={(e) => {
           if (e.button !== 0) return
@@ -287,7 +289,7 @@ export function Workspace() {
           role="status"
           className="pointer-events-none absolute top-2 left-2 rounded bg-slate-900/85 px-2 py-1 text-xs text-slate-200"
         >
-          A ligar <strong>{wiringLabel}</strong> — clica noutro terminal (Esc para cancelar)
+          {t('workspace.wiringBefore')} <strong>{wiringLabel}</strong> {t('workspace.wiringAfter')}
         </p>
       )}
     </div>
