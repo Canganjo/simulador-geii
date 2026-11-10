@@ -26,6 +26,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #6    | Selecionar, mover, rodar, duplicar e apagar        | E2    | feito  | `feature/selecao-edicao`       | PR #24 |
 | #25   | Ligar fios entre terminais (ortogonais)            | E2    | feito  | `feature/fios`                 | PR #26 |
 | #27   | Layout em telemóvel (iPhone)                       | E1    | feito  | `fix/layout-telemovel`         | PR #28 |
+| #29   | Trocar de língua: PT · FR · EN                     | E1    | feito  | `feature/idiomas`              | PR #30 |
 
 ### Tarefas extra
 
@@ -55,4 +56,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `207fe51` | Arrastar componentes do menu para a zona livre (issue #5)           | #23 |
 | `ff127e2` | Selecionar, mover, rodar, duplicar e apagar (issue #6)              | #24 |
 | `74e8349` | Ligar fios entre terminais (issue #25)                              | #26 |
-| (squash)  | Layout em telemóvel (issue #27)                                     | #28 |
+| `ff4c1af` | Layout em telemóvel (issue #27)                                     | #28 |
+| (squash)  | Trocar de língua: PT · FR · EN (issue #29)                          | #30 |

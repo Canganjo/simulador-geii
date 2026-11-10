@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { Workspace } from './scene/Workspace'
 import { COLLAPSED_SIZE } from './store/panelSizes'
+import { useLanguageStore } from './store/languageStore'
 import { useUiStore } from './store/uiStore'
 import { ComponentMenu } from './ui/ComponentMenu'
 import { PropertiesPanel } from './ui/PropertiesPanel'
@@ -8,6 +9,7 @@ import { ResizeHandle } from './ui/ResizeHandle'
 import { ResultsPanel } from './ui/ResultsPanel'
 import { TopBar } from './ui/TopBar'
 import { useEditShortcuts } from './ui/keyboard'
+import { useT } from './ui/i18n'
 import { useIsMobile } from './ui/useIsMobile'
 
 /** No telemóvel: altura máxima dos resultados e largura máxima das gavetas (fração do ecrã). */
@@ -30,7 +32,14 @@ const MOBILE_DRAWER_FRACTION = 0.85
 export default function App() {
   const ui = useUiStore()
   const mobile = useIsMobile()
+  const t = useT()
+  const language = useLanguageStore((s) => s.language)
   useEditShortcuts() // R, Ctrl+D, Delete, Escape no componente selecionado
+
+  // <html lang="…"> segue a língua escolhida (leitores de ecrã, hifenização, tradutores).
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
 
   // Ao entrar no modo telemóvel (abrir a app ou rodar o ecrã), as gavetas começam fechadas.
   useEffect(() => {
@@ -56,14 +65,14 @@ export default function App() {
           />
         </Drawer>
         {ui.menuOpen && !mobile && (
-          <ResizeHandle panel="menu" label="Redimensionar menu" grows="right" />
+          <ResizeHandle panel="menu" label={t('resize.menu')} grows="right" />
         )}
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1" data-testid="workspace">
             <Workspace />
           </div>
           {ui.resultsOpen && !mobile && (
-            <ResizeHandle panel="results" label="Redimensionar resultados" grows="up" />
+            <ResizeHandle panel="results" label={t('resize.results')} grows="up" />
           )}
           <ResultsPanel
             open={ui.resultsOpen}
@@ -72,7 +81,7 @@ export default function App() {
           />
         </main>
         {ui.propertiesOpen && !mobile && (
-          <ResizeHandle panel="properties" label="Redimensionar propriedades" grows="left" />
+          <ResizeHandle panel="properties" label={t('resize.properties')} grows="left" />
         )}
         <Drawer mobile={mobile} side="right" collapsed={COLLAPSED_SIZE.properties}>
           <PropertiesPanel
@@ -85,7 +94,7 @@ export default function App() {
         {drawerOpen && (
           <button
             type="button"
-            aria-label="Fechar painel"
+            aria-label={t('drawer.close')}
             onClick={closeDrawers}
             className="absolute inset-0 z-20 bg-black/50"
           />

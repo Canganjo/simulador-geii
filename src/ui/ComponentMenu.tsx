@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { catalogByCategory } from '../core/library'
 import { COMPONENT_DRAG_TYPE, requestPlaceComponent } from '../scene/componentDrag'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
+import { useT } from './i18n'
 import { IecSymbol } from './IecSymbol'
 
 // A lista vem do catálogo (src/core/library): um componente novo no catálogo aparece aqui sozinho.
@@ -18,30 +19,33 @@ interface Props {
 }
 
 export function ComponentMenu({ open, onToggle, width, onPicked }: Props) {
+  const t = useT()
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
   const visible = CATEGORIES.map((c) => ({
     ...c,
-    items: c.items.filter((i) => i.label.toLowerCase().includes(q)),
+    items: c.items.filter((i) => t(`kind.${i.kind}`).toLowerCase().includes(q)),
   })).filter((c) => c.items.length > 0)
+
+  const toggleLabel = open ? t('menu.collapse') : t('menu.expand')
 
   return (
     <aside
-      aria-label="Menu de componentes"
+      aria-label={t('menu.label')}
       style={{ width: open ? width : COLLAPSED_SIZE.menu }}
       className="flex shrink-0 flex-col overflow-hidden border-r border-slate-700 bg-slate-800 transition-[width]"
     >
       <div className="flex h-10 items-center justify-between px-2">
-        {open && <h2 className="px-1 text-sm font-semibold text-slate-200">Componentes</h2>}
+        {open && <h2 className="px-1 text-sm font-semibold text-slate-200">{t('menu.title')}</h2>}
         <button
           type="button"
           onClick={onToggle}
           aria-expanded={open}
-          title={open ? 'Recolher menu' : 'Abrir menu'}
+          title={toggleLabel}
           className="rounded p-1.5 text-slate-300 hover:bg-slate-700"
         >
           {open ? <PanelLeftClose className="size-5" /> : <PanelLeftOpen className="size-5" />}
-          <span className="sr-only">{open ? 'Recolher menu' : 'Abrir menu'}</span>
+          <span className="sr-only">{toggleLabel}</span>
         </button>
       </div>
 
@@ -53,7 +57,7 @@ export function ComponentMenu({ open, onToggle, width, onPicked }: Props) {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Pesquisar…"
+              placeholder={t('menu.search')}
               className="w-full bg-transparent text-base text-slate-100 outline-none placeholder:text-slate-500 md:text-sm"
             />
           </label>
@@ -62,7 +66,7 @@ export function ComponentMenu({ open, onToggle, width, onPicked }: Props) {
             {visible.map((category) => (
               <section key={category.name} className="mb-3">
                 <h3 className="px-1 pb-1 text-xs font-medium tracking-wide text-slate-400 uppercase">
-                  {category.name}
+                  {t(`category.${category.name}`)}
                 </h3>
                 <ul>
                   {category.items.map((item) => (
@@ -80,11 +84,11 @@ export function ComponentMenu({ open, onToggle, width, onPicked }: Props) {
                           requestPlaceComponent(item.kind)
                           onPicked?.()
                         }}
-                        title={`Arrasta para a zona livre (ou clica) para adicionar: ${item.label}`}
+                        title={t('menu.itemHint', { name: t(`kind.${item.kind}`) })}
                         className="flex w-full cursor-grab items-center gap-3 rounded px-2 py-2.5 text-left text-sm text-slate-200 hover:bg-slate-700 active:cursor-grabbing md:py-1.5"
                       >
                         <IecSymbol kind={item.kind} className="h-5 w-8 text-amber-300" />
-                        {item.label}
+                        {t(`kind.${item.kind}`)}
                       </button>
                     </li>
                   ))}
@@ -92,7 +96,7 @@ export function ComponentMenu({ open, onToggle, width, onPicked }: Props) {
               </section>
             ))}
             {visible.length === 0 && (
-              <p className="px-1 text-sm text-slate-500">Nenhum componente encontrado.</p>
+              <p className="px-1 text-sm text-slate-500">{t('menu.empty')}</p>
             )}
           </div>
         </>

@@ -16,8 +16,16 @@ const PREFIXES: readonly { exponent: number; symbol: string }[] = [
   { exponent: -12, symbol: 'p' },
 ]
 
-/** `digits` = algarismos significativos (3 por defeito: 21,3 mA). */
-export function formatSi(value: number, unit: string, digits = 3): string {
+/**
+ * `digits` = algarismos significativos (3 por defeito: 21,3 mA).
+ * `decimal` = separador decimal: vírgula (português, francês) ou ponto (inglês: 21.3 mA).
+ */
+export function formatSi(
+  value: number,
+  unit: string,
+  digits = 3,
+  decimal: ',' | '.' = ',',
+): string {
   if (!Number.isFinite(value)) return `— ${unit}`
   if (value === 0) return `0 ${unit}`
 
@@ -31,8 +39,8 @@ export function formatSi(value: number, unit: string, digits = 3): string {
   let rounded = Number(scaled.toPrecision(digits))
   // 999,6 → arredonda para 1000: passa para o prefixo seguinte (1 k em vez de 1000).
   if (Math.abs(rounded) >= 1000 && prefix.exponent < 9) {
-    return formatSi(Math.sign(value) * 10 ** (prefix.exponent + 3), unit, digits)
+    return formatSi(Math.sign(value) * 10 ** (prefix.exponent + 3), unit, digits, decimal)
   }
   if (Object.is(rounded, -0)) rounded = 0
-  return `${String(rounded).replace('.', ',')} ${prefix.symbol}${unit}`
+  return `${String(rounded).replace('.', decimal)} ${prefix.symbol}${unit}`
 }

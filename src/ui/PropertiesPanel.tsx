@@ -9,8 +9,10 @@ import {
 import { CATALOG, type ParamSpec } from '../core/library'
 import type { Component } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
+import { useLanguageStore } from '../store/languageStore'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
 import { formatSi } from './formatSi'
+import { decimalSeparator, isMessageKey, useT, type Translate } from './i18n'
 import { IecSymbol } from './IecSymbol'
 
 interface Props {
@@ -22,12 +24,13 @@ interface Props {
 
 /** Painel de propriedades (direita). Recolhe para uma faixa estreita, como o menu da esquerda. */
 export function PropertiesPanel({ open, onToggle, width }: Props) {
-  const label = open ? 'Recolher propriedades' : 'Abrir propriedades'
+  const t = useT()
+  const label = open ? t('props.collapse') : t('props.expand')
   const selected = useCircuitStore((s) => s.components.find((c) => c.id === s.selectedId) ?? null)
 
   return (
     <aside
-      aria-label="Propriedades"
+      aria-label={t('props.label')}
       style={{ width: open ? width : COLLAPSED_SIZE.properties }}
       className="flex shrink-0 flex-col overflow-hidden border-l border-slate-700 bg-slate-800 transition-[width]"
     >
@@ -45,7 +48,7 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
         {open && (
           <h2 className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-200">
             <SlidersHorizontal className="size-4" aria-hidden />
-            Propriedades
+            {t('props.label')}
           </h2>
         )}
       </div>
@@ -54,36 +57,61 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
         (selected ? (
           <SelectedComponent component={selected} />
         ) : (
-          <p className="px-3 text-sm text-slate-400">
-            Seleciona um componente para ver e editar o nome, o valor, a unidade e a rotação.
-          </p>
+          <p className="px-3 text-sm text-slate-400">{t('props.empty')}</p>
         ))}
     </aside>
   )
 }
 
 /** Mostra um valor de um parâmetro: número com prefixo SI, Sim/Não, ou a opção escolhida. */
-function formatParam(spec: ParamSpec, value: unknown): string {
-  if (spec.type === 'number') return typeof value === 'number' ? formatSi(value, spec.unit) : '—'
-  if (spec.type === 'boolean') return value === true ? 'Sim' : 'Não'
-  return typeof value === 'string' ? value : '—'
+function formatParam(spec: ParamSpec, value: unknown, t: Translate, decimal: ',' | '.'): string {
+  if (spec.type === 'number') {
+    return typeof value === 'number' ? formatSi(value, spec.unit, 3, decimal) : '—'
+  }
+  if (spec.type === 'boolean') return value === true ? t('common.yes') : t('common.no')
+  if (typeof value !== 'string') return '—'
+  // Opções conhecidas (cores do LED) são traduzidas; outras mostram-se como estão.
+  return isColor(value) ? t(`color.${value}`) : value
+}
+
+/** Nome do parâmetro na língua escolhida (se faltar a tradução, o nome do catálogo). */
+function paramLabel(key: string, spec: ParamSpec, t: Translate): string {
+  const messageKey = `param.${key}`
+  return isMessageKey(messageKey) ? t(messageKey) : spec.label
+}
+
+const COLORS = ['vermelho', 'verde', 'azul', 'amarelo', 'branco'] as const
+function isColor(value: string): value is (typeof COLORS)[number] {
+  return (COLORS as readonly string[]).includes(value)
 }
 
 function SelectedComponent({ component }: { component: Component }) {
+  const t = useT()
+  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
   const { rotateComponent, duplicateComponent, removeComponent } = useCircuitStore.getState()
   const definition = CATALOG[component.kind]
   const specs: Readonly<Record<string, ParamSpec>> = definition.params
   const params: Readonly<Record<string, unknown>> = component.params
 
   const actions = [
-    { label: 'Rodar', shortcut: 'R', icon: RotateCw, run: () => rotateComponent(component.id) },
     {
-      label: 'Duplicar',
+      label: t('props.rotate'),
+      shortcut: 'R',
+      icon: RotateCw,
+      run: () => rotateComponent(component.id),
+    },
+    {
+      label: t('props.duplicate'),
       shortcut: 'Ctrl+D',
       icon: Copy,
       run: () => duplicateComponent(component.id),
     },
-    { label: 'Apagar', shortcut: 'Delete', icon: Trash2, run: () => removeComponent(component.id) },
+    {
+      label: t('props.delete'),
+      shortcut: 'Delete',
+      icon: Trash2,
+      run: () => removeComponent(component.id),
+    },
   ]
 
   return (
@@ -94,21 +122,21 @@ function SelectedComponent({ component }: { component: Component }) {
           <h3 className="text-base font-semibold text-slate-100" data-testid="selected-name">
             {component.name}
           </h3>
-          <p className="text-slate-400">{definition.label}</p>
+          <p className="text-slate-400">{t(`kind.${component.kind}`)}</p>
         </div>
       </div>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-300">
-        <dt className="text-slate-400">Posição</dt>
+        <dt className="text-slate-400">{t('props.position')}</dt>
         <dd data-testid="selected-position">
           ({component.position.x}, {component.position.y})
         </dd>
-        <dt className="text-slate-400">Rotação</dt>
+        <dt className="text-slate-400">{t('props.rotation')}</dt>
         <dd data-testid="selected-rotation">{component.rotation}°</dd>
         {Object.entries(specs).map(([key, spec]) => (
           <div key={key} className="contents">
-            <dt className="text-slate-400">{spec.label}</dt>
-            <dd>{formatParam(spec, params[key])}</dd>
+            <dt className="text-slate-400">{paramLabel(key, spec, t)}</dt>
+            <dd>{formatParam(spec, params[key], t, decimal)}</dd>
           </div>
         ))}
       </dl>
