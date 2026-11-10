@@ -152,7 +152,8 @@ export function Workspace() {
   return (
     <div
       ref={container}
-      className="absolute inset-0"
+      // touch-none: com o dedo, arrastar na cena move o componente em vez de fazer scroll/zoom.
+      className="absolute inset-0 touch-none"
       onDragOver={onDragOver}
       onDrop={onDrop}
       data-component-count={components.length}

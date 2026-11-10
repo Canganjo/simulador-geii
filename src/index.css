@@ -7,6 +7,25 @@ body,
   margin: 0;
 }
 
+/* Telemóvel (iPhone):
+   - 100dvh = altura VISÍVEL (sem a barra do Safari); 100% cortava o fundo da app;
+   - as margens seguras afastam a app do entalhe e da barra de baixo (viewport-fit=cover);
+   - a página nunca faz scroll nem "elástico": só os painéis fazem scroll por dentro;
+   - touch-action: manipulation tira o zoom com duplo toque (que atrasava os toques). */
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  background: #0f172a; /* slate-900, igual à app: as margens seguras não ficam brancas */
+}
+#root {
+  box-sizing: border-box;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
 /* Enquanto se puxa a borda de um painel (ResizeHandle): o painel segue o rato sem animação,
    o texto não fica selecionado e o cursor mantém-se, mesmo fora da borda. */
 .is-resizing,
