@@ -7,7 +7,7 @@ const history = () => useCircuitStore.temporal.getState()
 const actions = () => store.getState()
 
 beforeEach(() => {
-  store.setState({ components: [], wires: [], selectedId: null })
+  store.setState({ components: [], wires: [], selectedId: null, selectedWireId: null })
   history().clear()
 })
 
@@ -194,5 +194,49 @@ describe('seleção e histórico', () => {
     const r = actions().addComponent('resistor', { x: 0, y: 0 })
     for (let i = 1; i <= HISTORY_LIMIT + 20; i++) actions().moveComponent(r, { x: i, y: 0 })
     expect(history().pastStates).toHaveLength(HISTORY_LIMIT)
+  })
+})
+
+describe('seleção de fios', () => {
+  /** R1 e R2 com um fio R1:b → R2:a. */
+  function twoResistorsWithWire() {
+    const r1 = store.getState().addComponent('resistor', { x: 0, y: 0 })
+    const r2 = store.getState().addComponent('resistor', { x: 4, y: 0 })
+    const wire = store.getState().addWire(`${r1}:b` as TerminalId, `${r2}:a` as TerminalId)
+    if (!wire) throw new Error('fio recusado')
+    return { r1, r2, wire }
+  }
+
+  it('selecionar um fio tira a seleção do componente, e vice-versa', () => {
+    const { r1, wire } = twoResistorsWithWire()
+    store.getState().selectWire(wire)
+    expect(store.getState()).toMatchObject({ selectedWireId: wire, selectedId: null })
+    store.getState().select(r1)
+    expect(store.getState()).toMatchObject({ selectedWireId: null, selectedId: r1 })
+  })
+
+  it('apagar o fio selecionado limpa a seleção; Ctrl+Z repõe o fio', () => {
+    const { wire } = twoResistorsWithWire()
+    store.getState().selectWire(wire)
+    store.getState().removeWire(wire)
+    expect(store.getState().wires).toHaveLength(0)
+    expect(store.getState().selectedWireId).toBeNull()
+    store.temporal.getState().undo()
+    expect(store.getState().wires.map((w) => w.id)).toEqual([wire])
+  })
+
+  it('apagar um componente tira a seleção do fio que estava ligado a ele', () => {
+    const { r2, wire } = twoResistorsWithWire()
+    store.getState().selectWire(wire)
+    store.getState().removeComponent(r2)
+    expect(store.getState().selectedWireId).toBeNull()
+  })
+
+  it('selecionar um fio não grava passos no histórico', () => {
+    const { wire } = twoResistorsWithWire()
+    const steps = store.temporal.getState().pastStates.length
+    store.getState().selectWire(wire)
+    store.getState().selectWire(null)
+    expect(store.temporal.getState().pastStates.length).toBe(steps)
   })
 })

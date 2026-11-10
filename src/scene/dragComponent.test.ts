@@ -7,7 +7,7 @@ const position = (id: string) =>
   useCircuitStore.getState().components.find((c) => c.id === id)?.position
 
 beforeEach(() => {
-  useCircuitStore.setState({ components: [], wires: [], selectedId: null })
+  useCircuitStore.setState({ components: [], wires: [], selectedId: null, selectedWireId: null })
   history().clear()
 })
 

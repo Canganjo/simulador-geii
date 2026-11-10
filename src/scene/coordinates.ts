@@ -7,7 +7,7 @@
  *   cima, o y do esquema corresponde a −z:   modelo (x, y)  →  cena (x, 0, −y).
  */
 
-import type { ComponentKind, Rotation, Vec2 } from '../core/model'
+import type { Component, ComponentKind, Rotation, TerminalId, Vec2 } from '../core/model'
 
 /** Ponto da grelha mais próximo (as posições são sempre números inteiros). */
 export function snapToGrid(point: Vec2): Vec2 {
@@ -50,6 +50,38 @@ export function terminalOffsets(kind: ComponentKind): Vec2[] {
     { x: -1, y: 0 },
     { x: 1, y: 0 },
   ]
+}
+
+/**
+ * Posição (na grelha) do terminal nº `index` de um componente, já com a rotação aplicada.
+ * A ordem dos terminais é a do catálogo (ex.: resistência a, b; LED ânodo, cátodo).
+ */
+export function terminalPosition(component: Component, index: number): Vec2 {
+  const offset = terminalOffsets(component.kind)[index] ?? { x: 0, y: 0 }
+  const r = rotateOffset(offset, component.rotation)
+  return { x: component.position.x + r.x, y: component.position.y + r.y }
+}
+
+/** Posição de um terminal pelo seu ID ("R1:a"), ou null se não existir. */
+export function terminalPositionById(
+  components: readonly Component[],
+  terminalId: TerminalId,
+): Vec2 | null {
+  for (const c of components) {
+    const index = c.terminals.findIndex((t) => t.id === terminalId)
+    if (index >= 0) return terminalPosition(c, index)
+  }
+  return null
+}
+
+/**
+ * Traçado ORTOGONAL de um fio (só linhas horizontais e verticais, como num esquema):
+ * primeiro na horizontal, depois na vertical — um "L". Se os pontos já estão alinhados,
+ * o fio é uma só linha reta.
+ */
+export function orthogonalRoute(a: Vec2, b: Vec2): Vec2[] {
+  if (a.x === b.x || a.y === b.y) return [{ ...a }, { ...b }]
+  return [{ ...a }, { x: b.x, y: a.y }, { ...b }]
 }
 
 /**

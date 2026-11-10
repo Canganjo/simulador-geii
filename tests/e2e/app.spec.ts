@@ -276,3 +276,97 @@ test('apagar com Delete e voltar com Ctrl+Z; rodar com R; duplicar com Ctrl+D', 
   await page.keyboard.press('Control+z')
   await expect(scene.locator('[data-component-label="R2"]')).toBeVisible()
 })
+
+/** Centro (em píxeis) de um elemento âncora da cena, ex.: o terminal "R1:b". */
+async function anchor(page: import('@playwright/test').Page, selector: string) {
+  const box = await page.getByTestId('workspace').locator(selector).boundingBox()
+  if (!box) throw new Error(`âncora ${selector} não encontrada`)
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+}
+
+/** R1 em (0, 0) (clique no menu) e R2 em (4, 0) (arrastado 160 px para a direita do centro). */
+async function twoResistors(page: import('@playwright/test').Page) {
+  await page.goto('/')
+  const menu = page.getByRole('complementary', { name: 'Menu de componentes' })
+  const scene = page.getByTestId('workspace')
+  await menu.getByRole('button', { name: 'Resistência' }).click()
+  const box = await scene.boundingBox()
+  if (!box) throw new Error('zona livre não encontrada')
+  await menu.getByRole('button', { name: 'Resistência' }).dragTo(scene, {
+    targetPosition: { x: box.width / 2 + 160, y: box.height / 2 },
+  })
+  await expect(scene.locator('[data-component-label="R2"]')).toBeVisible()
+  return scene
+}
+
+/** Liga dois terminais com dois cliques. */
+async function connect(page: import('@playwright/test').Page, from: string, to: string) {
+  const a = await anchor(page, `[data-terminal="${from}"]`)
+  await page.mouse.click(a.x, a.y)
+  await expect(page.getByRole('status')).toContainText(`A ligar ${from}`)
+  const b = await anchor(page, `[data-terminal="${to}"]`)
+  await page.mouse.click(b.x, b.y)
+}
+
+test('fios: ligar dois terminais; os terminais ficam "ligados"', async ({ page }) => {
+  const scene = await twoResistors(page)
+  await connect(page, 'R1:b', 'R2:a')
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '1')
+  await expect(scene.locator('[data-terminal="R1:b"]')).toHaveAttribute(
+    'data-terminal-state',
+    'connected',
+  )
+  await expect(scene.locator('[data-terminal="R1:a"]')).toHaveAttribute(
+    'data-terminal-state',
+    'loose',
+  )
+})
+
+test('fios: o fio segue o componente quando este se move', async ({ page }) => {
+  const scene = await twoResistors(page)
+  await connect(page, 'R1:b', 'R2:a')
+  const before = await anchor(page, '[data-terminal="R2:a"]')
+
+  // Agarra o R2 pelo centro (a meio dos seus dois terminais) e arrasta 80 px para a direita.
+  const b = await anchor(page, '[data-terminal="R2:b"]')
+  const center = { x: (before.x + b.x) / 2, y: (before.y + b.y) / 2 }
+  await page.mouse.move(center.x, center.y)
+  await page.mouse.down()
+  await page.mouse.move(center.x + 80, center.y, { steps: 8 })
+  await page.mouse.up()
+
+  await expect
+    .poll(async () => (await anchor(page, '[data-terminal="R2:a"]')).x)
+    .toBeGreaterThan(before.x + 60)
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '1')
+  await expect(scene.locator('[data-terminal="R2:a"]')).toHaveAttribute(
+    'data-terminal-state',
+    'connected',
+  )
+})
+
+test('fios: selecionar e apagar com Delete; Ctrl+Z repõe', async ({ page }) => {
+  const scene = await twoResistors(page)
+  await connect(page, 'R1:b', 'R2:a')
+  const wire = scene.locator('[data-wire]')
+  const w = await anchor(page, '[data-wire]')
+  await page.mouse.click(w.x, w.y)
+  await expect(wire).toHaveAttribute('data-selected', 'true')
+
+  await page.keyboard.press('Delete')
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '0')
+  await expect(scene.locator('[data-component-label="R1"]')).toBeVisible() // só o fio saiu
+
+  await page.keyboard.press('Control+z')
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '1')
+})
+
+test('fios: Esc a meio cancela sem criar fio', async ({ page }) => {
+  const scene = await twoResistors(page)
+  const a = await anchor(page, '[data-terminal="R1:a"]')
+  await page.mouse.click(a.x, a.y)
+  await expect(page.getByRole('status')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('status')).toHaveCount(0)
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '0')
+})
