@@ -1,7 +1,7 @@
 import { temporal } from 'zundo'
 import { create } from 'zustand'
 import type { Component, ComponentKind, Rotation, TerminalId, Vec2, Wire } from '../core/model'
-import { createComponent } from '../core/library'
+import { createComponent, validateParams, type ParamIssue } from '../core/library'
 
 /**
  * Estado do CIRCUITO: componentes, fios e seleção.
@@ -31,6 +31,16 @@ export interface CircuitState {
   duplicateComponent: (id: string) => string | null
   /** Apaga o componente e os fios ligados aos seus terminais. */
   removeComponent: (id: string) => void
+  /**
+   * Muda parâmetros (ex.: { resistance: 470 }), verificados com o catálogo (validateParams).
+   * Devolve os problemas encontrados; se houver algum, NADA muda.
+   */
+  updateParams: (id: string, changes: Readonly<Record<string, unknown>>) => ParamIssue[]
+  /**
+   * Muda o nome (ex.: "R1" → "Rcarga"). Devolve null se mudou, ou o motivo da recusa:
+   * 'empty' (vazio) ou 'taken' (já há outro componente com esse nome).
+   */
+  renameComponent: (id: string, name: string) => null | 'empty' | 'taken'
   /** Liga dois terminais. Devolve o ID do fio, ou null se o fio for recusado. */
   addWire: (from: TerminalId, to: TerminalId) => string | null
   removeWire: (id: string) => void
@@ -78,6 +88,33 @@ export const useCircuitStore = create<CircuitState>()(
             c.id === id ? { ...c, rotation: ((c.rotation + 90) % 360) as Rotation } : c,
           ),
         })),
+
+      updateParams: (id, changes) => {
+        const component = get().components.find((c) => c.id === id)
+        if (!component) return []
+        const params = { ...component.params, ...changes }
+        const issues = validateParams(component.kind, params, component.name)
+        if (issues.length > 0) return issues
+        set((s) => ({
+          components: s.components.map((c) =>
+            // Seguro: validateParams acabou de confirmar os parâmetros deste tipo de componente.
+            c.id === id ? ({ ...c, params } as Component) : c,
+          ),
+        }))
+        return []
+      },
+
+      renameComponent: (id, name) => {
+        const clean = name.trim()
+        if (clean === '') return 'empty'
+        const { components } = get()
+        const lower = clean.toLowerCase()
+        if (components.some((c) => c.id !== id && c.name.toLowerCase() === lower)) return 'taken'
+        set((s) => ({
+          components: s.components.map((c) => (c.id === id ? { ...c, name: clean } : c)),
+        }))
+        return null
+      },
 
       duplicateComponent: (id) => {
         const { components } = get()

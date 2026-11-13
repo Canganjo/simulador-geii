@@ -60,6 +60,12 @@ export const en: Messages = {
   'props.rotate': 'Rotate',
   'props.duplicate': 'Duplicate',
   'props.delete': 'Delete',
+  'props.name': 'Name',
+  'props.nameEmpty': 'The name cannot be empty.',
+  'props.nameTaken': 'There is already a component named {name}.',
+  'props.invalidNumber': 'Type a number, e.g. 470, 4.7k, 4k7, 2m.',
+  'props.outOfRange': 'Must be between {min} and {max}.',
+  'props.numberHint': 'E.g. 470 · 4.7k · 4k7 · 2m (milli) · 1M (mega). Enter applies, Esc cancels.',
   'common.yes': 'Yes',
   'common.no': 'No',
 

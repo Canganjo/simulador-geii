@@ -240,3 +240,50 @@ describe('seleção de fios', () => {
     expect(store.temporal.getState().pastStates.length).toBe(steps)
   })
 })
+
+describe('updateParams', () => {
+  it('muda o valor (ex.: R1 = 470 Ω) e é um passo do desfazer', () => {
+    const r = actions().addComponent('resistor', { x: 0, y: 0 })
+    history().clear()
+    expect(actions().updateParams(r, { resistance: 470 })).toEqual([])
+    expect(actions().components[0]?.params).toMatchObject({ resistance: 470 })
+    expect(history().pastStates).toHaveLength(1)
+
+    history().undo()
+    expect(actions().components[0]?.params).toMatchObject({ resistance: 1000 })
+  })
+
+  it('valor fora dos limites (0 Ω) → devolve o problema e não muda nada', () => {
+    const r = actions().addComponent('resistor', { x: 0, y: 0 })
+    history().clear()
+    const issues = actions().updateParams(r, { resistance: 0 })
+    expect(issues.map((i) => [i.param, i.reason])).toEqual([['resistance', 'out-of-range']])
+    expect(actions().components[0]?.params).toMatchObject({ resistance: 1000 })
+    expect(history().pastStates).toHaveLength(0)
+  })
+
+  it('interruptor: fechar (boolean) e LED: mudar a cor (opção)', () => {
+    const s = actions().addComponent('switch', { x: 0, y: 0 })
+    const d = actions().addComponent('led', { x: 4, y: 0 })
+    expect(actions().updateParams(s, { closed: true })).toEqual([])
+    expect(actions().updateParams(d, { color: 'azul' })).toEqual([])
+    expect(actions().updateParams(d, { color: 'roxo' })).toHaveLength(1) // não existe
+    expect(actions().components.map((c) => c.params)).toEqual([
+      { closed: true },
+      expect.objectContaining({ color: 'azul' }),
+    ])
+  })
+})
+
+describe('renameComponent', () => {
+  it('muda o nome (sem espaços à volta); recusa vazio e nomes repetidos', () => {
+    const r1 = actions().addComponent('resistor', { x: 0, y: 0 })
+    actions().addComponent('resistor', { x: 4, y: 0 }) // R2
+    expect(actions().renameComponent(r1, '  Rcarga ')).toBeNull()
+    expect(actions().components[0]?.name).toBe('Rcarga')
+    expect(actions().renameComponent(r1, '   ')).toBe('empty')
+    expect(actions().renameComponent(r1, 'r2')).toBe('taken') // maiúsculas não contam
+    expect(actions().renameComponent(r1, 'Rcarga')).toBeNull() // o próprio nome pode ficar
+    expect(actions().components[0]?.name).toBe('Rcarga')
+  })
+})

@@ -73,6 +73,12 @@ export const pt = {
   'props.rotate': 'Rodar',
   'props.duplicate': 'Duplicar',
   'props.delete': 'Apagar',
+  'props.name': 'Nome',
+  'props.nameEmpty': 'O nome não pode ficar vazio.',
+  'props.nameTaken': 'Já existe um componente chamado {name}.',
+  'props.invalidNumber': 'Escreve um número, ex.: 470, 4,7k, 4k7, 2m.',
+  'props.outOfRange': 'Tem de estar entre {min} e {max}.',
+  'props.numberHint': 'Ex.: 470 · 4,7k · 4k7 · 2m (mili) · 1M (mega). Enter aplica, Esc anula.',
   'common.yes': 'Sim',
   'common.no': 'Não',
 
