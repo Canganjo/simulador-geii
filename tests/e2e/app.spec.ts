@@ -594,3 +594,42 @@ test('ficheiros: Novo pergunta se há alterações; ficheiro estragado dá mensa
   )
   await expect(scene.locator('[data-component-count]')).toHaveAttribute('data-component-count', '1')
 })
+
+test('etiquetas: o nome de cada componente aparece, em cima do componente certo', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await dropAt(page, 'LED', 160, 0)
+  await dropAt(page, 'GND', 0, 120)
+
+  for (const name of ['R1', 'V1', 'D1', 'GND1']) {
+    await expect(scene.locator(`[data-component-label="${name}"]`)).toBeVisible()
+  }
+  // Cada nome fica entre os dois terminais do seu componente (na horizontal) e acima deles.
+  for (const name of ['R1', 'V1']) {
+    const label = await scene.locator(`[data-component-label="${name}"]`).boundingBox()
+    const a = await anchor(page, `[data-terminal="${name}:${name === 'R1' ? 'a' : '+'}"]`)
+    const b = await anchor(page, `[data-terminal="${name}:${name === 'R1' ? 'b' : '-'}"]`)
+    if (!label) throw new Error(`sem etiqueta ${name}`)
+    const middle = label.x + label.width / 2
+    expect(middle).toBeGreaterThan(Math.min(a.x, b.x))
+    expect(middle).toBeLessThan(Math.max(a.x, b.x))
+    expect(label.y + label.height / 2).toBeLessThan(a.y)
+  }
+
+  // Selecionado → a etiqueta fica azul (data-selected) e as outras não.
+  await expect(scene.locator('[data-component-label="GND1"]')).toHaveAttribute(
+    'data-selected',
+    'true',
+  )
+  await expect(scene.locator('[data-component-label="R1"]')).toHaveAttribute(
+    'data-selected',
+    'false',
+  )
+})
