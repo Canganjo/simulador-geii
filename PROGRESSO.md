@@ -27,6 +27,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #25   | Ligar fios entre terminais (ortogonais)            | E2    | feito  | `feature/fios`                 | PR #26 |
 | #27   | Layout em telemóvel (iPhone)                       | E1    | feito  | `fix/layout-telemovel`         | PR #28 |
 | #29   | Trocar de língua: PT · FR · EN                     | E1    | feito  | `feature/idiomas`              | PR #30 |
+| #32   | Botão Simular e resultados U, I, R, P              | E2    | feito  | `feature/simular`              | PR #33 |
 
 ### Tarefas extra
 
@@ -34,30 +35,6 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | --------------------------------------------------------- | ------ | ---------------------------------- | ------ |
 | Licença "todos os direitos reservados" (LICENSE)          | feito  | `chore/licenca`                    | PR #11 |
 | Painéis redimensionáveis (puxar a borda, como no VS Code) | feito  | `feature/paineis-redimensionaveis` | PR #21 |
-
-## Próxima tarefa: botão Simular e resultados (plano, à espera do "ok")
-
-Ramo `feature/simular`. O que fica para quem usa:
-
-- **Simular** calcula o circuito; o painel de resultados mostra uma tabela
-  Componente | U | I | R | P (e nos LED "aceso"/"apagado").
-- Erros (vermelho, não calcula) e avisos (âmbar) por cima da tabela, ex.: "Falta o GND",
-  "Curto-circuito na fonte V1". Clicar numa mensagem seleciona o componente.
-- **Parar** / **RAZ** limpam os resultados. Mexer no circuito também os limpa.
-- Tudo nas 3 línguas, com o separador decimal de cada uma.
-
-Passos:
-
-1. `src/store/simulationStore.ts`: estado (vazio / resultados / erros); `run()` chama `simulateDc`.
-2. `TopBar`: ligar Simular, Parar e RAZ.
-3. `ResultsPanel`: tabela + lista de mensagens (R = resistência ou U/I da lâmpada; fonte e GND "—").
-4. Traduzir as mensagens do motor: pequena alteração em `src/core` (Pessoa 1) — cada mensagem
-   leva também os seus dados (ex.: `{ terminal: 'b' }`); a interface monta a frase pelo `code`.
-   O cálculo não muda; o texto em português fica como recurso.
-5. Testes: store com o teste 6 da planilha (12 V, 470 Ω, LED 2 V → 21,3 mA); E2E
-   V1 + R1 + GND → 12 mA, e só R1 → erro "Falta a fonte".
-
-Fica para depois: destacar na cena os componentes com erro e acender o LED em 3D.
 
 ## Já integrado no `main`
 
@@ -81,4 +58,6 @@ Fica para depois: destacar na cena os componentes com erro e acender o LED em 3D
 | `ff127e2` | Selecionar, mover, rodar, duplicar e apagar (issue #6)              | #24 |
 | `74e8349` | Ligar fios entre terminais (issue #25)                              | #26 |
 | `ff4c1af` | Layout em telemóvel (issue #27)                                     | #28 |
-| (squash)  | Trocar de língua: PT · FR · EN (issue #29)                          | #30 |
+| `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                          | #30 |
+| `213cf77` | Plano do botão Simular no PROGRESSO (docs)                          | #31 |
+| (squash)  | Botão Simular e resultados U, I, R, P (issue #32)                   | #33 |
