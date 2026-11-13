@@ -30,6 +30,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #32   | Botão Simular e resultados U, I, R, P              | E2    | feito  | `feature/simular`              | PR #33 |
 | #35   | Editar os valores e o nome dos componentes         | E2    | feito  | `feature/editar-valores`       | PR #36 |
 | #37   | Novo, Abrir e Guardar projetos (.geii.json)        | E2    | feito  | `feature/guardar-abrir`        | PR #38 |
+| #39   | O nome por cima do componente aparece sempre       | E2    | feito  | `fix/etiquetas-nomes`          | PR #40 |
 
 ### Tarefas extra
 
@@ -64,4 +65,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `213cf77` | Plano do botão Simular no PROGRESSO (docs)                          | #31 |
 | `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                   | #33 |
 | `49897f0` | Editar os valores e o nome dos componentes (issue #35)              | #36 |
-| (squash)  | Novo, Abrir e Guardar projetos .geii.json (issue #37)               | #38 |
+| `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)               | #38 |
+| (squash)  | O nome por cima do componente aparece sempre (issue #39)            | #40 |
