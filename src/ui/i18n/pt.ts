@@ -20,6 +20,15 @@ export const pt = {
   'action.stop': 'Parar',
   'action.reset': 'Reset',
 
+  // Ficheiros de projeto (Novo, Abrir, Guardar)
+  'file.confirmDiscard': 'Há alterações por guardar que se vão perder. Queres mesmo continuar?',
+  'file.unsaved': 'Alterações por guardar',
+  'file.errorNotJson': 'Não foi possível abrir {file}: não é um ficheiro de projeto (.geii.json).',
+  'file.errorNewer':
+    'Não foi possível abrir {file}: foi feito por uma versão mais recente do simulador (formato {version}).',
+  'file.errorInvalid': 'Não foi possível abrir {file}: o projeto tem um problema ({detail}).',
+  'file.close': 'Fechar',
+
   // Menu de componentes
   'menu.label': 'Menu de componentes',
   'menu.title': 'Componentes',

@@ -1,7 +1,16 @@
 import { temporal } from 'zundo'
 import { create } from 'zustand'
-import type { Component, ComponentKind, Rotation, TerminalId, Vec2, Wire } from '../core/model'
+import type {
+  Component,
+  ComponentKind,
+  Project,
+  Rotation,
+  TerminalId,
+  Vec2,
+  Wire,
+} from '../core/model'
 import { createComponent, validateParams, type ParamIssue } from '../core/library'
+import { PROJECT_FORMAT_VERSION } from '../core/model'
 
 /**
  * Estado do CIRCUITO: componentes, fios e seleção.
@@ -21,6 +30,15 @@ export interface CircuitState {
   selectedId: string | null
   /** ID do fio selecionado (ou null). Só há uma coisa selecionada de cada vez. */
   selectedWireId: string | null
+  /** Nome do projeto (vai para o nome do ficheiro ao guardar). */
+  projectName: string
+  /** Quando o projeto foi criado (ISO 8601); guarda-se no ficheiro. */
+  createdAt: string
+  /**
+   * O circuito tal como estava na última vez que foi guardado/aberto. Se `components` ou `wires`
+   * forem outros objetos, há alterações por guardar (ver `hasUnsavedChanges`).
+   */
+  saved: CircuitHistory
 
   /** Cria um componente do catálogo (nome livre: R1, R2…), seleciona-o e devolve o seu ID. */
   addComponent: (kind: ComponentKind, position: Vec2) => string
@@ -48,20 +66,40 @@ export interface CircuitState {
   select: (id: string | null) => void
   /** Seleciona um fio (e tira a seleção do componente). */
   selectWire: (id: string | null) => void
+  /** Substitui o circuito pelo de um projeto aberto. Limpa a seleção e o histórico (Ctrl+Z). */
+  loadProject: (project: Project) => void
+  /** Começa um projeto vazio (botão Novo). */
+  newProject: () => void
+  /** Marca o circuito atual como guardado (depois de descarregar o ficheiro). */
+  markSaved: () => void
 }
+
+/** Verdadeiro se o circuito mudou desde a última vez que foi guardado ou aberto. */
+export function hasUnsavedChanges(state: CircuitState): boolean {
+  return state.components !== state.saved.components || state.wires !== state.saved.wires
+}
+
+export const DEFAULT_PROJECT_NAME = 'circuito'
 
 /** A parte do estado que entra no histórico de desfazer/refazer. */
 export type CircuitHistory = Pick<CircuitState, 'components' | 'wires'>
 
 export const HISTORY_LIMIT = 100
 
+// Os mesmos objetos vazios no estado inicial e em `saved`: um circuito novo não tem alterações.
+const EMPTY_COMPONENTS: Component[] = []
+const EMPTY_WIRES: Wire[] = []
+
 export const useCircuitStore = create<CircuitState>()(
   temporal(
     (set, get) => ({
-      components: [],
-      wires: [],
+      components: EMPTY_COMPONENTS,
+      wires: EMPTY_WIRES,
       selectedId: null,
       selectedWireId: null,
+      projectName: DEFAULT_PROJECT_NAME,
+      createdAt: new Date().toISOString(),
+      saved: { components: EMPTY_COMPONENTS, wires: EMPTY_WIRES },
 
       addComponent: (kind, position) => {
         const component: Component = createComponent(kind, position, {
@@ -172,6 +210,33 @@ export const useCircuitStore = create<CircuitState>()(
 
       select: (id) => set({ selectedId: id, selectedWireId: null }),
       selectWire: (id) => set({ selectedWireId: id, selectedId: null }),
+
+      loadProject: (project) => {
+        const { components, wires } = project
+        set({
+          components,
+          wires,
+          projectName: project.name,
+          createdAt: project.createdAt,
+          saved: { components, wires },
+          selectedId: null,
+          selectedWireId: null,
+        })
+        // "Desfazer a abertura" não faz sentido: o histórico começa aqui.
+        useCircuitStore.temporal.getState().clear()
+      },
+
+      newProject: () =>
+        get().loadProject({
+          version: PROJECT_FORMAT_VERSION,
+          name: DEFAULT_PROJECT_NAME,
+          components: EMPTY_COMPONENTS,
+          wires: EMPTY_WIRES,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }),
+
+      markSaved: () => set((s) => ({ saved: { components: s.components, wires: s.wires } })),
     }),
     {
       partialize: ({ components, wires }): CircuitHistory => ({ components, wires }),

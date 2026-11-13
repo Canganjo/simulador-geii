@@ -525,3 +525,72 @@ test('editar: valor inválido fica a vermelho e não muda; Ctrl+Z desfaz um valo
   await name.press('Enter')
   await expect(props.getByTestId('selected-name')).toHaveText('Rcarga')
 })
+
+test('ficheiros: guardar o teste 6, Novo, abrir de novo e simular → 21,3 mA', async ({ page }) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  const resistance = props.getByRole('textbox', { name: 'Resistência', exact: true })
+  await resistance.fill('470')
+  await resistance.press('Enter')
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await dropAt(page, 'LED', 160, 0)
+  await dropAt(page, 'GND', 0, 120)
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'D1:anodo')
+  await connect(page, 'D1:catodo', 'GND1:gnd')
+  await connect(page, 'GND1:gnd', 'V1:-')
+  await expect(page.getByTestId('unsaved-badge')).toBeVisible() // alterações por guardar
+
+  // Guardar → descarrega circuito.geii.json
+  const downloading = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Guardar' }).click()
+  const download = await downloading
+  expect(download.suggestedFilename()).toBe('circuito.geii.json')
+  const file = await download.path()
+  await expect(page.getByTestId('unsaved-badge')).toHaveCount(0)
+
+  // Novo (sem perguntar: está tudo guardado) → zona livre vazia
+  await page.getByRole('button', { name: 'Novo' }).click()
+  await expect(scene.locator('[data-component-count]')).toHaveAttribute('data-component-count', '0')
+
+  // Abrir o ficheiro guardado → o circuito volta, e o cálculo dá o mesmo
+  await page.getByTestId('open-project-input').setInputFiles(file)
+  await expect(scene.locator('[data-component-count]')).toHaveAttribute('data-component-count', '4')
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '4')
+  await page.getByRole('button', { name: 'Simular' }).click()
+  await expect(
+    page.getByRole('region', { name: 'Resultados' }).locator('tr[data-component="R1"]'),
+  ).toContainText('21,3 mA')
+})
+
+test('ficheiros: Novo pergunta se há alterações; ficheiro estragado dá mensagem clara', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+
+  // "Cancelar" na pergunta → nada muda
+  page.once('dialog', (dialog) => void dialog.dismiss())
+  await page.getByRole('button', { name: 'Novo' }).click()
+  await expect(scene.locator('[data-component-count]')).toHaveAttribute('data-component-count', '1')
+
+  // Ficheiro que não é JSON → mensagem, e o circuito atual fica
+  await page.getByTestId('open-project-input').setInputFiles({
+    name: 'notas.geii.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('isto não é um projeto'),
+  })
+  await expect(page.getByRole('alert')).toContainText(
+    'Não foi possível abrir notas.geii.json: não é um ficheiro de projeto',
+  )
+  await expect(scene.locator('[data-component-count]')).toHaveAttribute('data-component-count', '1')
+})
