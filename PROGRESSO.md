@@ -28,6 +28,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #27   | Layout em telemóvel (iPhone)                       | E1    | feito  | `fix/layout-telemovel`         | PR #28 |
 | #29   | Trocar de língua: PT · FR · EN                     | E1    | feito  | `feature/idiomas`              | PR #30 |
 | #32   | Botão Simular e resultados U, I, R, P              | E2    | feito  | `feature/simular`              | PR #33 |
+| #35   | Editar os valores e o nome dos componentes         | E2    | feito  | `feature/editar-valores`       | PR #36 |
 
 ### Tarefas extra
 
@@ -60,4 +61,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `ff4c1af` | Layout em telemóvel (issue #27)                                     | #28 |
 | `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                          | #30 |
 | `213cf77` | Plano do botão Simular no PROGRESSO (docs)                          | #31 |
-| (squash)  | Botão Simular e resultados U, I, R, P (issue #32)                   | #33 |
+| `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                   | #33 |
+| (squash)  | Editar os valores e o nome dos componentes (issue #35)              | #36 |

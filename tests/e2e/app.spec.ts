@@ -231,7 +231,7 @@ test('selecionar: clique no componente mostra-o nas propriedades; clique no vazi
   await page.mouse.click(x, y) // em cima do R1
   await expect(props.getByTestId('selected-name')).toHaveText('R1')
   await expect(props).toContainText('Resistência')
-  await expect(props).toContainText('1 kΩ')
+  await expect(props.getByRole('textbox', { name: 'Resistência', exact: true })).toHaveValue('1k')
 })
 
 test('mover: arrastar o componente muda a posição; Ctrl+Z volta atrás num só passo', async ({
@@ -460,4 +460,68 @@ test('simular: só uma resistência → erros "sem fonte" e "falta o GND"; em in
   await expect(page.getByRole('region', { name: 'Results' })).toContainText(
     'There is no voltage source in the circuit.',
   )
+})
+
+test('editar: teste 6 da planilha montado pela interface (12 V, 470 Ω, LED) → 21,3 mA', async ({
+  page,
+}) => {
+  //   V1+ ── R1 ── D1 (ânodo → cátodo) ── GND1 ── V1−
+  //   I = (12 − 2) / 470 = 21,28 mA ; U(R1) = 470 × 0,02128 = 10 V
+  await page.goto('/')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click() // R1 no centro, já selecionado
+  const resistance = props.getByRole('textbox', { name: 'Resistência', exact: true })
+  await resistance.fill('470')
+  await resistance.press('Enter')
+  await expect(resistance).toHaveValue('470')
+
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await dropAt(page, 'LED', 160, 0)
+  await dropAt(page, 'GND', 0, 120)
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'D1:anodo')
+  await connect(page, 'D1:catodo', 'GND1:gnd')
+  await connect(page, 'GND1:gnd', 'V1:-')
+
+  await page.getByRole('button', { name: 'Simular' }).click()
+  const results = page.getByRole('region', { name: 'Resultados' })
+  await expect(results.locator('tr[data-component="R1"]')).toContainText('21,3 mA')
+  await expect(results.locator('tr[data-component="R1"]')).toContainText('470 Ω')
+  await expect(results.locator('tr[data-component="D1"]')).toContainText('aceso')
+})
+
+test('editar: valor inválido fica a vermelho e não muda; Ctrl+Z desfaz um valor; nome', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  const resistance = props.getByRole('textbox', { name: 'Resistência', exact: true })
+
+  await resistance.fill('abc')
+  await resistance.press('Enter')
+  await expect(props.getByRole('alert')).toContainText('Escreve um número')
+
+  await resistance.fill('0')
+  await resistance.press('Enter')
+  await expect(props.getByRole('alert')).toContainText('Tem de estar entre 1 mΩ e 100 MΩ')
+
+  await resistance.fill('4k7')
+  await resistance.press('Enter')
+  await expect(resistance).toHaveValue('4,7k')
+  await expect(props.getByRole('alert')).toHaveCount(0)
+
+  await page.keyboard.press('Control+z')
+  await expect(resistance).toHaveValue('1k')
+
+  const name = props.getByRole('textbox', { name: 'Nome' })
+  await name.fill('Rcarga')
+  await name.press('Enter')
+  await expect(props.getByTestId('selected-name')).toHaveText('Rcarga')
 })

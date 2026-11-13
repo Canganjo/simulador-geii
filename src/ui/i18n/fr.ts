@@ -61,6 +61,13 @@ export const fr: Messages = {
   'props.rotate': 'Tourner',
   'props.duplicate': 'Dupliquer',
   'props.delete': 'Supprimer',
+  'props.name': 'Nom',
+  'props.nameEmpty': 'Le nom ne peut pas être vide.',
+  'props.nameTaken': 'Il existe déjà un composant nommé {name}.',
+  'props.invalidNumber': 'Écris un nombre, ex. : 470, 4,7k, 4k7, 2m.',
+  'props.outOfRange': 'Doit être compris entre {min} et {max}.',
+  'props.numberHint':
+    'Ex. : 470 · 4,7k · 4k7 · 2m (milli) · 1M (méga). Entrée applique, Échap annule.',
   'common.yes': 'Oui',
   'common.no': 'Non',
 

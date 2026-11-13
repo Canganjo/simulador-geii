@@ -9,11 +9,10 @@ import {
 import { CATALOG, type ParamSpec } from '../core/library'
 import type { Component } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
-import { useLanguageStore } from '../store/languageStore'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
-import { formatSi } from './formatSi'
-import { decimalSeparator, isMessageKey, useT, type Translate } from './i18n'
+import { useT } from './i18n'
 import { IecSymbol } from './IecSymbol'
+import { BooleanParamField, ChoiceParamField, NameField, NumberParamField } from './ParamFields'
 
 interface Props {
   open: boolean
@@ -63,31 +62,8 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
   )
 }
 
-/** Mostra um valor de um parâmetro: número com prefixo SI, Sim/Não, ou a opção escolhida. */
-function formatParam(spec: ParamSpec, value: unknown, t: Translate, decimal: ',' | '.'): string {
-  if (spec.type === 'number') {
-    return typeof value === 'number' ? formatSi(value, spec.unit, 3, decimal) : '—'
-  }
-  if (spec.type === 'boolean') return value === true ? t('common.yes') : t('common.no')
-  if (typeof value !== 'string') return '—'
-  // Opções conhecidas (cores do LED) são traduzidas; outras mostram-se como estão.
-  return isColor(value) ? t(`color.${value}`) : value
-}
-
-/** Nome do parâmetro na língua escolhida (se faltar a tradução, o nome do catálogo). */
-function paramLabel(key: string, spec: ParamSpec, t: Translate): string {
-  const messageKey = `param.${key}`
-  return isMessageKey(messageKey) ? t(messageKey) : spec.label
-}
-
-const COLORS = ['vermelho', 'verde', 'azul', 'amarelo', 'branco'] as const
-function isColor(value: string): value is (typeof COLORS)[number] {
-  return (COLORS as readonly string[]).includes(value)
-}
-
 function SelectedComponent({ component }: { component: Component }) {
   const t = useT()
-  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
   const { rotateComponent, duplicateComponent, removeComponent } = useCircuitStore.getState()
   const definition = CATALOG[component.kind]
   const specs: Readonly<Record<string, ParamSpec>> = definition.params
@@ -133,13 +109,23 @@ function SelectedComponent({ component }: { component: Component }) {
         </dd>
         <dt className="text-slate-400">{t('props.rotation')}</dt>
         <dd data-testid="selected-rotation">{component.rotation}°</dd>
-        {Object.entries(specs).map(([key, spec]) => (
-          <div key={key} className="contents">
-            <dt className="text-slate-400">{paramLabel(key, spec, t)}</dt>
-            <dd>{formatParam(spec, params[key], t, decimal)}</dd>
-          </div>
-        ))}
       </dl>
+
+      {/* Campos editáveis. A `key` inclui o valor guardado: se ele mudar por fora (Ctrl+Z),
+          o campo recomeça com o valor novo em vez de ficar com o rascunho antigo. */}
+      <div className="flex flex-col gap-2" data-testid="param-fields">
+        <NameField key={`${component.id}:name:${component.name}`} component={component} />
+        {Object.entries(specs).map(([param, spec]) => {
+          const key = `${component.id}:${param}:${String(params[param])}`
+          if (spec.type === 'number') {
+            return <NumberParamField key={key} component={component} param={param} spec={spec} />
+          }
+          if (spec.type === 'boolean') {
+            return <BooleanParamField key={key} component={component} param={param} spec={spec} />
+          }
+          return <ChoiceParamField key={key} component={component} param={param} spec={spec} />
+        })}
+      </div>
 
       <div className="flex flex-wrap gap-1">
         {actions.map(({ label, shortcut, icon: Icon, run }) => (
