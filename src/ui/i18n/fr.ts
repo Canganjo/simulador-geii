@@ -71,6 +71,31 @@ export const fr: Messages = {
   'results.hintAfter':
     'pour voir la tension (U), le courant (I), la résistance (R) et la puissance (P) de chaque composant.',
 
+  'results.component': 'Composant',
+  'results.ledOn': 'allumée',
+  'results.ledOff': 'éteinte',
+  'results.error': 'Erreur',
+  'results.warning': 'Avertissement',
+  'results.calcFailed': 'Le calcul a échoué : {detail}',
+
+  'terminal.anodo': 'anode',
+  'terminal.catodo': 'cathode',
+
+  'issue.no-source': 'Il n’y a aucune source de tension dans le circuit.',
+  'issue.no-ground': 'Il manque la masse GND (référence 0 V). Relie un GND au circuit.',
+  'issue.invalid-wire': 'Le fil {wire} est relié à une borne qui n’existe pas.',
+  'issue.invalid-params': '{name} : la valeur de « {param} » n’est pas valide.',
+  'issue.source-short-wire': '{name} est en court-circuit : le + et le − sont reliés par un fil.',
+  'issue.source-short-switch':
+    '{name} est en court-circuit : le + et le − sont reliés par un interrupteur fermé.',
+  'issue.parallel-sources':
+    '{a} et {b} sont en parallèle (deux sources reliées aux deux mêmes nœuds).',
+  'issue.floating-part': '{name} n’est pas relié au reste du circuit avec la masse.',
+  'issue.open-circuit': 'Circuit ouvert : aucun courant ne sort de {name}.',
+  'issue.loose-terminal': '{name} : la borne {terminal} n’est pas reliée.',
+  'issue.led-overcurrent':
+    '{name} : courant de {current} au-dessus du courant maximal ({max}) — la LED grillerait.',
+
   'resize.menu': 'Redimensionner le menu',
   'resize.results': 'Redimensionner les résultats',
   'resize.properties': 'Redimensionner les propriétés',

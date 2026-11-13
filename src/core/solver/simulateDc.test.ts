@@ -136,6 +136,11 @@ describe('simulateDc — LED no modelo simples (Vf + Rs)', () => {
         componentIds: ['D1'],
       }),
     ])
+    // Os dados da mensagem (correntes em A), para a interface a escrever noutra língua.
+    const params = r.issues[0]?.params
+    expect(params?.name).toBe('D1')
+    expect(params?.current).toBeCloseTo(0.1, 9)
+    expect(params?.max).toBeCloseTo(0.02, 9)
   })
 
   it('com 470 Ω (21,28 mA > 20 mA) também avisa; com 1 kΩ (10 mA) não', () => {

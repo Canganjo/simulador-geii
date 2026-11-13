@@ -398,3 +398,66 @@ test('idioma: o interruptor PT · FR · EN do menu da conta muda a app e fica gu
     'Résistance',
   )
 })
+
+/** Arrasta um item do menu para a zona livre, a (dx, dy) píxeis do centro. */
+async function dropAt(page: import('@playwright/test').Page, item: string, dx: number, dy: number) {
+  const menu = page.getByRole('complementary', { name: 'Menu de componentes' })
+  const scene = page.getByTestId('workspace')
+  const box = await scene.boundingBox()
+  if (!box) throw new Error('zona livre não encontrada')
+  await menu.getByRole('button', { name: item }).dragTo(scene, {
+    targetPosition: { x: box.width / 2 + dx, y: box.height / 2 + dy },
+  })
+}
+
+test('simular: V1 (12 V) + R1 (1 kΩ) + GND → I = 12 mA na tabela; mexer limpa', async ({
+  page,
+}) => {
+  //   V1+ ── R1:a   R1:b ── GND1 ── V1−      I = 12 V / 1000 Ω = 12 mA ; P(R1) = 12 × 0,012 = 144 mW
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click() // R1 no centro
+  await dropAt(page, 'Fonte DC', -160, 0) // V1 à esquerda
+  await dropAt(page, 'GND', 0, 120) // GND1 em baixo
+  await expect(scene.locator('[data-component-label="GND1"]')).toBeVisible()
+
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'GND1:gnd')
+  await connect(page, 'GND1:gnd', 'V1:-')
+  await expect(scene.locator('[data-wire-count]')).toHaveAttribute('data-wire-count', '3')
+
+  await page.getByRole('button', { name: 'Simular' }).click()
+  const row = page.getByRole('region', { name: 'Resultados' }).locator('tr[data-component="R1"]')
+  await expect(row).toContainText('12 V')
+  await expect(row).toContainText('12 mA')
+  await expect(row).toContainText('1 kΩ')
+  await expect(row).toContainText('144 mW')
+
+  // Mexer no circuito (Ctrl+Z tira o último fio) → os resultados desaparecem.
+  await page.keyboard.press('Control+z')
+  await expect(page.getByTestId('results-table')).toHaveCount(0)
+})
+
+test('simular: só uma resistência → erros "sem fonte" e "falta o GND"; em inglês também', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  await page.getByRole('button', { name: 'Simular' }).click()
+  const results = page.getByRole('region', { name: 'Resultados' })
+  await expect(results).toContainText('Não há nenhuma fonte de tensão no circuito.')
+  await expect(results).toContainText('Falta o GND')
+  await expect(results.locator('[data-severity="error"]')).toHaveCount(2)
+
+  await page.getByRole('button', { name: /^Conta:/ }).click()
+  await page.getByRole('radio', { name: 'English' }).click()
+  await expect(page.getByRole('region', { name: 'Results' })).toContainText(
+    'There is no voltage source in the circuit.',
+  )
+})

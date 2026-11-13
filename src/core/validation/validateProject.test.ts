@@ -193,6 +193,9 @@ describe('validateProject', () => {
     expect(r.ok).toBe(true)
     expect(codes(r)).toEqual(['open-circuit', 'loose-terminal'])
     expect(r.issues[1]?.message).toBe('R1: o terminal b não está ligado.')
+    // Os dados da mensagem, para a interface a escrever noutra língua.
+    expect(r.issues[0]?.params).toEqual({ name: 'V1' })
+    expect(r.issues[1]?.params).toEqual({ name: 'R1', terminal: 'b' })
   })
 
   it('o terminal solto do LED aparece com o nome legível (cátodo)', () => {

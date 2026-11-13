@@ -70,6 +70,31 @@ export const en: Messages = {
   'results.hintAfter':
     'to see the voltage (U), current (I), resistance (R) and power (P) of each component.',
 
+  'results.component': 'Component',
+  'results.ledOn': 'on',
+  'results.ledOff': 'off',
+  'results.error': 'Error',
+  'results.warning': 'Warning',
+  'results.calcFailed': 'The calculation failed: {detail}',
+
+  'terminal.anodo': 'anode',
+  'terminal.catodo': 'cathode',
+
+  'issue.no-source': 'There is no voltage source in the circuit.',
+  'issue.no-ground': 'The GND (0 V reference) is missing. Connect a GND to the circuit.',
+  'issue.invalid-wire': 'Wire {wire} is connected to a terminal that does not exist.',
+  'issue.invalid-params': '{name}: the value of “{param}” is not valid.',
+  'issue.source-short-wire': '{name} is short-circuited: + and − are connected by a wire.',
+  'issue.source-short-switch':
+    '{name} is short-circuited: + and − are connected by a closed switch.',
+  'issue.parallel-sources':
+    '{a} and {b} are in parallel (two sources connected to the same two nodes).',
+  'issue.floating-part': '{name} is not connected to the rest of the circuit with GND.',
+  'issue.open-circuit': 'Open circuit: no current leaves {name}.',
+  'issue.loose-terminal': '{name}: terminal {terminal} is not connected.',
+  'issue.led-overcurrent':
+    '{name}: current of {current} above the maximum current ({max}) — the LED would burn out.',
+
   'resize.menu': 'Resize menu',
   'resize.results': 'Resize results',
   'resize.properties': 'Resize properties',

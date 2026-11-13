@@ -84,6 +84,34 @@ export const pt = {
   'results.hintAfter':
     'para ver a tensão (U), a corrente (I), a resistência (R) e a potência (P) de cada componente.',
 
+  // Resultados da simulação
+  'results.component': 'Componente',
+  'results.ledOn': 'aceso',
+  'results.ledOff': 'apagado',
+  'results.error': 'Erro',
+  'results.warning': 'Aviso',
+  'results.calcFailed': 'O cálculo falhou: {detail}',
+
+  // Terminais com nome (os outros, como "a" e "b", mostram-se tal como estão)
+  'terminal.anodo': 'ânodo',
+  'terminal.catodo': 'cátodo',
+
+  // Mensagens do motor (pelo código do erro/aviso; {name} = nome do componente, ex.: R1)
+  'issue.no-source': 'Não há nenhuma fonte de tensão no circuito.',
+  'issue.no-ground': 'Falta o GND (referência 0 V). Liga um GND ao circuito.',
+  'issue.invalid-wire': 'O fio {wire} liga a um terminal que não existe.',
+  'issue.invalid-params': '{name}: o valor de «{param}» não é válido.',
+  'issue.source-short-wire': '{name} está em curto-circuito: o + e o − estão ligados por um fio.',
+  'issue.source-short-switch':
+    '{name} está em curto-circuito: o + e o − estão ligados por um interruptor fechado.',
+  'issue.parallel-sources':
+    '{a} e {b} estão em paralelo (duas fontes ligadas aos mesmos dois nós).',
+  'issue.floating-part': '{name} não está ligado ao resto do circuito com GND.',
+  'issue.open-circuit': 'Circuito aberto: nenhuma corrente sai de {name}.',
+  'issue.loose-terminal': '{name}: o terminal {terminal} não está ligado.',
+  'issue.led-overcurrent':
+    '{name}: corrente de {current} acima da corrente máxima ({max}) — o LED queimava.',
+
   // Bordas dos painéis e gavetas (telemóvel)
   'resize.menu': 'Redimensionar menu',
   'resize.results': 'Redimensionar resultados',
