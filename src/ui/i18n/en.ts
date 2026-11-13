@@ -14,6 +14,14 @@ export const en: Messages = {
   'action.stop': 'Stop',
   'action.reset': 'Reset',
 
+  'file.confirmDiscard': 'Unsaved changes will be lost. Do you really want to continue?',
+  'file.unsaved': 'Unsaved changes',
+  'file.errorNotJson': 'Could not open {file}: it is not a project file (.geii.json).',
+  'file.errorNewer':
+    'Could not open {file}: it was made by a newer version of the simulator (format {version}).',
+  'file.errorInvalid': 'Could not open {file}: the project has a problem ({detail}).',
+  'file.close': 'Close',
+
   'menu.label': 'Components menu',
   'menu.title': 'Components',
   'menu.collapse': 'Collapse menu',

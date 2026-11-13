@@ -14,6 +14,16 @@ export const fr: Messages = {
   'action.stop': 'Arrêter',
   'action.reset': 'RAZ', // remise à zéro
 
+  'file.confirmDiscard':
+    'Des modifications non enregistrées vont être perdues. Continuer quand même ?',
+  'file.unsaved': 'Modifications non enregistrées',
+  'file.errorNotJson':
+    'Impossible d’ouvrir {file} : ce n’est pas un fichier de projet (.geii.json).',
+  'file.errorNewer':
+    'Impossible d’ouvrir {file} : il a été créé par une version plus récente du simulateur (format {version}).',
+  'file.errorInvalid': 'Impossible d’ouvrir {file} : le projet a un problème ({detail}).',
+  'file.close': 'Fermer',
+
   'menu.label': 'Menu des composants',
   'menu.title': 'Composants',
   'menu.collapse': 'Réduire le menu',

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { TerminalId } from '../core/model'
-import { HISTORY_LIMIT, useCircuitStore } from './circuitStore'
+import { hasUnsavedChanges, HISTORY_LIMIT, useCircuitStore } from './circuitStore'
 
 const store = useCircuitStore
 const history = () => useCircuitStore.temporal.getState()
@@ -285,5 +285,49 @@ describe('renameComponent', () => {
     expect(actions().renameComponent(r1, 'r2')).toBe('taken') // maiúsculas não contam
     expect(actions().renameComponent(r1, 'Rcarga')).toBeNull() // o próprio nome pode ficar
     expect(actions().components[0]?.name).toBe('Rcarga')
+  })
+})
+
+describe('projetos: abrir, novo, alterações por guardar', () => {
+  it('loadProject substitui o circuito, limpa a seleção e o histórico; sem alterações', () => {
+    actions().addComponent('resistor', { x: 0, y: 0 })
+    const { v } = sourceAndResistor()
+    const { components, wires } = actions()
+    actions().select(v)
+
+    actions().loadProject({
+      version: 1,
+      name: 'Divisor',
+      components,
+      wires,
+      createdAt: '2026-11-13T10:00:00.000Z',
+      updatedAt: '2026-11-13T10:00:00.000Z',
+    })
+    expect(actions().projectName).toBe('Divisor')
+    expect(actions().selectedId).toBeNull()
+    expect(history().pastStates).toHaveLength(0)
+    expect(hasUnsavedChanges(actions())).toBe(false)
+  })
+
+  it('mexer marca alterações; desfazer até ao estado guardado tira a marca; markSaved também', () => {
+    actions().newProject()
+    expect(hasUnsavedChanges(actions())).toBe(false)
+
+    actions().addComponent('resistor', { x: 0, y: 0 })
+    expect(hasUnsavedChanges(actions())).toBe(true)
+    history().undo()
+    expect(hasUnsavedChanges(actions())).toBe(false)
+
+    history().redo()
+    actions().markSaved()
+    expect(hasUnsavedChanges(actions())).toBe(false)
+  })
+
+  it('newProject deixa a zona livre vazia', () => {
+    sourceAndResistor()
+    actions().newProject()
+    expect(actions().components).toEqual([])
+    expect(actions().wires).toEqual([])
+    expect(actions().projectName).toBe('circuito')
   })
 })

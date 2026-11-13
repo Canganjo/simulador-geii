@@ -29,6 +29,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #29   | Trocar de língua: PT · FR · EN                     | E1    | feito  | `feature/idiomas`              | PR #30 |
 | #32   | Botão Simular e resultados U, I, R, P              | E2    | feito  | `feature/simular`              | PR #33 |
 | #35   | Editar os valores e o nome dos componentes         | E2    | feito  | `feature/editar-valores`       | PR #36 |
+| #37   | Novo, Abrir e Guardar projetos (.geii.json)        | E2    | feito  | `feature/guardar-abrir`        | PR #38 |
 
 ### Tarefas extra
 
@@ -62,4 +63,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                          | #30 |
 | `213cf77` | Plano do botão Simular no PROGRESSO (docs)                          | #31 |
 | `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                   | #33 |
-| (squash)  | Editar os valores e o nome dos componentes (issue #35)              | #36 |
+| `49897f0` | Editar os valores e o nome dos componentes (issue #35)              | #36 |
+| (squash)  | Novo, Abrir e Guardar projetos .geii.json (issue #37)               | #38 |
