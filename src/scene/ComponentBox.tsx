@@ -1,7 +1,8 @@
-import { Edges, Html } from '@react-three/drei'
+import { Edges } from '@react-three/drei'
 import type { ThreeEvent } from '@react-three/fiber'
 import { useState } from 'react'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
+import { boxSize } from './componentShape'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
 
 /**
@@ -20,17 +21,6 @@ const COLORS: Record<ComponentKind, string> = {
 }
 
 const SELECTION_COLOR = '#38bdf8'
-
-/**
- * O `Html` do drei tem dois invólucros (div): `pointerEvents` só desliga o de fora, `style` vai
- * para o de dentro. Os dois têm de deixar passar o rato, senão o clique não chega à cena 3D.
- */
-const NO_POINTER = { pointerEvents: 'none' } as const
-
-/** Tamanho da caixa [comprimento, altura, largura] em células. */
-function boxSize(kind: ComponentKind): [number, number, number] {
-  return kind === 'ground' ? [0.9, 0.25, 0.9] : [1.6, 0.5, 0.7]
-}
 
 interface Props {
   component: Component
@@ -55,7 +45,7 @@ export function ComponentBox({
   wiringFrom,
   onTerminalClick,
 }: Props) {
-  const { kind, position, rotation, name } = component
+  const { kind, position, rotation } = component
   const [length, height, width] = boxSize(kind)
 
   const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
@@ -110,24 +100,8 @@ export function ComponentBox({
         )
       })}
 
-      {/* Nome por cima (HTML: não precisa de descarregar uma fonte 3D). */}
-      <Html
-        position={[0, height + 0.3, 0]}
-        center
-        zIndexRange={[10, 0]}
-        pointerEvents="none"
-        style={NO_POINTER}
-      >
-        <span
-          data-component-label={name}
-          data-selected={selected}
-          className={`pointer-events-none rounded px-1 text-xs font-semibold whitespace-nowrap select-none ${
-            selected ? 'bg-sky-500 text-white' : 'bg-slate-900/70 text-slate-100'
-          }`}
-        >
-          {name}
-        </span>
-      </Html>
+      {/* O nome (R1, D1…) não é desenhado aqui: fica na camada HTML única do Workspace
+          (um `Html` do drei por componente às vezes desaparecia). */}
     </group>
   )
 }

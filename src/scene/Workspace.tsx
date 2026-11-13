@@ -6,6 +6,7 @@ import type { Component, TerminalId, Vec2 } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
 import { useT } from '../ui/i18n'
 import { ComponentBox } from './ComponentBox'
+import { labelHeight } from './componentShape'
 import { COMPONENT_DRAG_TYPE, isComponentKind, PLACE_COMPONENT_EVENT } from './componentDrag'
 import {
   findFreeCell,
@@ -246,12 +247,31 @@ export function Workspace() {
         />
       </Canvas>
 
-      {/* Âncoras invisíveis por cima dos terminais e dos fios (ver ScreenAnchors.tsx). */}
+      {/* Camada HTML única por cima da cena (ver ScreenAnchors.tsx): o nome de cada componente
+          (visível) e âncoras invisíveis por cima dos terminais e dos fios (para os testes E2E). */}
       <div
         ref={anchorLayer}
         aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden"
+        className="pointer-events-none absolute inset-0 overflow-hidden select-none"
       >
+        {components.map((c) => (
+          <span
+            key={`label-${c.id}`}
+            data-anchor={modelToScene(c.position, labelHeight(c.kind)).join(',')}
+            className="absolute top-0 left-0"
+          >
+            {/* O ponto projetado é o canto do <span> de fora; este fica centrado nele. */}
+            <span
+              data-component-label={c.name}
+              data-selected={c.id === selectedId}
+              className={`absolute -translate-x-1/2 -translate-y-1/2 rounded px-1 text-xs font-semibold whitespace-nowrap ${
+                c.id === selectedId ? 'bg-sky-500 text-white' : 'bg-slate-900/70 text-slate-100'
+              }`}
+            >
+              {c.name}
+            </span>
+          </span>
+        ))}
         {components.flatMap((c) =>
           c.terminals.map((t, i) => (
             <span
