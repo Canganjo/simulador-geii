@@ -31,7 +31,14 @@ export interface ValidationIssue {
   message: string
   /** Componentes envolvidos (para a cena os poder destacar). */
   componentIds: string[]
+  /**
+   * Os dados da mensagem (nomes, terminal…), para a interface a poder escrever noutra língua
+   * a partir do `code`. Ex.: loose-terminal → { name: 'R1', terminal: 'b' }.
+   */
+  params?: Readonly<Record<string, string | number>>
 }
+
+type IssueParams = ValidationIssue['params']
 
 export interface ValidationResult {
   /** `true` se não houver nenhum ERRO (os avisos não impedem o cálculo). */
@@ -41,10 +48,18 @@ export interface ValidationResult {
 
 export function validateProject(project: Pick<Project, 'components' | 'wires'>): ValidationResult {
   const issues: ValidationIssue[] = []
-  const error = (code: IssueCode, message: string, componentIds: string[] = []) =>
-    issues.push({ severity: 'error', code, message, componentIds })
-  const warning = (code: IssueCode, message: string, componentIds: string[] = []) =>
-    issues.push({ severity: 'warning', code, message, componentIds })
+  const error = (
+    code: IssueCode,
+    message: string,
+    componentIds: string[] = [],
+    params: IssueParams = {},
+  ) => issues.push({ severity: 'error', code, message, componentIds, params })
+  const warning = (
+    code: IssueCode,
+    message: string,
+    componentIds: string[] = [],
+    params: IssueParams = {},
+  ) => issues.push({ severity: 'warning', code, message, componentIds, params })
 
   const { components } = project
   const graph = buildNodes(project)
@@ -58,13 +73,17 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
 
   // 2. Fios que apontam para terminais que não existem (ex.: ficheiro estragado).
   for (const w of graph.invalidWires) {
-    error('invalid-wire', `O fio ${w.id} liga a um terminal que não existe.`)
+    error('invalid-wire', `O fio ${w.id} liga a um terminal que não existe.`, [], { wire: w.id })
   }
 
   // 3. Valores fora dos limites (resistência 0 Ω, tensão negativa…).
   for (const c of components) {
     for (const issue of validateParams(c.kind, c.params, c.name)) {
-      error('invalid-params', issue.message, [c.id])
+      error('invalid-params', issue.message, [c.id], {
+        name: c.name,
+        param: issue.param,
+        reason: issue.reason,
+      })
     }
   }
 
@@ -82,6 +101,7 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
         'source-short',
         `${v.name} está em curto-circuito: o + e o − estão ligados por um fio.`,
         [v.id],
+        { name: v.name, via: 'wire' },
       )
       shorted.add(v.id)
     } else if (viaSwitches.same(plus, minus)) {
@@ -89,6 +109,7 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
         'source-short',
         `${v.name} está em curto-circuito: o + e o − estão ligados por um interruptor fechado.`,
         [v.id],
+        { name: v.name, via: 'switch' },
       )
       shorted.add(v.id)
     }
@@ -108,6 +129,7 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
           'parallel-sources',
           `${a.name} e ${b.name} estão em paralelo (duas fontes ligadas aos mesmos dois nós).`,
           [a.id, b.id],
+          { a: a.name, b: b.name },
         )
       }
     }
@@ -125,7 +147,9 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
     for (const c of components) {
       if (c.kind === 'ground' || !entersCalculation(c)) continue
       if (!c.terminals.some((t) => connected.same(node(c, t.name), GROUND_NODE))) {
-        error('floating-part', `${c.name} não está ligado ao resto do circuito com GND.`, [c.id])
+        error('floating-part', `${c.name} não está ligado ao resto do circuito com GND.`, [c.id], {
+          name: c.name,
+        })
       }
     }
   }
@@ -139,7 +163,9 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
   }
   for (const v of okSources) {
     if (!paths.same(node(v, '+'), node(v, '-'))) {
-      warning('open-circuit', `Circuito aberto: nenhuma corrente sai de ${v.name}.`, [v.id])
+      warning('open-circuit', `Circuito aberto: nenhuma corrente sai de ${v.name}.`, [v.id], {
+        name: v.name,
+      })
     }
   }
 
@@ -151,7 +177,10 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
     if (!c) continue
     const label =
       CATALOG[c.kind].terminals.find((t) => t.name === terminalName)?.label ?? terminalName
-    warning('loose-terminal', `${c.name}: o terminal ${label} não está ligado.`, [c.id])
+    warning('loose-terminal', `${c.name}: o terminal ${label} não está ligado.`, [c.id], {
+      name: c.name,
+      terminal: terminalName,
+    })
   }
 
   return { ok: issues.every((i) => i.severity !== 'error'), issues }

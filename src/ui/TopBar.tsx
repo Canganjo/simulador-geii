@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useStore } from 'zustand'
 import { useCircuitStore } from '../store/circuitStore'
+import { useSimulationStore } from '../store/simulationStore'
 import { AccountMenu } from './AccountMenu'
 import { useT } from './i18n'
 import { isTyping } from './keyboard'
@@ -53,8 +54,12 @@ export function TopBar() {
   const canRedo = useStore(useCircuitStore.temporal, (s) => s.futureStates.length > 0)
   useUndoShortcuts()
   const t = useT()
+  const hasComponents = useCircuitStore((s) => s.components.length > 0)
+  const hasResult = useSimulationStore((s) => s.result !== null)
+  const { run, clear } = useSimulationStore.getState()
 
-  // Ações do dossier (secção 6). Desfazer/Refazer já funcionam; as outras serão ligadas depois.
+  // Ações do dossier (secção 6). Novo/Abrir/Guardar serão ligadas com a persistência (JSON).
+  // Parar e RAZ limpam os resultados (no MVP só DC não há simulação a correr no tempo).
   const groups: Action[][] = [
     [
       { label: t('action.new'), icon: FilePlus, disabled: true },
@@ -78,9 +83,9 @@ export function TopBar() {
       },
     ],
     [
-      { label: t('action.simulate'), icon: Play, disabled: true },
-      { label: t('action.stop'), icon: Square, disabled: true },
-      { label: t('action.reset'), icon: RotateCcw, disabled: true },
+      { label: t('action.simulate'), icon: Play, onClick: run, disabled: !hasComponents },
+      { label: t('action.stop'), icon: Square, onClick: clear, disabled: !hasResult },
+      { label: t('action.reset'), icon: RotateCcw, onClick: clear, disabled: !hasResult },
     ],
   ]
 

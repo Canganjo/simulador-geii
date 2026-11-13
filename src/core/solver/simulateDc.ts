@@ -40,6 +40,8 @@ export type SimulationIssue =
       code: 'led-overcurrent'
       message: string
       componentIds: string[]
+      /** { name, current, max } — correntes em A. */
+      params?: Readonly<Record<string, string | number>>
     }
 
 export type SimulationResult =
@@ -111,6 +113,7 @@ export function simulateDc(project: Pick<Project, 'components' | 'wires'>): Simu
             `${c.name}: corrente de ${round(r.current)} A acima da corrente máxima ` +
             `(${c.params.maxCurrent} A) — o LED queimava.`,
           componentIds: [c.id],
+          params: { name: c.name, current: r.current, max: c.params.maxCurrent },
         })
       }
     }
