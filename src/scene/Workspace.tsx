@@ -7,6 +7,8 @@ import { useCircuitStore } from '../store/circuitStore'
 import { useT } from '../ui/i18n'
 import { ComponentBox } from './ComponentBox'
 import { labelHeight } from './componentShape'
+import { NO_VISUAL, visualState } from './visualState'
+import { useSimulationStore } from '../store/simulationStore'
 import { COMPONENT_DRAG_TYPE, isComponentKind, PLACE_COMPONENT_EVENT } from './componentDrag'
 import {
   findFreeCell,
@@ -42,6 +44,8 @@ export function Workspace() {
   const t = useT()
   const components = useCircuitStore((s) => s.components)
   const selectedId = useCircuitStore((s) => s.selectedId)
+  // Depois de Simular: LED/lâmpada acendem, componentes com problemas ficam com contorno.
+  const simulation = useSimulationStore((s) => s.result)
   const addComponent = useCircuitStore((s) => s.addComponent)
   const select = useCircuitStore((s) => s.select)
   const wires = useCircuitStore((s) => s.wires)
@@ -71,6 +75,10 @@ export function Workspace() {
   }
 
   const connected = useMemo(() => new Set(wires.flatMap((w) => [w.from, w.to])), [wires])
+  const visuals = useMemo(
+    () => new Map(components.map((c) => [c.id, visualState(c, simulation)])),
+    [components, simulation],
+  )
 
   const cancelWiring = () => {
     setWiringFrom(null)
@@ -232,6 +240,7 @@ export function Workspace() {
             connected={connected}
             wiringFrom={wiringFrom}
             onTerminalClick={onTerminalClick}
+            visual={visuals.get(c.id) ?? NO_VISUAL}
           />
         ))}
 
@@ -264,6 +273,9 @@ export function Workspace() {
             <span
               data-component-label={c.name}
               data-selected={c.id === selectedId}
+              // Para os testes E2E: brilho (0 a 1) e problema depois de Simular.
+              data-glow={(visuals.get(c.id)?.glow ?? 0).toFixed(2)}
+              data-issue={visuals.get(c.id)?.issue ?? 'none'}
               className={`absolute -translate-x-1/2 -translate-y-1/2 rounded px-1 text-xs font-semibold whitespace-nowrap ${
                 c.id === selectedId ? 'bg-sky-500 text-white' : 'bg-slate-900/70 text-slate-100'
               }`}

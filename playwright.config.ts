@@ -8,6 +8,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
+  // Alguns testes montam um circuito inteiro (4 componentes, 4 fios) num WebGL sem placa
+  // gráfica: em paralelo podem passar dos 30 s por defeito, sem haver erro nenhum.
+  timeout: 60_000,
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',

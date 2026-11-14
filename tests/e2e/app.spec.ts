@@ -633,3 +633,38 @@ test('etiquetas: o nome de cada componente aparece, em cima do componente certo'
     'false',
   )
 })
+
+test('cena: depois de Simular o LED acende; com problemas há contorno; mexer apaga tudo', async ({
+  page,
+}) => {
+  //   V1 12 V ── R1 1 kΩ ── D1 ── GND1 : I = (12 − 2) / 1000 = 10 mA < 20 mA → aceso, sem aviso
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await dropAt(page, 'LED', 160, 0)
+  await dropAt(page, 'GND', 0, 120)
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'D1:anodo')
+  await connect(page, 'D1:catodo', 'GND1:gnd')
+
+  const led = scene.locator('[data-component-label="D1"]')
+  const source = scene.locator('[data-component-label="V1"]')
+  await expect(led).toHaveAttribute('data-glow', '0.00') // antes de Simular: apagado
+
+  // Falta o último fio (GND → V1−): V1 tem um terminal solto → aviso (contorno âmbar)
+  await page.getByRole('button', { name: 'Simular' }).click()
+  await expect(source).toHaveAttribute('data-issue', 'warning')
+
+  await connect(page, 'GND1:gnd', 'V1:-') // mexer no circuito limpa os resultados
+  await expect(source).toHaveAttribute('data-issue', 'none')
+  await page.getByRole('button', { name: 'Simular' }).click()
+  await expect(led).toHaveAttribute('data-glow', '1.00')
+  await expect(led).toHaveAttribute('data-issue', 'none')
+
+  await page.getByRole('button', { name: 'Parar' }).click()
+  await expect(led).toHaveAttribute('data-glow', '0.00')
+})

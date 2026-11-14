@@ -1,9 +1,11 @@
 import { Edges } from '@react-three/drei'
-import type { ThreeEvent } from '@react-three/fiber'
-import { useState } from 'react'
+import { useFrame, type ThreeEvent } from '@react-three/fiber'
+import { useRef, useState } from 'react'
+import type { MeshStandardMaterial } from 'three'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
 import { boxSize } from './componentShape'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
+import { LED_LIGHT, type VisualState } from './visualState'
 
 /**
  * Um componente na cena, ainda como CAIXA SIMPLES (regra 8: primeiro funcional, depois bonito;
@@ -21,6 +23,16 @@ const COLORS: Record<ComponentKind, string> = {
 }
 
 const SELECTION_COLOR = '#38bdf8'
+/** Contorno de um componente com problema depois de Simular. */
+const ISSUE_COLORS = { error: '#ef4444', warning: '#f59e0b' }
+/** Força máxima da luz emitida (glow = 1). */
+const MAX_GLOW = 1.6
+
+/** Cor da caixa: o LED tem a cor da sua luz (só brilha quando aceso); os outros, a do tipo. */
+function bodyColor(component: Component): string {
+  if (component.kind === 'led') return LED_LIGHT[component.params.color] ?? COLORS.led
+  return COLORS[component.kind]
+}
 
 interface Props {
   component: Component
@@ -33,6 +45,8 @@ interface Props {
   wiringFrom: TerminalId | null
   /** Clique num terminal: começa ou termina um fio. */
   onTerminalClick: (terminal: TerminalId) => void
+  /** Aspeto depois de Simular: brilho, contorno de erro/aviso, piscar (ver visualState.ts). */
+  visual: VisualState
 }
 
 const TERMINAL_COLORS = { loose: '#e2e8f0', connected: '#4ade80', active: '#38bdf8' }
@@ -44,9 +58,28 @@ export function ComponentBox({
   connected,
   wiringFrom,
   onTerminalClick,
+  visual,
 }: Props) {
   const { kind, position, rotation } = component
   const [length, height, width] = boxSize(kind)
+  const material = useRef<MeshStandardMaterial>(null)
+
+  // Luz própria: o brilho da simulação (LED/lâmpada) tem prioridade sobre o da seleção.
+  const lit = visual.glow > 0 && visual.glowColor !== null
+  const emissive = lit ? visual.glowColor : selected ? SELECTION_COLOR : '#000000'
+  const intensity = lit ? visual.glow * MAX_GLOW : selected ? 0.25 : 0
+  // LED em sobrecorrente: a luz pisca (2 vezes por segundo).
+  useFrame(({ clock }) => {
+    if (!visual.blink || !material.current) return
+    const on = Math.floor(clock.elapsedTime * 4) % 2 === 0
+    material.current.emissiveIntensity = on ? intensity : 0.1
+  })
+
+  const outline = selected
+    ? SELECTION_COLOR
+    : visual.issue !== null
+      ? ISSUE_COLORS[visual.issue]
+      : null
 
   const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
     if (e.button !== 0) return // direito/meio: deslocar a vista
@@ -71,12 +104,13 @@ export function ComponentBox({
       >
         <boxGeometry args={[length, height, width]} />
         <meshStandardMaterial
-          color={COLORS[kind]}
-          emissive={selected ? SELECTION_COLOR : '#000000'}
-          emissiveIntensity={selected ? 0.25 : 0}
+          ref={material}
+          color={bodyColor(component)}
+          emissive={emissive ?? '#000000'}
+          emissiveIntensity={intensity}
         />
-        {/* Contorno de destaque do componente selecionado. */}
-        {selected && <Edges scale={1.12} color={SELECTION_COLOR} />}
+        {/* Contorno: azul se selecionado; senão vermelho (erro) ou âmbar (aviso) após Simular. */}
+        {outline && <Edges scale={1.12} color={outline} />}
       </mesh>
 
       {/* Terminais: clicar num e depois noutro liga-os com um fio. */}
