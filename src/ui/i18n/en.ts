@@ -67,6 +67,10 @@ export const en: Messages = {
   'props.label': 'Properties',
   'props.collapse': 'Collapse properties',
   'props.expand': 'Open properties',
+  'props.multiTitle': '{count} components selected',
+  'props.multiHint':
+    'Delete removes them all at once (Ctrl+Z brings them back). Ctrl+click adds or removes a component.',
+  'props.deleteAll': 'Delete all {count}',
   'props.empty': 'Select a component to see and edit its name, value, unit and rotation.',
   'props.position': 'Position',
   'props.rotation': 'Rotation',

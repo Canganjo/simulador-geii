@@ -80,6 +80,10 @@ export const pt = {
   'props.label': 'Propriedades',
   'props.collapse': 'Recolher propriedades',
   'props.expand': 'Abrir propriedades',
+  'props.multiTitle': '{count} componentes selecionados',
+  'props.multiHint':
+    'Delete apaga todos de uma vez (Ctrl+Z repõe). Ctrl+clique junta ou tira um componente.',
+  'props.deleteAll': 'Apagar os {count}',
   'props.empty':
     'Seleciona um componente para ver e editar o nome, o valor, a unidade e a rotação.',
   'props.position': 'Posição',

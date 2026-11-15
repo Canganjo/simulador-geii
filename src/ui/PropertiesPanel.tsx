@@ -26,6 +26,7 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
   const t = useT()
   const label = open ? t('props.collapse') : t('props.expand')
   const selected = useCircuitStore((s) => s.components.find((c) => c.id === s.selectedId) ?? null)
+  const count = useCircuitStore((s) => s.selectedIds.length)
 
   return (
     <aside
@@ -53,12 +54,49 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
       </div>
 
       {open &&
-        (selected ? (
+        (count > 1 ? (
+          <MultiSelection />
+        ) : selected ? (
           <SelectedComponent component={selected} />
         ) : (
           <p className="px-3 text-sm text-slate-400">{t('props.empty')}</p>
         ))}
     </aside>
+  )
+}
+
+/** Vários componentes selecionados: os nomes e um botão para os apagar todos de uma vez. */
+function MultiSelection() {
+  const t = useT()
+  const components = useCircuitStore((s) => s.components)
+  const selectedIds = useCircuitStore((s) => s.selectedIds)
+  const names = components.filter((c) => selectedIds.includes(c.id)).map((c) => c.name)
+  const count = names.length
+
+  return (
+    <div
+      className="flex flex-col gap-3 overflow-y-auto px-3 pb-3 text-sm"
+      data-testid="multi-selection"
+    >
+      <h3 className="text-base font-semibold text-slate-100">{t('props.multiTitle', { count })}</h3>
+      <p className="flex flex-wrap gap-1">
+        {names.map((name) => (
+          <span key={name} className="rounded bg-sky-500/20 px-1.5 py-0.5 text-sky-200">
+            {name}
+          </span>
+        ))}
+      </p>
+      <p className="text-slate-400">{t('props.multiHint')}</p>
+      <button
+        type="button"
+        onClick={() => useCircuitStore.getState().removeSelected()}
+        title={`${t('props.deleteAll', { count })} (Delete)`}
+        className="flex items-center gap-1.5 self-start rounded border border-red-500/60 px-2 py-1 text-red-200 hover:bg-red-500/20"
+      >
+        <Trash2 className="size-4" aria-hidden />
+        {t('props.deleteAll', { count })}
+      </button>
+    </div>
   )
 }
 

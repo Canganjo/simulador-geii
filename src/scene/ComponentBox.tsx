@@ -38,8 +38,11 @@ function bodyColor(component: Component): string {
 interface Props {
   component: Component
   selected: boolean
-  /** Botão esquerdo em cima do componente: selecionar e começar a arrastar. */
-  onGrab: (component: Component, clientX: number, clientY: number) => void
+  /**
+   * Botão esquerdo em cima do componente: selecionar e começar a arrastar.
+   * `additive` = Ctrl/Shift/⌘ carregado: junta/tira o componente da seleção (sem arrastar).
+   */
+  onGrab: (component: Component, clientX: number, clientY: number, additive: boolean) => void
   /** Terminais com pelo menos um fio (ficam verdes; os soltos ficam brancos). */
   connected: ReadonlySet<TerminalId>
   /** Terminal de onde parte o fio que se está a desenhar (ou null). */
@@ -85,7 +88,7 @@ export function ComponentBox({
   const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
     if (e.button !== 0) return // direito/meio: deslocar a vista
     e.stopPropagation() // só o componente da frente reage
-    onGrab(component, e.clientX, e.clientY)
+    onGrab(component, e.clientX, e.clientY, e.ctrlKey || e.shiftKey || e.metaKey)
   }
 
   return (

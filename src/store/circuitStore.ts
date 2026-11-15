@@ -26,8 +26,13 @@ import { PROJECT_FORMAT_VERSION } from '../core/model'
 export interface CircuitState {
   components: Component[]
   wires: Wire[]
-  /** ID do componente selecionado (ou null). */
+  /**
+   * Componente "principal" da seleção: o último clicado (é o que aparece nas propriedades).
+   * null se não houver nenhum componente selecionado.
+   */
   selectedId: string | null
+  /** TODOS os componentes selecionados (Ctrl+clique, retângulo, Ctrl+A). Inclui `selectedId`. */
+  selectedIds: string[]
   /** ID do fio selecionado (ou null). Só há uma coisa selecionada de cada vez. */
   selectedWireId: string | null
   /** Nome do projeto (vai para o nome do ficheiro ao guardar). */
@@ -62,8 +67,19 @@ export interface CircuitState {
   /** Liga dois terminais. Devolve o ID do fio, ou null se o fio for recusado. */
   addWire: (from: TerminalId, to: TerminalId) => string | null
   removeWire: (id: string) => void
-  /** Seleciona um componente (e tira a seleção do fio); null tira tudo. */
+  /** Seleciona SÓ este componente (e tira a seleção do fio); null tira tudo. */
   select: (id: string | null) => void
+  /** Ctrl+clique: junta o componente à seleção, ou tira-o se já lá estava. */
+  toggleSelect: (id: string) => void
+  /** Seleciona vários de uma vez (retângulo); `additive` junta-os aos que já estavam. */
+  selectMany: (ids: readonly string[], additive?: boolean) => void
+  /** Ctrl+A: seleciona todos os componentes. */
+  selectAll: () => void
+  /**
+   * Apaga tudo o que está selecionado (componentes + os seus fios, ou o fio selecionado),
+   * num SÓ passo de desfazer. Devolve quantos componentes apagou.
+   */
+  removeSelected: () => number
   /** Seleciona um fio (e tira a seleção do componente). */
   selectWire: (id: string | null) => void
   /** Substitui o circuito pelo de um projeto aberto. Limpa a seleção e o histórico (Ctrl+Z). */
@@ -96,6 +112,7 @@ export const useCircuitStore = create<CircuitState>()(
       components: EMPTY_COMPONENTS,
       wires: EMPTY_WIRES,
       selectedId: null,
+      selectedIds: [],
       selectedWireId: null,
       projectName: DEFAULT_PROJECT_NAME,
       createdAt: new Date().toISOString(),
@@ -108,6 +125,7 @@ export const useCircuitStore = create<CircuitState>()(
         set((s) => ({
           components: [...s.components, component],
           selectedId: component.id,
+          selectedIds: [component.id],
           selectedWireId: null,
         }))
         return component.id
@@ -168,6 +186,7 @@ export const useCircuitStore = create<CircuitState>()(
         set((s) => ({
           components: [...s.components, copy],
           selectedId: copy.id,
+          selectedIds: [copy.id],
           selectedWireId: null,
         }))
         return copy.id
@@ -183,6 +202,7 @@ export const useCircuitStore = create<CircuitState>()(
             components: s.components.filter((c) => c.id !== id),
             wires,
             selectedId: s.selectedId === id ? null : s.selectedId,
+            selectedIds: s.selectedIds.filter((x) => x !== id),
             selectedWireId: wires.some((w) => w.id === s.selectedWireId) ? s.selectedWireId : null,
           }
         }),
@@ -208,8 +228,49 @@ export const useCircuitStore = create<CircuitState>()(
           selectedWireId: s.selectedWireId === id ? null : s.selectedWireId,
         })),
 
-      select: (id) => set({ selectedId: id, selectedWireId: null }),
-      selectWire: (id) => set({ selectedWireId: id, selectedId: null }),
+      select: (id) =>
+        set({ selectedId: id, selectedIds: id === null ? [] : [id], selectedWireId: null }),
+      selectWire: (id) => set({ selectedWireId: id, selectedId: null, selectedIds: [] }),
+
+      toggleSelect: (id) =>
+        set((s) => {
+          if (s.selectedIds.includes(id)) {
+            const selectedIds = s.selectedIds.filter((x) => x !== id)
+            return { selectedIds, selectedId: selectedIds.at(-1) ?? null, selectedWireId: null }
+          }
+          return { selectedIds: [...s.selectedIds, id], selectedId: id, selectedWireId: null }
+        }),
+
+      selectMany: (ids, additive = false) =>
+        set((s) => {
+          const selectedIds = additive ? [...new Set([...s.selectedIds, ...ids])] : [...ids]
+          return { selectedIds, selectedId: selectedIds.at(-1) ?? null, selectedWireId: null }
+        }),
+
+      selectAll: () =>
+        set((s) => {
+          const selectedIds = s.components.map((c) => c.id)
+          return { selectedIds, selectedId: selectedIds.at(-1) ?? null, selectedWireId: null }
+        }),
+
+      removeSelected: () => {
+        const { selectedIds, selectedWireId } = get()
+        if (selectedIds.length === 0) {
+          if (selectedWireId !== null) get().removeWire(selectedWireId)
+          return 0
+        }
+        const gone = new Set(selectedIds)
+        const touches = (t: TerminalId) => gone.has(t.slice(0, t.lastIndexOf(':')))
+        // Um só `set` → um só passo no histórico: Ctrl+Z repõe tudo de uma vez.
+        set((s) => ({
+          components: s.components.filter((c) => !gone.has(c.id)),
+          wires: s.wires.filter((w) => !touches(w.from) && !touches(w.to)),
+          selectedId: null,
+          selectedIds: [],
+          selectedWireId: null,
+        }))
+        return gone.size
+      },
 
       loadProject: (project) => {
         const { components, wires } = project
@@ -220,6 +281,7 @@ export const useCircuitStore = create<CircuitState>()(
           createdAt: project.createdAt,
           saved: { components, wires },
           selectedId: null,
+          selectedIds: [],
           selectedWireId: null,
         })
         // "Desfazer a abertura" não faz sentido: o histórico começa aqui.
@@ -248,12 +310,16 @@ export const useCircuitStore = create<CircuitState>()(
   ),
 )
 
-// Se desfazer/refazer fizer desaparecer o componente ou o fio selecionado, limpa a seleção.
+// Se desfazer/refazer fizer desaparecer componentes ou o fio selecionados, tira-os da seleção.
 // (Este `set` não mexe em componentes nem fios, por isso não grava nenhum passo no histórico.)
 useCircuitStore.subscribe((state) => {
-  const { selectedId, selectedWireId, components, wires } = state
-  if (selectedId !== null && !components.some((c) => c.id === selectedId)) {
-    useCircuitStore.setState({ selectedId: null })
+  const { selectedId, selectedIds, selectedWireId, components, wires } = state
+  const exists = (id: string) => components.some((c) => c.id === id)
+  if (!selectedIds.every(exists)) {
+    useCircuitStore.setState({ selectedIds: selectedIds.filter(exists) })
+  }
+  if (selectedId !== null && !exists(selectedId)) {
+    useCircuitStore.setState({ selectedId: useCircuitStore.getState().selectedIds.at(-1) ?? null })
   }
   if (selectedWireId !== null && !wires.some((w) => w.id === selectedWireId)) {
     useCircuitStore.setState({ selectedWireId: null })

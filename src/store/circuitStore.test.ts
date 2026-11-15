@@ -7,7 +7,13 @@ const history = () => useCircuitStore.temporal.getState()
 const actions = () => store.getState()
 
 beforeEach(() => {
-  store.setState({ components: [], wires: [], selectedId: null, selectedWireId: null })
+  store.setState({
+    components: [],
+    wires: [],
+    selectedId: null,
+    selectedIds: [],
+    selectedWireId: null,
+  })
   history().clear()
 })
 
@@ -329,5 +335,78 @@ describe('projetos: abrir, novo, alterações por guardar', () => {
     expect(actions().components).toEqual([])
     expect(actions().wires).toEqual([])
     expect(actions().projectName).toBe('circuito')
+  })
+})
+
+describe('seleção de vários componentes', () => {
+  /** V1, R1 (ligados por 2 fios) e R2 (ligado a R1 por 1 fio). */
+  function three() {
+    const { v, r } = sourceAndResistor()
+    const r2 = actions().addComponent('resistor', { x: 8, y: 0 })
+    actions().addWire(`${r}:b`, `${r2}:a`)
+    return { v, r, r2 }
+  }
+
+  it('toggleSelect junta e tira; o último clicado é o principal', () => {
+    const { v, r } = three()
+    actions().select(v)
+    actions().toggleSelect(r)
+    expect(actions().selectedIds).toEqual([v, r])
+    expect(actions().selectedId).toBe(r)
+    actions().toggleSelect(r)
+    expect(actions().selectedIds).toEqual([v])
+    expect(actions().selectedId).toBe(v)
+  })
+
+  it('selectMany substitui (ou junta, com additive); selectAll seleciona tudo', () => {
+    const { v, r, r2 } = three()
+    actions().selectMany([v, r])
+    expect(actions().selectedIds).toEqual([v, r])
+    actions().selectMany([r, r2], true)
+    expect(actions().selectedIds).toEqual([v, r, r2])
+    actions().select(null)
+    actions().selectAll()
+    expect(actions().selectedIds).toEqual([v, r, r2])
+  })
+
+  it('selecionar um fio tira os componentes da seleção', () => {
+    const { v, r } = three()
+    actions().selectMany([v, r])
+    const wire = actions().wires[0]?.id ?? ''
+    actions().selectWire(wire)
+    expect(actions().selectedIds).toEqual([])
+    expect(actions().selectedId).toBeNull()
+  })
+
+  it('removeSelected apaga os selecionados e os seus fios, num SÓ passo de desfazer', () => {
+    const { v, r, r2 } = three()
+    actions().selectMany([v, r])
+    const before = history().pastStates.length
+    expect(actions().removeSelected()).toBe(2)
+    expect(actions().components.map((c) => c.id)).toEqual([r2])
+    expect(actions().wires).toEqual([]) // os 3 fios tocavam em V1 ou R1
+    expect(actions().selectedIds).toEqual([])
+    expect(history().pastStates.length).toBe(before + 1)
+
+    history().undo()
+    expect(actions().components.map((c) => c.id)).toEqual([v, r, r2])
+    expect(actions().wires).toHaveLength(3)
+  })
+
+  it('removeSelected sem componentes selecionados apaga o fio selecionado', () => {
+    three()
+    const wire = actions().wires[0]?.id ?? ''
+    actions().selectWire(wire)
+    expect(actions().removeSelected()).toBe(0)
+    expect(actions().wires.map((w) => w.id)).not.toContain(wire)
+  })
+
+  it('desfazer a criação de um componente selecionado tira-o da seleção', () => {
+    const { v } = three()
+    const r3 = actions().addComponent('resistor', { x: 12, y: 0 })
+    actions().selectMany([v, r3])
+    history().undo()
+    expect(actions().selectedIds).toEqual([v])
+    expect(actions().selectedId).toBe(v)
   })
 })
