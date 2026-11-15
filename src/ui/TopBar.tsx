@@ -3,6 +3,7 @@ import {
   CircleHelp,
   FilePlus,
   FolderOpen,
+  Hash,
   Play,
   Redo2,
   RotateCcw,
@@ -16,6 +17,7 @@ import { useStore } from 'zustand'
 import type { ProjectFileError } from '../persistence/projectFile'
 import { hasUnsavedChanges, useCircuitStore } from '../store/circuitStore'
 import { useSimulationStore } from '../store/simulationStore'
+import { useUiStore } from '../store/uiStore'
 import { AccountMenu } from './AccountMenu'
 import { useT, type Translate } from './i18n'
 import { isTyping } from './keyboard'
@@ -28,6 +30,10 @@ interface Action {
   shortcut?: string
   onClick?: () => void
   disabled: boolean
+  /** Botão que liga/desliga (aria-pressed): está ligado? */
+  pressed?: boolean
+  /** Dica (title) diferente do nome. */
+  hint?: string
   /** Bolinha âmbar no ícone (ex.: Guardar com alterações por guardar). */
   badge?: boolean
 }
@@ -90,6 +96,8 @@ export function TopBar() {
   const t = useT()
   const hasComponents = useCircuitStore((s) => s.components.length > 0)
   const hasResult = useSimulationStore((s) => s.result !== null)
+  const showNodes = useUiStore((s) => s.showNodes)
+  const toggleNodes = useUiStore((s) => s.toggleNodes)
   const { run, clear } = useSimulationStore.getState()
   const unsaved = useCircuitStore(hasUnsavedChanges)
   // O <input type="file"> escondido (guardado em estado, para o botão Abrir clicar nele).
@@ -159,6 +167,16 @@ export function TopBar() {
       { label: t('action.stop'), icon: Square, onClick: clear, disabled: !hasResult },
       { label: t('action.reset'), icon: RotateCcw, onClick: clear, disabled: !hasResult },
     ],
+    [
+      {
+        label: t('action.nodes'),
+        hint: t('action.nodesHint'),
+        icon: Hash,
+        onClick: toggleNodes,
+        disabled: false,
+        pressed: showNodes,
+      },
+    ],
   ]
 
   return (
@@ -178,29 +196,34 @@ export function TopBar() {
             key={i}
             className="flex shrink-0 items-center gap-1 border-l border-slate-700 pl-2 first:border-0"
           >
-            {group.map(({ label, icon: Icon, shortcut, onClick, disabled, badge }) => (
-              <button
-                key={label}
-                type="button"
-                aria-label={label}
-                title={shortcut ? `${label} (${shortcut})` : label}
-                disabled={disabled}
-                onClick={onClick}
-                className="flex items-center gap-1.5 rounded px-2 py-1 text-sm text-slate-300 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="relative">
-                  <Icon className="size-4" aria-hidden />
-                  {badge && (
-                    <span
-                      data-testid="unsaved-badge"
-                      title={t('file.unsaved')}
-                      className="absolute -top-1 -right-1 size-2 rounded-full bg-amber-400"
-                    />
-                  )}
-                </span>
-                <span className="hidden lg:inline">{label}</span>
-              </button>
-            ))}
+            {group.map(
+              ({ label, icon: Icon, shortcut, onClick, disabled, badge, pressed, hint }) => (
+                <button
+                  key={label}
+                  type="button"
+                  aria-label={label}
+                  aria-pressed={pressed}
+                  title={shortcut ? `${hint ?? label} (${shortcut})` : (hint ?? label)}
+                  disabled={disabled}
+                  onClick={onClick}
+                  className={`flex items-center gap-1.5 rounded px-2 py-1 text-sm hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    pressed ? 'bg-sky-500/20 text-sky-300' : 'text-slate-300'
+                  }`}
+                >
+                  <span className="relative">
+                    <Icon className="size-4" aria-hidden />
+                    {badge && (
+                      <span
+                        data-testid="unsaved-badge"
+                        title={t('file.unsaved')}
+                        className="absolute -top-1 -right-1 size-2 rounded-full bg-amber-400"
+                      />
+                    )}
+                  </span>
+                  <span className="hidden lg:inline">{label}</span>
+                </button>
+              ),
+            )}
           </div>
         ))}
       </nav>

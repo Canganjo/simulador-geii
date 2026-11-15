@@ -8,6 +8,8 @@ import { useT } from '../ui/i18n'
 import { ComponentBox } from './ComponentBox'
 import { labelHeight } from './componentShape'
 import { NO_VISUAL, visualState } from './visualState'
+import { nodeLabels } from './nodeLabels'
+import { useUiStore } from '../store/uiStore'
 import { useSimulationStore } from '../store/simulationStore'
 import { COMPONENT_DRAG_TYPE, isComponentKind, PLACE_COMPONENT_EVENT } from './componentDrag'
 import {
@@ -75,6 +77,12 @@ export function Workspace() {
   }
 
   const connected = useMemo(() => new Set(wires.flatMap((w) => [w.from, w.to])), [wires])
+  // Opção de debug "Nós" (E3): número do nó elétrico de cada terminal, calculado pelo core.
+  const showNodes = useUiStore((s) => s.showNodes)
+  const nodes = useMemo(
+    () => (showNodes ? nodeLabels({ components, wires }) : null),
+    [showNodes, components, wires],
+  )
   const visuals = useMemo(
     () => new Map(components.map((c) => [c.id, visualState(c, simulation)])),
     [components, simulation],
@@ -257,7 +265,8 @@ export function Workspace() {
       </Canvas>
 
       {/* Camada HTML única por cima da cena (ver ScreenAnchors.tsx): o nome de cada componente
-          (visível) e âncoras invisíveis por cima dos terminais e dos fios (para os testes E2E). */}
+          (visível), âncoras por cima dos terminais (com o número do nó, se a opção "Nós" estiver
+          ligada) e por cima dos fios (para os testes E2E). */}
       <div
         ref={anchorLayer}
         aria-hidden
@@ -293,8 +302,21 @@ export function Workspace() {
               data-terminal-state={
                 t.id === wiringFrom ? 'active' : connected.has(t.id) ? 'connected' : 'loose'
               }
+              data-node={nodes?.get(t.id)}
               className="absolute top-0 left-0 size-1"
-            />
+            >
+              {nodes && (
+                <span
+                  className={`absolute bottom-1 left-1 rounded px-1 font-mono text-[10px] leading-4 font-bold whitespace-nowrap ${
+                    nodes.get(t.id) === '0'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-amber-300 text-slate-900'
+                  }`}
+                >
+                  {nodes.get(t.id)}
+                </span>
+              )}
+            </span>
           )),
         )}
         {wires.map((w) => {

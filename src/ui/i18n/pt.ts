@@ -19,6 +19,8 @@ export const pt = {
   'action.simulate': 'Simular',
   'action.stop': 'Parar',
   'action.reset': 'Reset',
+  'action.nodes': 'Nós',
+  'action.nodesHint': 'Mostrar o número do nó de cada terminal (debug)',
 
   // Ficheiros de projeto (Novo, Abrir, Guardar)
   'file.confirmDiscard': 'Há alterações por guardar que se vão perder. Queres mesmo continuar?',

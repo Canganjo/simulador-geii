@@ -668,3 +668,42 @@ test('cena: depois de Simular o LED acende; com problemas há contorno; mexer ap
   await page.getByRole('button', { name: 'Parar' }).click()
   await expect(led).toHaveAttribute('data-glow', '0.00')
 })
+
+test('debug: o botão Nós mostra o número do nó de cada terminal (GND = 0)', async ({ page }) => {
+  //   V1+ ── R1 ── D1 ── GND1 ── V1− : nós à mão → V1:+ e R1:a = 1; R1:b e D1:anodo = 2;
+  //   D1:catodo, GND1 e V1:− = 0 (referência)
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await dropAt(page, 'LED', 160, 0)
+  await dropAt(page, 'GND', 0, 120)
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'D1:anodo')
+  await connect(page, 'D1:catodo', 'GND1:gnd')
+
+  const node = (t: string) => scene.locator(`[data-terminal="${t}"]`)
+  const button = page.getByRole('button', { name: 'Nós' })
+  await expect(button).toHaveAttribute('aria-pressed', 'false')
+  await expect(node('V1:+')).not.toHaveAttribute('data-node')
+
+  await button.click()
+  await expect(button).toHaveAttribute('aria-pressed', 'true')
+  await expect(node('V1:+')).toHaveAttribute('data-node', '1')
+  await expect(node('R1:a')).toHaveAttribute('data-node', '1')
+  await expect(node('R1:b')).toHaveAttribute('data-node', '2')
+  await expect(node('D1:anodo')).toHaveAttribute('data-node', '2')
+  await expect(node('D1:catodo')).toHaveAttribute('data-node', '0')
+  await expect(node('V1:-')).toHaveAttribute('data-node', '–') // ainda solto
+  await expect(node('V1:+')).toHaveText('1') // a etiqueta está visível
+
+  // Ligar o último fio: V1− passa para o nó do GND, sem precisar de Simular
+  await connect(page, 'GND1:gnd', 'V1:-')
+  await expect(node('V1:-')).toHaveAttribute('data-node', '0')
+
+  await button.click()
+  await expect(node('V1:+')).not.toHaveAttribute('data-node')
+})
