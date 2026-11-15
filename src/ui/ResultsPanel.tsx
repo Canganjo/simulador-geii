@@ -135,6 +135,18 @@ function SimulationOutput() {
                       {r.ledState === 'on' ? t('results.ledOn') : t('results.ledOff')}
                     </span>
                   )}
+                  {r.diodeState && (
+                    <span
+                      data-diode-state={r.diodeState}
+                      className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
+                        r.diodeState === 'conducting'
+                          ? 'bg-emerald-400/20 text-emerald-300'
+                          : 'bg-slate-700 text-slate-400'
+                      }`}
+                    >
+                      {r.diodeState === 'conducting' ? t('results.diodeOn') : t('results.diodeOff')}
+                    </span>
+                  )}
                 </th>
                 <td className="py-1 pr-3">{formatSi(r.voltage, 'V', 3, decimal)}</td>
                 <td className="py-1 pr-3">{formatSi(r.current, 'A', 3, decimal)}</td>
@@ -186,5 +198,6 @@ function resistanceText(c: Component, decimal: ',' | '.'): string {
   if (c.kind === 'lamp') {
     return formatSi(c.params.ratedVoltage ** 2 / c.params.ratedPower, 'Ω', 3, decimal)
   }
+  // Díodo, LED, fonte, interruptor: não têm uma resistência fixa (o díodo é não linear).
   return '—'
 }

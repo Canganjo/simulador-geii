@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-15 — issue #49 (díodo real com Newton-Raphson, E10).
+Última atualização: 2026-11-16 — issue #51 (díodo na interface, E10).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -36,6 +36,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #45   | Critérios v1.0: testes de referência e demonstração pela interface | E9    | feito  | `test/criterios-v1`            | PR #46              |
 | #47   | Publicar a v1.0 do MVP DC (tag e Release)                          | E9    | feito  | `docs/versao-v1`               | PR #48 · tag `v1.0` |
 | #49   | Díodo real (Shockley) com Newton-Raphson no motor                  | E10   | feito  | `feature/diodo-newton`         | PR #50              |
+| #51   | Díodo na interface: menu, cena, propriedades, resultados e JSON    | E10   | feito  | `feature/diodo-interface`      | PR #52              |
 
 ### Tarefas extra
 
@@ -85,34 +86,35 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 
 ## Já integrado no `main`
 
-| Commit    | O quê                                                               | PR  |
-| --------- | ------------------------------------------------------------------- | --- |
-| `e4e23e2` | Tipos base, netlist, Gauss, solver MNA DC + testes                  | #1  |
-| `66b7a66` | Layout E1: barra, menu recolhível, cena ortográfica, botão de conta | #2  |
-| `7ff0fcd` | `.gitignore` + PROGRESSO.md → tag `v0.1` (fim da E0)                | #8  |
-| `d175b3a` | Painéis de propriedades e resultados recolhíveis (Tarefa 3)         | #9  |
-| `e18e08f` | Testes de referência 1 a 5 com tolerância de 0,1 % (Tarefa 4)       | #10 |
-| `4c05f6c` | Licença "todos os direitos reservados" (tarefa extra)               | #11 |
-| `ba0a3de` | Decisão D-008: formatos de ficheiro e distribuição (Tarefa 5)       | #12 |
-| `8c622d7` | Biblioteca MVP: catálogo, createComponent, validateParams (T6)      | #13 |
-| `ad6ec46` | Grafo: terminais ligados → nós elétricos (Tarefa 7)                 | #14 |
-| `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)       | #18 |
-| `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)             | #19 |
-| `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17) | #20 |
-| `2d4617e` | Painéis redimensionáveis (tarefa extra)                             | #21 |
-| `44e3b7e` | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)    | #22 |
-| `207fe51` | Arrastar componentes do menu para a zona livre (issue #5)           | #23 |
-| `ff127e2` | Selecionar, mover, rodar, duplicar e apagar (issue #6)              | #24 |
-| `74e8349` | Ligar fios entre terminais (issue #25)                              | #26 |
-| `ff4c1af` | Layout em telemóvel (issue #27)                                     | #28 |
-| `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                          | #30 |
-| `213cf77` | Plano do botão Simular no PROGRESSO (docs)                          | #31 |
-| `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                   | #33 |
-| `49897f0` | Editar os valores e o nome dos componentes (issue #35)              | #36 |
-| `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)               | #38 |
-| `a7dfb8c` | O nome por cima do componente aparece sempre (issue #39)            | #40 |
-| `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)         | #42 |
-| `5a7140e` | Opção de debug: número do nó em cada terminal (issue #43)           | #44 |
-| `8149abd` | Critérios v1.0: testes de referência e demonstração (issue #45)     | #46 |
-| `83a2341` | Versão v1.0 do MVP DC: tag e Release (issue #47)                    | #48 |
-| (squash)  | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)       | #50 |
+| Commit    | O quê                                                                       | PR  |
+| --------- | --------------------------------------------------------------------------- | --- |
+| `e4e23e2` | Tipos base, netlist, Gauss, solver MNA DC + testes                          | #1  |
+| `66b7a66` | Layout E1: barra, menu recolhível, cena ortográfica, botão de conta         | #2  |
+| `7ff0fcd` | `.gitignore` + PROGRESSO.md → tag `v0.1` (fim da E0)                        | #8  |
+| `d175b3a` | Painéis de propriedades e resultados recolhíveis (Tarefa 3)                 | #9  |
+| `e18e08f` | Testes de referência 1 a 5 com tolerância de 0,1 % (Tarefa 4)               | #10 |
+| `4c05f6c` | Licença "todos os direitos reservados" (tarefa extra)                       | #11 |
+| `ba0a3de` | Decisão D-008: formatos de ficheiro e distribuição (Tarefa 5)               | #12 |
+| `8c622d7` | Biblioteca MVP: catálogo, createComponent, validateParams (T6)              | #13 |
+| `ad6ec46` | Grafo: terminais ligados → nós elétricos (Tarefa 7)                         | #14 |
+| `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)               | #18 |
+| `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)                     | #19 |
+| `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17)         | #20 |
+| `2d4617e` | Painéis redimensionáveis (tarefa extra)                                     | #21 |
+| `44e3b7e` | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)            | #22 |
+| `207fe51` | Arrastar componentes do menu para a zona livre (issue #5)                   | #23 |
+| `ff127e2` | Selecionar, mover, rodar, duplicar e apagar (issue #6)                      | #24 |
+| `74e8349` | Ligar fios entre terminais (issue #25)                                      | #26 |
+| `ff4c1af` | Layout em telemóvel (issue #27)                                             | #28 |
+| `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                                  | #30 |
+| `213cf77` | Plano do botão Simular no PROGRESSO (docs)                                  | #31 |
+| `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                           | #33 |
+| `49897f0` | Editar os valores e o nome dos componentes (issue #35)                      | #36 |
+| `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)                       | #38 |
+| `a7dfb8c` | O nome por cima do componente aparece sempre (issue #39)                    | #40 |
+| `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)                 | #42 |
+| `5a7140e` | Opção de debug: número do nó em cada terminal (issue #43)                   | #44 |
+| `8149abd` | Critérios v1.0: testes de referência e demonstração (issue #45)             | #46 |
+| `83a2341` | Versão v1.0 do MVP DC: tag e Release (issue #47)                            | #48 |
+| `56054e8` | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)               | #50 |
+| (squash)  | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52 |

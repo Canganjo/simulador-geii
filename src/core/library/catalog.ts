@@ -21,8 +21,8 @@ export const COMPONENT_CATEGORIES = [
 
 export type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number]
 
-/** Unidades SI usadas pelos parâmetros. */
-export type SiUnit = 'V' | 'A' | 'Ω' | 'W'
+/** Unidades SI usadas pelos parâmetros ('' = sem unidade, ex.: o coeficiente n do díodo). */
+export type SiUnit = 'V' | 'A' | 'Ω' | 'W' | ''
 
 /** Um terminal do catálogo: nome técnico (vai para o ID, ex.: "c3:+") e nome para mostrar. */
 export interface TerminalDefinition {
@@ -152,6 +152,34 @@ export const CATALOG: { readonly [K in ComponentKind]: ComponentDefinition<K> } 
         type: 'choice',
         label: 'Cor',
         options: ['vermelho', 'verde', 'azul', 'amarelo', 'branco'],
+      },
+    },
+  },
+  diode: {
+    kind: 'diode',
+    label: 'Díodo',
+    category: 'Semicondutores',
+    namePrefix: 'D',
+    terminals: [
+      { name: 'anodo', label: 'ânodo' },
+      { name: 'catodo', label: 'cátodo' },
+    ],
+    // 1N4148 (modelos SPICE habituais): cerca de 0,65 V a 4 mA. Ver D-009.
+    defaultParams: { saturationCurrent: 2.52e-9, emissionCoefficient: 1.752 },
+    params: {
+      saturationCurrent: {
+        type: 'number',
+        label: 'Corrente de saturação (Is)',
+        unit: 'A',
+        min: 1e-18,
+        max: 1e-3,
+      },
+      emissionCoefficient: {
+        type: 'number',
+        label: 'Coeficiente de emissão (n)',
+        unit: '',
+        min: 0.5,
+        max: 4,
       },
     },
   },

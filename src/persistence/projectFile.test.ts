@@ -53,6 +53,17 @@ describe('guardar e abrir', () => {
   })
 })
 
+describe('díodo real (E10)', () => {
+  it('um projeto com um díodo guarda-se e abre-se igual (Is e n incluídos)', () => {
+    const project = sample()
+    const d = createComponent('diode', { x: 4, y: 0 }, { existing: project.components })
+    project.components.push(d)
+    const result = parseProjectFile(toProjectFile(project))
+    expect(result).toEqual({ ok: true, project })
+    expect(d.params).toEqual({ saturationCurrent: 2.52e-9, emissionCoefficient: 1.752 })
+  })
+})
+
 describe('ficheiros recusados', () => {
   it('não é JSON', () => {
     expect(parseProjectFile('isto não é JSON')).toEqual({ ok: false, error: { code: 'not-json' } })

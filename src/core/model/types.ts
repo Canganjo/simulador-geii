@@ -8,8 +8,9 @@
  * Unidades SI em todo o lado: V, A, Ω, W. Posições em unidades da grelha.
  */
 
-/** Tipos de componente do MVP. */
-export type ComponentKind = 'dc-source' | 'ground' | 'resistor' | 'switch' | 'led' | 'lamp'
+/** Tipos de componente (MVP + díodo real da E10). */
+export type ComponentKind =
+  'dc-source' | 'ground' | 'resistor' | 'switch' | 'led' | 'lamp' | 'diode'
 
 /** Posição no plano da zona livre (x para a direita, y para cima), em unidades da grelha. */
 export interface Vec2 {
@@ -44,6 +45,8 @@ export interface ComponentParamsByKind {
   led: { forwardVoltage: number; seriesResistance: number; maxCurrent: number; color: string }
   /** A lâmpada comporta-se como uma resistência R = U² / P (valores nominais). */
   lamp: { ratedVoltage: number; ratedPower: number }
+  /** Díodo real (E10): modelo de Shockley I = Is · (e^(U/(n·Vt)) − 1). Ver docs/decisoes.md, D-009. */
+  diode: { saturationCurrent: number; emissionCoefficient: number }
 }
 
 interface ComponentBase<K extends ComponentKind> {

@@ -260,3 +260,35 @@ for (const { name, width, height } of [
     expect(box?.height ?? 0).toBeGreaterThan(height / 2)
   })
 }
+
+// ─── E10: díodo real (Shockley, Newton-Raphson) ──────────────────────────────────────────────
+
+test('díodo real: 5 V + 1 kΩ + 1N4148 → U = 0,6505 V, I = 4,35 mA, "conduz"', async ({ page }) => {
+  //   À mão (ver src/core/solver/newton.test.ts): U = 0,045293 · ln(I / 2,52e-9 + 1),
+  //   I = (5 − U) / 1000 → U = 0,650463 V, I = 4,349537 mA
+  await page.goto('/')
+  await menu(page).getByRole('button', { name: 'Resistência' }).click() // R1 (1 kΩ)
+  await dropAt(page, 'Díodo', 160, 0) // D1
+  // Propriedades do díodo: Is e n do 1N4148
+  await expect(
+    props(page).getByRole('textbox', { name: 'Corrente de saturação (Is)' }),
+  ).toHaveValue('2,52n')
+  await expect(
+    props(page).getByRole('textbox', { name: 'Coeficiente de emissão (n)' }),
+  ).toHaveValue('1,752')
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await setParam(page, 'Tensão', '5')
+  await dropAt(page, 'GND', 0, 120)
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'D1:anodo')
+  await connect(page, 'D1:catodo', 'GND1:gnd')
+  await connect(page, 'GND1:gnd', 'V1:-')
+  await simulate(page)
+
+  const relClose = (a: number, b: number) => expect(Math.abs(a - b) / b).toBeLessThan(1e-5)
+  relClose(await value(page, 'D1', 'u'), 0.650463)
+  relClose(await value(page, 'D1', 'i'), 4.349537e-3)
+  const row = results(page).locator('tr[data-component="D1"]')
+  await expect(row).toContainText('conduz')
+  await expect(row).toContainText('4,35 mA')
+})

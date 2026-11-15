@@ -1,7 +1,7 @@
 /**
  * Simulação DC completa de um projeto — é esta a função que o botão "Simular" vai chamar.
  *
- *   projeto ──► validateProject ──► (erros? pára) ──► buildNetlist ──► solveDc ──► resultados
+ *   projeto ──► validateProject ──► (erros? pára) ──► buildNetlist ──► solveDcNonlinear ──► resultados
  *                                                         ▲                │
  *                                                         └── LED mudou? ──┘
  *
@@ -11,16 +11,22 @@
  *   2. um LED a conduzir com corrente NEGATIVA (do cátodo para o ânodo) é impossível → bloqueado;
  *   3. um LED bloqueado com U ≥ Vf aos terminais teria de conduzir → passa a conduzir;
  *   4. repete-se (um LED de cada vez) até nenhum mudar.
+ *
+ * Díodo real (E10): não precisa deste ciclo — a curva de Shockley é resolvida dentro de
+ * `solveDcNonlinear` (Newton-Raphson, newton.ts). Sem díodos, é o `solveDc` de sempre.
  */
 
 import type { Component, Project, TerminalId } from '../model'
 import { buildNetlist, ledSourceId } from '../netlist'
 import { validateProject, type ValidationIssue } from '../validation'
-import { solveDc, type DcSolution } from './mna'
+import { type DcSolution } from './mna'
+import { solveDcNonlinear } from './newton'
 
 /** Margens numéricas: abaixo disto considera-se 0 (erros de arredondamento). */
 const CURRENT_EPSILON = 1e-12 // A
 const VOLTAGE_EPSILON = 1e-9 // V
+/** Um díodo real "conduz" a partir de 1 µA (abaixo disso é só a fuga de saturação). */
+export const DIODE_ON_CURRENT = 1e-6 // A
 
 export interface ComponentResult {
   /** Tensão aos terminais, em V (fonte: V+ − V−; LED: V(ânodo) − V(cátodo); outros: V(a) − V(b)). */
@@ -31,6 +37,8 @@ export interface ComponentResult {
   power: number
   /** Só para os LED: se está a conduzir (aceso) ou bloqueado (apagado). */
   ledState?: 'on' | 'off'
+  /** Só para os díodos reais: conduz (I ≥ 1 µA) ou bloqueado. */
+  diodeState?: 'conducting' | 'blocked'
 }
 
 export type SimulationIssue =
@@ -73,7 +81,7 @@ export function simulateDc(project: Pick<Project, 'components' | 'wires'>): Simu
   for (let iteration = 0; iteration < maxIterations; iteration++) {
     const built = buildNetlist(project, { ledOff })
     if (!built.ok) return { ok: false, issues: validation.issues, message: 'Falta o GND.' }
-    const solution = solveDc(built.netlist)
+    const solution = solveDcNonlinear(built.netlist)
     if (!solution.ok) {
       return { ok: false, issues: validation.issues, message: solution.error.message }
     }
@@ -159,6 +167,11 @@ function componentResult(
     case 'resistor':
     case 'lamp':
       return solution.elements.get(c.id)
+    case 'diode': {
+      const r = solution.elements.get(c.id)
+      if (!r) return undefined
+      return { ...r, diodeState: r.current >= DIODE_ON_CURRENT ? 'conducting' : 'blocked' }
+    }
     case 'switch': {
       const closed = solution.elements.get(c.id)
       if (closed) return closed

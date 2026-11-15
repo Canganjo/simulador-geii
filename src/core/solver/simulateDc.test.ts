@@ -206,3 +206,69 @@ describe('simulateDc — resto do circuito', () => {
     expect(r.issues.map((i) => i.code)).toEqual(['no-ground'])
   })
 })
+
+describe('simulateDc — díodo real (Shockley + Newton-Raphson, E10)', () => {
+  /** V1 ── R1 1 kΩ ── díodo 1N4148 (por defeito) ── GND, direto ou ao contrário. */
+  function diodeCircuit(voltage: number, reversed = false) {
+    const c: Component[] = []
+    part(c, 'dc-source', { voltage })
+    part(c, 'resistor', { resistance: 1000 })
+    part(c, 'diode')
+    part(c, 'ground')
+    const [top, bottom] = reversed ? ['D1:catodo', 'D1:anodo'] : ['D1:anodo', 'D1:catodo']
+    return simulateDc({
+      components: c,
+      wires: [
+        wire('V1:+', 'R1:a'),
+        wire('R1:b', top as TerminalId),
+        wire(bottom as TerminalId, 'GND1:gnd'),
+        wire('GND1:gnd', 'V1:-'),
+      ],
+    })
+  }
+
+  it('5 V + 1 kΩ + 1N4148 direto → U = 0,6505 V, I = 4,3495 mA, conduz', () => {
+    // À mão (ver newton.test.ts): U = 0,045293 · ln(I / 2,52e-9 + 1), I = (5 − U) / 1000
+    //   → U = 0,650463 V, I = 4,349537 mA
+    const r = diodeCircuit(5)
+    expectRelative(result(r, 'D1').voltage, 0.650463, 1e-5)
+    expectRelative(result(r, 'D1').current, 4.349537e-3, 1e-5)
+    expectRelative(result(r, 'R1').voltage, 5 - 0.650463, 1e-5)
+    expect(result(r, 'D1').diodeState).toBe('conducting')
+    expect(result(r, 'D1').ledState).toBeUndefined()
+  })
+
+  it('díodo ao contrário → bloqueado: U ≈ −5 V, I ≈ 0', () => {
+    const r = diodeCircuit(5, true)
+    expect(result(r, 'D1').voltage).toBeCloseTo(-5, 4)
+    expect(Math.abs(result(r, 'D1').current)).toBeLessThan(1e-8)
+    expect(result(r, 'D1').diodeState).toBe('blocked')
+  })
+
+  it('LED (modelo simples) e díodo real no mesmo circuito: D1 = LED, D2 = díodo', () => {
+    //   V1 12 V ── R1 1 kΩ ── D1 LED (Vf = 2 V) ── D2 díodo ── GND
+    //   À mão: 12 = 1000·I + 2 + 0,045293 · ln(I / 2,52e-9 + 1)
+    //     I = 9,4 mA → U(D2) = 0,045293 · ln(3,730159e6) = 0,685367 V → I = 9,314633 mA
+    //     → U(D2) = 0,684954 V → I = 9,315046 mA → U(D2) = 0,684956 V, I = 9,315044 mA (estável)
+    const c: Component[] = []
+    part(c, 'dc-source')
+    part(c, 'resistor', { resistance: 1000 })
+    part(c, 'led')
+    part(c, 'diode')
+    part(c, 'ground')
+    const r = simulateDc({
+      components: c,
+      wires: [
+        wire('V1:+', 'R1:a'),
+        wire('R1:b', 'D1:anodo'),
+        wire('D1:catodo', 'D2:anodo'),
+        wire('D2:catodo', 'GND1:gnd'),
+        wire('GND1:gnd', 'V1:-'),
+      ],
+    })
+    expectRelative(result(r, 'D2').voltage, 0.684956, 1e-5)
+    expectRelative(result(r, 'R1').current, 9.315044e-3, 1e-5)
+    expect(result(r, 'D1').ledState).toBe('on')
+    expect(result(r, 'D2').diodeState).toBe('conducting')
+  })
+})

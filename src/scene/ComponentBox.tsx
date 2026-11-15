@@ -20,6 +20,7 @@ const COLORS: Record<ComponentKind, string> = {
   switch: '#3b82f6',
   led: '#22c55e',
   lamp: '#facc15',
+  diode: '#a855f7', // violeta: distingue-se do LED e vê-se bem no fundo escuro
 }
 
 const SELECTION_COLOR = '#38bdf8'

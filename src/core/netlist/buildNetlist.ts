@@ -132,6 +132,17 @@ export function buildNetlist(
         })
         break
       }
+      case 'diode':
+        // Díodo real (E10): elemento não linear, resolvido pelo Newton-Raphson (solver/newton.ts).
+        elements.push({
+          type: 'diode',
+          id: c.id,
+          anode: nodeAt(c, 'anodo'),
+          cathode: nodeAt(c, 'catodo'),
+          saturationCurrent: c.params.saturationCurrent,
+          emissionCoefficient: c.params.emissionCoefficient,
+        })
+        break
       case 'ground':
         break // o GND é o nó 0
     }
