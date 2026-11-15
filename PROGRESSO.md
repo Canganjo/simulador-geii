@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-15 — issue #47 (v1.0 do MVP DC, fim da E9).
+Última atualização: 2026-11-15 — issue #49 (díodo real com Newton-Raphson, E10).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -35,6 +35,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #43   | Opção de debug: número do nó em cada terminal                      | E3    | feito  | `feature/debug-nos`            | PR #44              |
 | #45   | Critérios v1.0: testes de referência e demonstração pela interface | E9    | feito  | `test/criterios-v1`            | PR #46              |
 | #47   | Publicar a v1.0 do MVP DC (tag e Release)                          | E9    | feito  | `docs/versao-v1`               | PR #48 · tag `v1.0` |
+| #49   | Díodo real (Shockley) com Newton-Raphson no motor                  | E10   | feito  | `feature/diodo-newton`         | PR #50              |
 
 ### Tarefas extra
 
@@ -113,4 +114,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)         | #42 |
 | `5a7140e` | Opção de debug: número do nó em cada terminal (issue #43)           | #44 |
 | `8149abd` | Critérios v1.0: testes de referência e demonstração (issue #45)     | #46 |
-| (squash)  | Versão v1.0 do MVP DC: tag e Release (issue #47)                    | #48 |
+| `83a2341` | Versão v1.0 do MVP DC: tag e Release (issue #47)                    | #48 |
+| (squash)  | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)       | #50 |

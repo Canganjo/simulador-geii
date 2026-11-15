@@ -19,7 +19,14 @@
 
 import { buildNodes } from '../graph'
 import type { Component, Project, TerminalId } from '../model'
-import { GROUND_NODE, type Netlist, type NetlistElement, type NodeIndex } from './types'
+import {
+  elementNodes,
+  GROUND_NODE,
+  mapElementNodes,
+  type Netlist,
+  type NetlistElement,
+  type NodeIndex,
+} from './types'
 
 /** Resistência de um interruptor fechado: 1 mΩ (o mínimo aceite para uma resistência). */
 export const CLOSED_SWITCH_RESISTANCE = 1e-3
@@ -135,7 +142,7 @@ export function buildNetlist(
   //    do MNA → matriz singular. O GND continua a ser o 0; os outros ficam 1, 2, 3… seguidos.
   const used = new Set<NodeIndex>()
   for (const e of elements) {
-    for (const n of e.type === 'resistor' ? [e.nodeA, e.nodeB] : [e.plus, e.minus]) used.add(n)
+    for (const n of elementNodes(e)) used.add(n)
   }
   const renumber = new Map<NodeIndex, NodeIndex>([[GROUND_NODE, GROUND_NODE]])
   for (const n of [...used].sort((a, b) => a - b)) {
@@ -145,11 +152,7 @@ export function buildNetlist(
 
   const netlist: Netlist = {
     nodeCount: renumber.size - 1, // a netlist não conta o GND
-    elements: elements.map((e) =>
-      e.type === 'resistor'
-        ? { ...e, nodeA: to(e.nodeA), nodeB: to(e.nodeB) }
-        : { ...e, plus: to(e.plus), minus: to(e.minus) },
-    ),
+    elements: elements.map((e) => mapElementNodes(e, to)),
   }
 
   const nodeOfTerminal = new Map<TerminalId, NodeIndex>()

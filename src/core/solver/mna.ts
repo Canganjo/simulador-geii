@@ -1,5 +1,7 @@
 /**
- * Análise nodal modificada (MNA) em regime DC — versão 1: resistências e fontes de tensão.
+ * Análise nodal modificada (MNA) em regime DC: resistências, fontes de tensão e de corrente.
+ * (Os díodos são NÃO lineares: resolvem-se com `solveDcNonlinear`, em newton.ts, que chama esta
+ * função várias vezes.)
  *
  * INCÓGNITAS (vetor x):
  *   [ V1, V2, …, Vn,  I_fonte1, I_fonte2, …, I_fontem ]
@@ -21,6 +23,8 @@
  *   Fonte E entre + (p) e − (q), com índice k:
  *       B[p][k] += 1   B[q][k] −= 1     (a corrente da fonte entra na KCL dos seus nós)
  *       Bᵀ[k][p] += 1  Bᵀ[k][q] −= 1   b[n+k] = E
+ *   Fonte de corrente J de `from` (f) para `to` (t) através da fonte (E10):
+ *       b[f] −= J      b[t] += J      (sai J do nó f, entra J no nó t; a matriz não muda)
  *   Qualquer linha/coluna do GND (nó 0) é simplesmente ignorada.
  *
  * Convenção de potência: P = U · I em convenção RECETOR.
@@ -29,7 +33,7 @@
  *   Num circuito correto, a soma de todas as potências é 0 (conservação da energia).
  */
 
-import { GROUND_NODE, type Netlist, type NodeIndex } from '../netlist'
+import { elementNodes, GROUND_NODE, type Netlist, type NodeIndex } from '../netlist'
 import { solveLinearSystem } from './gauss'
 
 /** Resultado elétrico de um componente. */
@@ -41,7 +45,7 @@ export interface ElementResult {
   voltage: number
   /**
    * Corrente, em A.
-   * Resistência: de nodeA para nodeB através dela.
+   * Resistência: de nodeA para nodeB através dela. Fonte de corrente: de `from` para `to`.
    * Fonte: corrente FORNECIDA ao circuito (sai pelo +). Positiva quando a fonte alimenta.
    */
   current: number
@@ -65,8 +69,9 @@ export type DcSolution =
 export type DcSolveError =
   | { code: 'invalid-netlist'; message: string; elementId?: string }
   | { code: 'singular-matrix'; message: string }
+  | { code: 'no-convergence'; message: string }
 
-/** Resolve um circuito DC linear (resistências + fontes de tensão ideais). */
+/** Resolve um circuito DC LINEAR (resistências + fontes de tensão e de corrente ideais). */
 export function solveDc(netlist: Netlist): DcSolution {
   const invalid = checkNetlist(netlist)
   if (invalid) return { ok: false, error: invalid }
@@ -94,6 +99,15 @@ export function solveDc(netlist: Netlist): DcSolution {
     add(c, c, g)
     add(a, c, -g)
     add(c, a, -g)
+  }
+
+  // Stamps das fontes de corrente (só mexem no vetor b)
+  for (const e of netlist.elements) {
+    if (e.type !== 'current-source') continue
+    const f = idx(e.from)
+    const t = idx(e.to)
+    if (f >= 0) b[f] -= e.current
+    if (t >= 0) b[t] += e.current
   }
 
   // Stamps das fontes de tensão
@@ -130,6 +144,10 @@ export function solveDc(netlist: Netlist): DcSolution {
       const voltage = v(e.nodeA) - v(e.nodeB)
       const current = voltage / e.resistance
       elements.set(e.id, { voltage, current, power: voltage * current })
+    } else if (e.type === 'current-source') {
+      // A corrente entra pelo nó `from` (convenção recetor): P = U · J.
+      const voltage = v(e.from) - v(e.to)
+      elements.set(e.id, { voltage, current: e.current, power: voltage * e.current })
     }
   }
   sources.forEach((e, k) => {
@@ -159,14 +177,27 @@ function checkNetlist(netlist: Netlist): DcSolveError | null {
       return { code: 'invalid-netlist', message: `ID repetido: ${e.id}`, elementId: e.id }
     }
     ids.add(e.id)
-    const nodes = e.type === 'resistor' ? [e.nodeA, e.nodeB] : [e.plus, e.minus]
-    if (!nodes.every(validNode)) {
+    if (e.type === 'diode') {
+      return {
+        code: 'invalid-netlist',
+        message: `${e.id}: um díodo é não linear — usar solveDcNonlinear (Newton-Raphson)`,
+        elementId: e.id,
+      }
+    }
+    if (!elementNodes(e).every(validNode)) {
       return { code: 'invalid-netlist', message: `${e.id}: nó fora do intervalo`, elementId: e.id }
     }
     if (e.type === 'resistor' && !(Number.isFinite(e.resistance) && e.resistance > 0)) {
       return {
         code: 'invalid-netlist',
         message: `${e.id}: a resistência tem de ser um número > 0 (recebido ${e.resistance})`,
+        elementId: e.id,
+      }
+    }
+    if (e.type === 'current-source' && !Number.isFinite(e.current)) {
+      return {
+        code: 'invalid-netlist',
+        message: `${e.id}: corrente inválida (${e.current})`,
         elementId: e.id,
       }
     }
