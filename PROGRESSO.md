@@ -32,6 +32,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #37   | Novo, Abrir e Guardar projetos (.geii.json)        | E2    | feito  | `feature/guardar-abrir`        | PR #38 |
 | #39   | O nome por cima do componente aparece sempre       | E2    | feito  | `fix/etiquetas-nomes`          | PR #40 |
 | #41   | LED e lâmpada acendem na cena; erros destacados    | E7    | feito  | `feature/feedback-cena`        | PR #42 |
+| #43   | Opção de debug: número do nó em cada terminal      | E3    | feito  | `feature/debug-nos`            | PR #44 |
 
 ### Tarefas extra
 
@@ -68,4 +69,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `49897f0` | Editar os valores e o nome dos componentes (issue #35)              | #36 |
 | `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)               | #38 |
 | `a7dfb8c` | O nome por cima do componente aparece sempre (issue #39)            | #40 |
-| (squash)  | LED e lâmpada acendem na cena; erros destacados (issue #41)         | #42 |
+| `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)         | #42 |
+| (squash)  | Opção de debug: número do nó em cada terminal (issue #43)           | #44 |
