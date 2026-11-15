@@ -7,6 +7,31 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-009 · 2026-11-15 · Díodo real: modelo de Shockley resolvido por Newton-Raphson ✅
+
+Início da E10 (fase 3 do motor, ver `docs/plano-simulador-geii.md`).
+
+- **Modelo:** equação de Shockley `I = Is · (e^(U/(n·Vt)) − 1)`, sem resistência série nem rutura
+  inversa (ficam para depois, se forem precisas).
+  - **Vt = k·T/q a 300 K = 25,852 mV** (temperatura fixa).
+  - **Valores por defeito do 1N4148** (modelos SPICE habituais): **Is = 2,52 nA, n = 1,752** → cerca de
+    0,65 V a 4 mA.
+- **Método (como o SPICE):** em cada iteração o díodo é trocado pela sua **reta tangente**, uma
+  resistência 1/g em paralelo com uma fonte de corrente Ieq; resolve-se o MNA linear e repete-se.
+  - **paragem:** a tensão de todos os díodos muda menos de **1 µV**; máximo **100 iterações**
+    (senão: erro `no-convergence` com mensagem clara);
+  - **limitação do salto de tensão** (`pnjlim` do SPICE), para a exponencial nunca dar infinito;
+  - **GMIN = 10⁻¹² S** em paralelo com cada díodo, para a matriz não ficar singular com o díodo bloqueado.
+- **O MNA ganha a fonte de corrente** (elemento `current-source`), necessária para a reta tangente.
+- **O LED mantém o modelo simples** (Vf + Rs) do MVP: os testes de referência da planilha e o que os
+  estudantes já conhecem não mudam. O díodo real é um componente novo (`diode`).
+- **Porquê:** é o método do SPICE/LTspice (permite comparar resultados) e reutiliza todo o MNA que já
+  está testado; Newton converge em poucas iterações (quadrático) perto da solução.
+- **Alternativas consideradas:**
+  - modelo por troços (Vf + Rs, como o LED) — simples, mas não mostra a curva exponencial real;
+  - bisseção / ponto fixo — mais simples de explicar, mas lentos e só funcionam com um díodo de cada vez;
+  - biblioteca externa de cálculo — contra a decisão de ter um motor próprio (D-005).
+
 ## D-008 · 2026-11-09 · Formatos de ficheiro, exportações e distribuição 🟡 (a validar em reunião)
 
 Detalha e alarga a D-004.
