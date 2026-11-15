@@ -61,13 +61,50 @@ export interface DiodeElement {
   emissionCoefficient: number
 }
 
+/**
+ * Condensador (E10, transitório): i = C · du/dt, com u = V(nodeA) − V(nodeB).
+ * Só o solver do transitório (`solveTransient`) sabe resolver este elemento.
+ */
+export interface CapacitorElement {
+  type: 'capacitor'
+  id: string
+  nodeA: NodeIndex
+  nodeB: NodeIndex
+  /** C, em F (> 0). */
+  capacitance: number
+  /** Tensão u em t = 0, em V (0 = descarregado). */
+  initialVoltage?: number
+}
+
+/**
+ * Bobina (E10, transitório): u = L · di/dt, com i de nodeA para nodeB.
+ * Só o solver do transitório (`solveTransient`) sabe resolver este elemento.
+ */
+export interface InductorElement {
+  type: 'inductor'
+  id: string
+  nodeA: NodeIndex
+  nodeB: NodeIndex
+  /** L, em H (> 0). */
+  inductance: number
+  /** Corrente i em t = 0, em A (0 = sem corrente). */
+  initialCurrent?: number
+}
+
 export type NetlistElement =
-  ResistorElement | VoltageSourceElement | CurrentSourceElement | DiodeElement
+  | ResistorElement
+  | VoltageSourceElement
+  | CurrentSourceElement
+  | DiodeElement
+  | CapacitorElement
+  | InductorElement
 
 /** Os dois nós a que um elemento está ligado. */
 export function elementNodes(e: NetlistElement): [NodeIndex, NodeIndex] {
   switch (e.type) {
     case 'resistor':
+    case 'capacitor':
+    case 'inductor':
       return [e.nodeA, e.nodeB]
     case 'voltage-source':
       return [e.plus, e.minus]
@@ -82,6 +119,8 @@ export function elementNodes(e: NetlistElement): [NodeIndex, NodeIndex] {
 export function mapElementNodes<E extends NetlistElement>(e: E, f: (n: NodeIndex) => NodeIndex): E {
   switch (e.type) {
     case 'resistor':
+    case 'capacitor':
+    case 'inductor':
       return { ...e, nodeA: f(e.nodeA), nodeB: f(e.nodeB) }
     case 'voltage-source':
       return { ...e, plus: f(e.plus), minus: f(e.minus) }
