@@ -19,6 +19,9 @@ interface UiState {
   setPanelSize: (panel: ResizablePanel, size: number, maxOverride?: number) => void
   /** Volta ao tamanho por defeito. */
   resetPanelSize: (panel: ResizablePanel) => void
+  /** Opção de debug (E3): mostrar o número do nó elétrico ao lado de cada terminal. */
+  showNodes: boolean
+  toggleNodes: () => void
 }
 
 const DEFAULT_SIZES: Record<ResizablePanel, number> = {
@@ -34,6 +37,7 @@ export const useUiStore = create<UiState>()(
       propertiesOpen: true,
       resultsOpen: true,
       sizes: { ...DEFAULT_SIZES },
+      showNodes: false,
       toggleMenu: () => set((s) => ({ menuOpen: !s.menuOpen })),
       toggleProperties: () => set((s) => ({ propertiesOpen: !s.propertiesOpen })),
       toggleResults: () => set((s) => ({ resultsOpen: !s.resultsOpen })),
@@ -43,15 +47,17 @@ export const useUiStore = create<UiState>()(
         })),
       resetPanelSize: (panel) =>
         set((s) => ({ sizes: { ...s.sizes, [panel]: PANEL_LIMITS[panel].default } })),
+      toggleNodes: () => set((s) => ({ showNodes: !s.showNodes })),
     }),
     {
       name: 'simulador-geii:interface',
       // Só se guardam os valores, não as funções.
-      partialize: ({ menuOpen, propertiesOpen, resultsOpen, sizes }) => ({
+      partialize: ({ menuOpen, propertiesOpen, resultsOpen, sizes, showNodes }) => ({
         menuOpen,
         propertiesOpen,
         resultsOpen,
         sizes,
+        showNodes,
       }),
       // Um valor guardado estranho (ficheiro antigo, mexido à mão) volta aos limites.
       merge: (persisted, current) => {
@@ -61,7 +67,7 @@ export const useUiStore = create<UiState>()(
           const value = saved.sizes?.[panel]
           if (typeof value === 'number') sizes[panel] = clampPanelSize(panel, value)
         }
-        return { ...current, ...saved, sizes }
+        return { ...current, ...saved, sizes, showNodes: saved.showNodes === true }
       },
     },
   ),

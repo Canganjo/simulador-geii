@@ -13,6 +13,8 @@ export const fr: Messages = {
   'action.simulate': 'Simuler',
   'action.stop': 'Arrêter',
   'action.reset': 'RAZ', // remise à zéro
+  'action.nodes': 'Nœuds',
+  'action.nodesHint': 'Afficher le numéro du nœud de chaque borne (débogage)',
 
   'file.confirmDiscard':
     'Des modifications non enregistrées vont être perdues. Continuer quand même ?',

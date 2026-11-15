@@ -13,6 +13,8 @@ export const en: Messages = {
   'action.simulate': 'Simulate',
   'action.stop': 'Stop',
   'action.reset': 'Reset',
+  'action.nodes': 'Nodes',
+  'action.nodesHint': 'Show the node number of each terminal (debug)',
 
   'file.confirmDiscard': 'Unsaved changes will be lost. Do you really want to continue?',
   'file.unsaved': 'Unsaved changes',
