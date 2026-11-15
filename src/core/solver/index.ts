@@ -11,6 +11,13 @@ export {
   VOLTAGE_TOLERANCE,
 } from './newton'
 export {
+  MAX_TRANSIENT_STEPS,
+  solveTransient,
+  type ElementWaveform,
+  type TransientOptions,
+  type TransientResult,
+} from './transient'
+export {
   simulateDc,
   type ComponentResult,
   type SimulationIssue,

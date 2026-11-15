@@ -184,6 +184,13 @@ function checkNetlist(netlist: Netlist): DcSolveError | null {
         elementId: e.id,
       }
     }
+    if (e.type === 'capacitor' || e.type === 'inductor') {
+      return {
+        code: 'invalid-netlist',
+        message: `${e.id}: condensador/bobina dependem do tempo — usar solveTransient`,
+        elementId: e.id,
+      }
+    }
     if (!elementNodes(e).every(validNode)) {
       return { code: 'invalid-netlist', message: `${e.id}: nó fora do intervalo`, elementId: e.id }
     }

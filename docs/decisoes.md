@@ -7,6 +7,32 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-010 · 2026-11-16 · Transitório: Euler implícito com passo fixo ✅
+
+Fase 4 do motor (E10): condensador e bobina ao longo do tempo.
+
+- **Método:** **Euler implícito** (backward Euler) com **passo fixo h** escolhido pelo utilizador.
+  - **Condensador:** resistência h/C em paralelo com uma fonte de corrente −(C/h)·uₙ.
+  - **Bobina:** resistência L/h em paralelo com uma fonte de corrente iₙ.
+  - Cada passo é um circuito DC normal, resolvido pelo MNA ou pelo Newton-Raphson (D-009) se houver
+    díodos.
+- **Estado inicial:** condensadores com `initialVoltage` (0 V por defeito) e bobinas com
+  `initialCurrent` (0 A).
+  - O ponto t = 0 é calculado com o condensador como **fonte de tensão** e a bobina como **fonte de
+    corrente** (exato).
+  - Se isso não tiver solução (condensador diretamente numa fonte de tensão), usam-se resistências de
+    1 mΩ / 1 GΩ.
+- **Limite:** no máximo **100 000 passos** por simulação (erro claro acima disso).
+- **Porquê:** é o método mais simples que é **sempre estável**, para qualquer passo. Os resultados de
+  cada passo seguem uma fórmula calculável à mão, xₖ = X∞ · (1 − (1 + h/τ)^(−k)), por isso os testes
+  são exatos. Reutiliza todo o MNA e o Newton já testados.
+- **Limitação conhecida:** é de 1.ª ordem: o erro é proporcional a h (com h = τ/1000, < 0,05 %).
+- **Alternativas consideradas:**
+  - trapézios (método do SPICE) — 2.ª ordem, mais exato, mas pode oscilar ("ringing") e é mais difícil
+    de explicar;
+  - Euler explícito — instável se h for grande;
+  - passo variável — mais rápido, mas mais complexo; fica para depois, se for preciso.
+
 ## D-009 · 2026-11-15 · Díodo real: modelo de Shockley resolvido por Newton-Raphson ✅
 
 Início da E10 (fase 3 do motor, ver `docs/plano-simulador-geii.md`).
