@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-10 — issue #6 (selecionar, mover, rodar, apagar).
+Última atualização: 2026-11-15 — issue #45 (critérios v1.0, E9).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -16,23 +16,24 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas seguintes (issues da E5 e da E2)
 
-| Issue | Tarefa                                             | Etapa | Estado | Ramo                           | PR     |
-| ----- | -------------------------------------------------- | ----- | ------ | ------------------------------ | ------ |
-| #15   | Netlist: do projeto para o solver (teste 7 OK)     | E5    | feito  | `feature/netlist`              | PR #18 |
-| #16   | Validações antes do cálculo (erros e avisos)       | E5    | feito  | `feature/validacoes`           | PR #19 |
-| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK       | E5    | feito  | `feature/led-simples`          | PR #20 |
-| #4    | Estado do circuito com Zustand + zundo             | E2    | feito  | `feature/estado-circuito`      | PR #22 |
-| #5    | Arrastar do menu para a zona livre (snap à grelha) | E2    | feito  | `feature/arrastar-componentes` | PR #23 |
-| #6    | Selecionar, mover, rodar, duplicar e apagar        | E2    | feito  | `feature/selecao-edicao`       | PR #24 |
-| #25   | Ligar fios entre terminais (ortogonais)            | E2    | feito  | `feature/fios`                 | PR #26 |
-| #27   | Layout em telemóvel (iPhone)                       | E1    | feito  | `fix/layout-telemovel`         | PR #28 |
-| #29   | Trocar de língua: PT · FR · EN                     | E1    | feito  | `feature/idiomas`              | PR #30 |
-| #32   | Botão Simular e resultados U, I, R, P              | E2    | feito  | `feature/simular`              | PR #33 |
-| #35   | Editar os valores e o nome dos componentes         | E2    | feito  | `feature/editar-valores`       | PR #36 |
-| #37   | Novo, Abrir e Guardar projetos (.geii.json)        | E2    | feito  | `feature/guardar-abrir`        | PR #38 |
-| #39   | O nome por cima do componente aparece sempre       | E2    | feito  | `fix/etiquetas-nomes`          | PR #40 |
-| #41   | LED e lâmpada acendem na cena; erros destacados    | E7    | feito  | `feature/feedback-cena`        | PR #42 |
-| #43   | Opção de debug: número do nó em cada terminal      | E3    | feito  | `feature/debug-nos`            | PR #44 |
+| Issue | Tarefa                                                             | Etapa | Estado | Ramo                           | PR     |
+| ----- | ------------------------------------------------------------------ | ----- | ------ | ------------------------------ | ------ |
+| #15   | Netlist: do projeto para o solver (teste 7 OK)                     | E5    | feito  | `feature/netlist`              | PR #18 |
+| #16   | Validações antes do cálculo (erros e avisos)                       | E5    | feito  | `feature/validacoes`           | PR #19 |
+| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK                       | E5    | feito  | `feature/led-simples`          | PR #20 |
+| #4    | Estado do circuito com Zustand + zundo                             | E2    | feito  | `feature/estado-circuito`      | PR #22 |
+| #5    | Arrastar do menu para a zona livre (snap à grelha)                 | E2    | feito  | `feature/arrastar-componentes` | PR #23 |
+| #6    | Selecionar, mover, rodar, duplicar e apagar                        | E2    | feito  | `feature/selecao-edicao`       | PR #24 |
+| #25   | Ligar fios entre terminais (ortogonais)                            | E2    | feito  | `feature/fios`                 | PR #26 |
+| #27   | Layout em telemóvel (iPhone)                                       | E1    | feito  | `fix/layout-telemovel`         | PR #28 |
+| #29   | Trocar de língua: PT · FR · EN                                     | E1    | feito  | `feature/idiomas`              | PR #30 |
+| #32   | Botão Simular e resultados U, I, R, P                              | E2    | feito  | `feature/simular`              | PR #33 |
+| #35   | Editar os valores e o nome dos componentes                         | E2    | feito  | `feature/editar-valores`       | PR #36 |
+| #37   | Novo, Abrir e Guardar projetos (.geii.json)                        | E2    | feito  | `feature/guardar-abrir`        | PR #38 |
+| #39   | O nome por cima do componente aparece sempre                       | E2    | feito  | `fix/etiquetas-nomes`          | PR #40 |
+| #41   | LED e lâmpada acendem na cena; erros destacados                    | E7    | feito  | `feature/feedback-cena`        | PR #42 |
+| #43   | Opção de debug: número do nó em cada terminal                      | E3    | feito  | `feature/debug-nos`            | PR #44 |
+| #45   | Critérios v1.0: testes de referência e demonstração pela interface | E9    | feito  | `test/criterios-v1`            | PR #46 |
 
 ### Tarefas extra
 
@@ -40,6 +41,36 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | --------------------------------------------------------- | ------ | ---------------------------------- | ------ |
 | Licença "todos os direitos reservados" (LICENSE)          | feito  | `chore/licenca`                    | PR #11 |
 | Painéis redimensionáveis (puxar a borda, como no VS Code) | feito  | `feature/paineis-redimensionaveis` | PR #21 |
+
+## Critérios de aceitação v1.0 (secção 19 do dossier)
+
+Cada critério tem pelo menos um teste automático que o prova (corre na CI a cada PR).
+Testes E2E em `tests/e2e/`, testes unitários ao lado do código em `src/`.
+
+| Critério (secção 19)                                        | Estado | Prova                                                                                                                 |
+| ----------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| Criar um circuito simples sem assistência externa           | ✅     | `referencia.spec.ts` › demonstração (arrastar do menu, ligar, simular) · teste com colegas na revisão final do grupo  |
+| Editar e alinhar componentes corretamente                   | ✅     | `app.spec.ts` › mover / apagar / rodar / duplicar, editar valores · snap à grelha em `coordinates.test.ts`            |
+| Ligar fios apenas a terminais válidos                       | ✅     | `referencia.spec.ts` › fios (não liga a si próprio, sem fios repetidos) · `circuitStore.test.ts`                      |
+| Gerar netlist coerente com o circuito visível               | ✅     | `buildNetlist.test.ts`, `graph.test.ts` · botão **Nós** mostra os nós na cena (`app.spec.ts` › debug)                 |
+| Resultados iguais ao cálculo teórico (circuitos conhecidos) | ✅     | os 7 testes da planilha no motor (`mna.test.ts`, `buildNetlist.test.ts`…) **e** pela interface (`referencia.spec.ts`) |
+| Detetar e explicar erros básicos                            | ✅     | `validateProject` (sem fonte, sem GND, curto, nó solto) · `app.spec.ts` › simular só uma resistência · demonstração   |
+| Guardar e reabrir sem perda                                 | ✅     | `projectFile.test.ts` · `app.spec.ts` › ficheiros (guardar, Novo, abrir, simular → mesmo resultado)                   |
+| Interface legível nas resoluções previstas                  | ✅     | `referencia.spec.ts` › 1366×768 e 1920×1080 · `mobile.spec.ts` (telemóvel)                                            |
+
+### Testes de referência da planilha (tolerância 0,1 %)
+
+Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela interface):
+
+| Nº  | Circuito                           | Grandeza                | Teórico  | Simulador |
+| --- | ---------------------------------- | ----------------------- | -------- | --------- |
+| 1   | Divisor 12 V, 1 kΩ + 2 kΩ          | Tensão no nó do meio    | 8 V      | 8 V       |
+| 2   | Divisor 12 V, 1 kΩ + 2 kΩ          | Corrente                | 4 mA     | 4 mA      |
+| 3   | 1 kΩ ∥ 1 kΩ sob 10 V               | Corrente total          | 20 mA    | 20 mA     |
+| 4   | 1 kΩ ∥ 1 kΩ sob 10 V               | Resistência equivalente | 500 Ω    | 500 Ω     |
+| 5   | Série 12 V, 1 kΩ + 2 kΩ            | Potência em R2          | 32 mW    | 32 mW     |
+| 6   | Demo 12 V + 470 Ω + LED (Vf = 2 V) | Corrente no LED         | 21,28 mA | 21,28 mA  |
+| 7   | Interruptor aberto                 | Corrente                | 0 A      | 0 A       |
 
 ## Já integrado no `main`
 
@@ -70,4 +101,5 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)               | #38 |
 | `a7dfb8c` | O nome por cima do componente aparece sempre (issue #39)            | #40 |
 | `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)         | #42 |
-| (squash)  | Opção de debug: número do nó em cada terminal (issue #43)           | #44 |
+| `5a7140e` | Opção de debug: número do nó em cada terminal (issue #43)           | #44 |
+| (squash)  | Critérios v1.0: testes de referência e demonstração (issue #45)     | #46 |
