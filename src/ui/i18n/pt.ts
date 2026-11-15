@@ -54,6 +54,7 @@ export const pt = {
   'kind.switch': 'Interruptor',
   'kind.led': 'LED',
   'kind.lamp': 'Lâmpada',
+  'kind.diode': 'Díodo',
 
   // Parâmetros (pelo nome técnico no catálogo)
   'param.voltage': 'Tensão',
@@ -65,6 +66,8 @@ export const pt = {
   'param.maxCurrent': 'Corrente máxima',
   'param.color': 'Cor',
   'param.ratedVoltage': 'Tensão nominal',
+  'param.saturationCurrent': 'Corrente de saturação (Is)',
+  'param.emissionCoefficient': 'Coeficiente de emissão (n)',
 
   // Cores do LED (o valor guardado no projeto fica sempre em português)
   'color.vermelho': 'vermelho',
@@ -105,6 +108,8 @@ export const pt = {
   'results.component': 'Componente',
   'results.ledOn': 'aceso',
   'results.ledOff': 'apagado',
+  'results.diodeOn': 'conduz',
+  'results.diodeOff': 'bloqueado',
   'results.error': 'Erro',
   'results.warning': 'Aviso',
   'results.calcFailed': 'O cálculo falhou: {detail}',

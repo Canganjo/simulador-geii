@@ -46,6 +46,14 @@ const PATHS: Record<ComponentKind, ReactNode> = {
       <path d="M24 2h2v2M28 2h2v2" />
     </>
   ),
+  // Díodo: triângulo (sentido da corrente, ânodo → cátodo) + barra do cátodo
+  diode: (
+    <>
+      <path d="M2 12h12M26 12h12" />
+      <path d="M14 6v12l12-6z" />
+      <path d="M26 6v12" />
+    </>
+  ),
   // Lâmpada: círculo com uma cruz
   lamp: (
     <>

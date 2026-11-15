@@ -13,9 +13,9 @@ function sequentialIds() {
 }
 
 describe('catálogo', () => {
-  it('tem os 6 componentes do MVP', () => {
+  it('tem os 6 componentes do MVP + o díodo real (E10)', () => {
     expect([...ALL_KINDS].sort()).toEqual(
-      ['dc-source', 'ground', 'lamp', 'led', 'resistor', 'switch'].sort(),
+      ['dc-source', 'ground', 'lamp', 'led', 'resistor', 'switch', 'diode'].sort(),
     )
   })
 
@@ -26,15 +26,25 @@ describe('catálogo', () => {
     }
   })
 
-  it('nomes de base: V, GND, R, S, D, L (todos diferentes)', () => {
+  it('nomes de base: V, GND, R, S, D, L (o LED e o díodo partilham o D, como nos esquemas)', () => {
     expect(CATALOG['dc-source'].namePrefix).toBe('V')
     expect(CATALOG.ground.namePrefix).toBe('GND')
     expect(CATALOG.resistor.namePrefix).toBe('R')
     expect(CATALOG.switch.namePrefix).toBe('S')
     expect(CATALOG.led.namePrefix).toBe('D')
+    expect(CATALOG.diode.namePrefix).toBe('D')
     expect(CATALOG.lamp.namePrefix).toBe('L')
-    const prefixes = Object.values(CATALOG).map((d) => d.namePrefix)
+    // Fora o D, todos diferentes.
+    const prefixes = Object.values(CATALOG)
+      .filter((d) => d.kind !== 'diode')
+      .map((d) => d.namePrefix)
     expect(new Set(prefixes).size).toBe(prefixes.length)
+  })
+
+  it('um LED D1 e um díodo a seguir → D2 (os nomes nunca se repetem)', () => {
+    const led = createComponent('led', { x: 0, y: 0 }, { newId: sequentialIds() })
+    const diode = createComponent('diode', { x: 1, y: 0 }, { existing: [led] })
+    expect([led.name, diode.name]).toEqual(['D1', 'D2'])
   })
 
   it.each([
@@ -43,6 +53,7 @@ describe('catálogo', () => {
     ['resistor', ['a', 'b']],
     ['switch', ['a', 'b']],
     ['led', ['ânodo', 'cátodo']],
+    ['diode', ['ânodo', 'cátodo']],
     ['lamp', ['a', 'b']],
   ] as const)('%s mostra os terminais %j', (kind, labels) => {
     expect(CATALOG[kind].terminals.map((t) => t.label)).toEqual(labels)
@@ -56,12 +67,12 @@ describe('catálogo', () => {
     }
   })
 
-  it('os parâmetros numéricos têm unidade SI e limites coerentes (min ≤ max)', () => {
+  it('os parâmetros numéricos têm unidade SI (ou nenhuma) e limites coerentes (min ≤ max)', () => {
     for (const def of Object.values(CATALOG)) {
       const specs: Record<string, ParamSpec> = def.params
       for (const [param, spec] of Object.entries(specs)) {
         if (spec.type !== 'number') continue
-        expect(['V', 'A', 'Ω', 'W'], `${def.kind}.${param}`).toContain(spec.unit)
+        expect(['V', 'A', 'Ω', 'W', ''], `${def.kind}.${param}`).toContain(spec.unit)
         expect(spec.min, `${def.kind}.${param}`).toBeLessThanOrEqual(spec.max)
       }
     }

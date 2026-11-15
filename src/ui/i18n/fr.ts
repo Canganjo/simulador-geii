@@ -46,6 +46,7 @@ export const fr: Messages = {
   'kind.switch': 'Interrupteur',
   'kind.led': 'LED',
   'kind.lamp': 'Lampe',
+  'kind.diode': 'Diode',
 
   'param.voltage': 'Tension',
   'param.resistance': 'Résistance',
@@ -56,6 +57,8 @@ export const fr: Messages = {
   'param.maxCurrent': 'Courant maximal',
   'param.color': 'Couleur',
   'param.ratedVoltage': 'Tension nominale',
+  'param.saturationCurrent': 'Courant de saturation (Is)',
+  'param.emissionCoefficient': 'Coefficient d’émission (n)',
 
   'color.vermelho': 'rouge',
   'color.verde': 'vert',
@@ -93,6 +96,8 @@ export const fr: Messages = {
   'results.component': 'Composant',
   'results.ledOn': 'allumée',
   'results.ledOff': 'éteinte',
+  'results.diodeOn': 'passante',
+  'results.diodeOff': 'bloquée',
   'results.error': 'Erreur',
   'results.warning': 'Avertissement',
   'results.calcFailed': 'Le calcul a échoué : {detail}',
