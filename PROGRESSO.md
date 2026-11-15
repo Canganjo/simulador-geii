@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #51 (díodo na interface, E10).
+Última atualização: 2026-11-16 — issue #53 (motor do transitório, E10).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -37,6 +37,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #47   | Publicar a v1.0 do MVP DC (tag e Release)                          | E9    | feito  | `docs/versao-v1`               | PR #48 · tag `v1.0` |
 | #49   | Díodo real (Shockley) com Newton-Raphson no motor                  | E10   | feito  | `feature/diodo-newton`         | PR #50              |
 | #51   | Díodo na interface: menu, cena, propriedades, resultados e JSON    | E10   | feito  | `feature/diodo-interface`      | PR #52              |
+| #53   | Motor do transitório: condensador e bobina (Euler implícito)       | E10   | feito  | `feature/transitorio-motor`    | PR #56              |
 
 ### Tarefas extra
 
@@ -117,4 +118,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `8149abd` | Critérios v1.0: testes de referência e demonstração (issue #45)             | #46 |
 | `83a2341` | Versão v1.0 do MVP DC: tag e Release (issue #47)                            | #48 |
 | `56054e8` | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)               | #50 |
-| (squash)  | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52 |
+| `a0a99ef` | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52 |
+| (squash)  | Motor do transitório: condensador e bobina (issue #53)                      | #56 |
