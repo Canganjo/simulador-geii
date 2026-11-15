@@ -115,6 +115,11 @@ function SimulationOutput() {
               <tr
                 key={component.id}
                 data-component={component.name}
+                // Valores exatos em unidades SI (V, A, W), para os testes compararem com o
+                // cálculo à mão com a tolerância da planilha (a tabela só mostra 3 algarismos).
+                data-u={r.voltage}
+                data-i={r.current}
+                data-p={r.power}
                 className="border-t border-slate-700"
               >
                 <th scope="row" className="py-1 pr-3 font-semibold">
