@@ -1,5 +1,5 @@
 import { Grid, Line, MapControls } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { MOUSE } from 'three'
 import type { Component, TerminalId, Vec2 } from '../core/model'
@@ -21,7 +21,14 @@ import {
   terminalPositionById,
 } from './coordinates'
 import { startComponentDrag } from './dragComponent'
-import { GroundPicker, type ScreenToModel } from './GroundPicker'
+import { GroundPicker, type ModelToScreen, type ScreenToModel } from './GroundPicker'
+import {
+  idsInsideRect,
+  isDrag,
+  rectFromCorners,
+  type ScreenPoint,
+  type ScreenRect,
+} from './selectionBox'
 import { AnchorProjector } from './ScreenAnchors'
 import { WireView } from './WireView'
 
@@ -39,13 +46,17 @@ import { WireView } from './WireView'
  *   mais próximo), ou clicar no item (fica no centro da vista, numa célula livre).
  * - Editar: clique num componente = selecionar (clique no vazio tira a seleção); arrastá-lo
  *   move-o de ponto em ponto da grelha (um arrasto = um só passo de Desfazer).
+ * - Vários de uma vez: Ctrl (ou Shift) + clique junta/tira; arrastar no VAZIO com o botão
+ *   esquerdo (ou tocar duas vezes no touchpad e arrastar) desenha um retângulo que seleciona
+ *   os componentes lá dentro. Delete apaga todos (ver keyboard.ts).
  * - Fios: clique num terminal e depois noutro → fio ortogonal ("L"). Esc, botão direito ou
  *   clique no vazio cancelam. Clique num fio seleciona-o (Delete apaga).
  */
 export function Workspace() {
   const t = useT()
   const components = useCircuitStore((s) => s.components)
-  const selectedId = useCircuitStore((s) => s.selectedId)
+  const selectedIds = useCircuitStore((s) => s.selectedIds)
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds])
   // Depois de Simular: LED/lâmpada acendem, componentes com problemas ficam com contorno.
   const simulation = useSimulationStore((s) => s.result)
   const addComponent = useCircuitStore((s) => s.addComponent)
@@ -60,6 +71,9 @@ export function Workspace() {
   const [pointer, setPointer] = useState<Vec2 | null>(null)
   const container = useRef<HTMLDivElement>(null)
   const picker = useRef<ScreenToModel | null>(null)
+  const projector = useRef<ModelToScreen | null>(null)
+  /** Retângulo de seleção a ser desenhado (px, relativo à zona livre), ou null. */
+  const [box, setBox] = useState<ScreenRect | null>(null)
   const anchorLayer = useRef<HTMLDivElement>(null)
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -130,8 +144,13 @@ export function Workspace() {
     : ''
 
   // Botão esquerdo num componente: seleciona-o e começa a arrastá-lo até se largar o botão.
-  const onGrab = (component: Component, clientX: number, clientY: number) => {
+  const onGrab = (component: Component, clientX: number, clientY: number, additive: boolean) => {
     if (wiringFrom !== null) cancelWiring()
+    // Ctrl/Shift + clique: junta ou tira da seleção, sem arrastar.
+    if (additive) {
+      useCircuitStore.getState().toggleSelect(component.id)
+      return
+    }
     select(component.id)
     const grab = picker.current?.(clientX, clientY)
     const drag = grab ? startComponentDrag(component.id, grab) : null
@@ -147,6 +166,52 @@ export function Workspace() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+  }
+
+  // Botão esquerdo no VAZIO (o "chão" invisível): clique = tirar a seleção;
+  // arrasto = retângulo de seleção. Com o dedo (ecrã tátil) só o toque conta: arrastar desloca a vista.
+  const onGroundDown = (e: ThreeEvent<PointerEvent>) => {
+    if (e.button !== 0) return
+    e.stopPropagation()
+    const additive = e.ctrlKey || e.shiftKey || e.metaKey
+    const start: ScreenPoint = { x: e.clientX, y: e.clientY }
+    const touch = e.pointerType === 'touch'
+    let dragging = false
+
+    const onMove = (ev: PointerEvent) => {
+      if (touch) return
+      const now = { x: ev.clientX, y: ev.clientY }
+      if (!dragging && !isDrag(start, now)) return
+      dragging = true
+      const r = rectFromCorners(start, now)
+      const origin = container.current?.getBoundingClientRect()
+      setBox({ ...r, left: r.left - (origin?.left ?? 0), top: r.top - (origin?.top ?? 0) })
+    }
+    const onUp = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      setBox(null)
+      const end = { x: ev.clientX, y: ev.clientY }
+      if (!dragging || ev.type === 'pointercancel') {
+        // Um clique no vazio (sem arrastar): cancela o fio e tira a seleção.
+        if (!touch && isDrag(start, end)) return
+        if (wiringFrom !== null) cancelWiring()
+        if (!additive) select(null)
+        return
+      }
+      const toScreen = projector.current
+      if (!toScreen) return
+      const ids = idsInsideRect(
+        useCircuitStore.getState().components,
+        rectFromCorners(start, end),
+        toScreen,
+      )
+      useCircuitStore.getState().selectMany(ids, additive)
     }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
@@ -212,6 +277,13 @@ export function Workspace() {
           fadeStrength={1}
         />
 
+        {/* "Chão" invisível e enorme por baixo de tudo: recebe o botão esquerdo no vazio
+            (clique → tirar a seleção; arrasto → retângulo de seleção). */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} onPointerDown={onGroundDown}>
+          <planeGeometry args={[100000, 100000]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+
         {wires.map((w) => {
           const a = terminalPositionById(components, w.from)
           const b = terminalPositionById(components, w.to)
@@ -243,7 +315,7 @@ export function Workspace() {
           <ComponentBox
             key={c.id}
             component={c}
-            selected={c.id === selectedId}
+            selected={selectedSet.has(c.id)}
             onGrab={onGrab}
             connected={connected}
             wiringFrom={wiringFrom}
@@ -252,7 +324,7 @@ export function Workspace() {
           />
         ))}
 
-        <GroundPicker pickerRef={picker} />
+        <GroundPicker pickerRef={picker} projectorRef={projector} />
         <AnchorProjector layer={anchorLayer} />
 
         <MapControls
@@ -281,12 +353,12 @@ export function Workspace() {
             {/* O ponto projetado é o canto do <span> de fora; este fica centrado nele. */}
             <span
               data-component-label={c.name}
-              data-selected={c.id === selectedId}
+              data-selected={selectedSet.has(c.id)}
               // Para os testes E2E: brilho (0 a 1) e problema depois de Simular.
               data-glow={(visuals.get(c.id)?.glow ?? 0).toFixed(2)}
               data-issue={visuals.get(c.id)?.issue ?? 'none'}
               className={`absolute -translate-x-1/2 -translate-y-1/2 rounded px-1 text-xs font-semibold whitespace-nowrap ${
-                c.id === selectedId ? 'bg-sky-500 text-white' : 'bg-slate-900/70 text-slate-100'
+                selectedSet.has(c.id) ? 'bg-sky-500 text-white' : 'bg-slate-900/70 text-slate-100'
               }`}
             >
               {c.name}
@@ -337,6 +409,14 @@ export function Workspace() {
           )
         })}
       </div>
+
+      {box && (
+        <div
+          data-testid="selection-box"
+          className="pointer-events-none absolute rounded-sm border border-sky-400 bg-sky-400/15"
+          style={{ left: box.left, top: box.top, width: box.width, height: box.height }}
+        />
+      )}
 
       {wiringFrom && (
         <p

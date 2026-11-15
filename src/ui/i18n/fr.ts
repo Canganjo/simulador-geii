@@ -69,6 +69,10 @@ export const fr: Messages = {
   'props.label': 'Propriétés',
   'props.collapse': 'Réduire les propriétés',
   'props.expand': 'Ouvrir les propriétés',
+  'props.multiTitle': '{count} composants sélectionnés',
+  'props.multiHint':
+    'Suppr les efface tous d’un coup (Ctrl+Z les remet). Ctrl+clic ajoute ou retire un composant.',
+  'props.deleteAll': 'Supprimer les {count}',
   'props.empty':
     'Sélectionne un composant pour voir et modifier le nom, la valeur, l’unité et la rotation.',
   'props.position': 'Position',
