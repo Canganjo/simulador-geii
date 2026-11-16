@@ -40,6 +40,15 @@ export const en: Messages = {
   'file.errorNewer':
     'Could not open {file}: it was made by a newer version of the simulator (format {version}).',
   'file.errorInvalid': 'Could not open {file}: the project has a problem ({detail}).',
+  'file.none': 'Not saved yet',
+  'file.current': 'Current file: {file}',
+  'file.saveHint': 'Overwrites {file} without asking',
+  'file.saveHintNew': 'No file yet: the first time it asks where to save',
+  'file.saveAsHint': 'Always asks for the folder and name (e.g. to make a copy)',
+  'file.downloadHint': 'This browser cannot choose a folder: downloads the file',
+  'file.saved': 'Saved to {file}',
+  'file.savedAs': 'Saved as {file}',
+  'file.downloaded': 'Downloaded: {file} (Downloads folder)',
   'file.close': 'Close',
 
   'menu.label': 'Components menu',

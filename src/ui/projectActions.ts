@@ -7,6 +7,7 @@ import {
   type ProjectFileError,
 } from '../persistence/projectFile'
 import { hasUnsavedChanges, useCircuitStore } from '../store/circuitStore'
+import { useFileStore } from '../store/fileStore'
 import { isCancel, openPicker, savePicker, writeText, type FileHandle } from './fileSystem'
 
 /**
@@ -34,6 +35,12 @@ export function currentProject(): Project {
  */
 let currentFile: FileHandle | null = null
 
+/** Muda o ficheiro atual e avisa a interface (que mostra o nome na barra de cima). */
+function setCurrentFile(handle: FileHandle | null): void {
+  currentFile = handle
+  useFileStore.getState().setFileName(handle?.name ?? null)
+}
+
 /** Nome do ficheiro atual no disco (ex.: "divisor.geii.json"), ou null. */
 export function currentFileName(): string | null {
   return currentFile?.name ?? null
@@ -41,7 +48,7 @@ export function currentFileName(): string | null {
 
 /** Esquece o ficheiro atual (Novo, ou um projeto aberto sem a janela do sistema). */
 export function forgetCurrentFile(): void {
-  currentFile = null
+  setCurrentFile(null)
 }
 
 /** Como acabou um Guardar: gravado no disco, descarregado, ou cancelado pelo utilizador. */
@@ -56,10 +63,11 @@ export async function saveProject(): Promise<SaveOutcome> {
     try {
       await writeText(currentFile, toProjectFile(currentProject()))
       useCircuitStore.getState().markSaved()
+      useFileStore.getState().notify('saved', currentFile.name)
       return 'saved'
     } catch {
       // Sem permissão ou ficheiro apagado entretanto: pergunta outra vez onde guardar.
-      currentFile = null
+      setCurrentFile(null)
     }
   }
   return saveProjectAs()
@@ -88,8 +96,9 @@ export async function saveProjectAs(): Promise<SaveOutcome> {
   // O nome muda ANTES de gravar, para o ficheiro levar o nome novo.
   useCircuitStore.setState({ projectName: projectNameFromFile(handle.name) })
   await writeText(handle, toProjectFile(currentProject()))
-  currentFile = handle
+  setCurrentFile(handle)
   useCircuitStore.getState().markSaved()
+  useFileStore.getState().notify('saved-as', handle.name)
   return 'saved'
 }
 
@@ -106,6 +115,12 @@ function download(): void {
   // lento, o download chegava a ser cancelado).
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
   useCircuitStore.getState().markSaved()
+  useFileStore.getState().notify('downloaded', link.download)
+}
+
+/** O browser tem a janela "Guardar como" do sistema? (Sem ela, guardar = descarregar.) */
+export function canChooseFolder(): boolean {
+  return savePicker() !== null
 }
 
 /** Abrir: lê o ficheiro escolhido. Devolve null se abriu, ou o motivo da recusa. */
@@ -116,7 +131,7 @@ export async function openProjectFile(
   const result = parseProjectFile(await file.text())
   if (!result.ok) return result.error
   useCircuitStore.getState().loadProject(result.project)
-  currentFile = handle
+  setCurrentFile(handle)
   return null
 }
 

@@ -47,6 +47,15 @@ export const pt = {
   'file.errorNewer':
     'Não foi possível abrir {file}: foi feito por uma versão mais recente do simulador (formato {version}).',
   'file.errorInvalid': 'Não foi possível abrir {file}: o projeto tem um problema ({detail}).',
+  'file.none': 'Ainda não guardado',
+  'file.current': 'Ficheiro atual: {file}',
+  'file.saveHint': 'Grava por cima de {file}, sem perguntar',
+  'file.saveHintNew': 'Ainda não há ficheiro: da 1.ª vez pergunta onde guardar',
+  'file.saveAsHint': 'Pergunta sempre a pasta e o nome (ex.: para fazer uma cópia)',
+  'file.downloadHint': 'Este browser não deixa escolher a pasta: descarrega o ficheiro',
+  'file.saved': 'Guardado em {file}',
+  'file.savedAs': 'Guardado como {file}',
+  'file.downloaded': 'Descarregado: {file} (pasta Transferências)',
   'file.close': 'Fechar',
 
   // Menu de componentes

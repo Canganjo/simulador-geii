@@ -18,6 +18,7 @@ import {
 import { useStore } from 'zustand'
 import type { ProjectFileError } from '../persistence/projectFile'
 import { hasUnsavedChanges, useCircuitStore } from '../store/circuitStore'
+import { useFileStore } from '../store/fileStore'
 import { useSimulationStore } from '../store/simulationStore'
 import { useUiStore } from '../store/uiStore'
 import { AccountMenu } from './AccountMenu'
@@ -25,6 +26,7 @@ import { useT, type Translate } from './i18n'
 import { isTyping } from './keyboard'
 import { TransientDialog } from './TransientDialog'
 import {
+  canChooseFolder,
   confirmDiscard,
   forgetCurrentFile,
   openProjectFile,
@@ -117,6 +119,32 @@ export function TopBar() {
   const toggleNodes = useUiStore((s) => s.toggleNodes)
   const { run, clear } = useSimulationStore.getState()
   const unsaved = useCircuitStore(hasUnsavedChanges)
+  const fileName = useFileStore((s) => s.fileName)
+  const notice = useFileStore((s) => s.notice)
+  // O aviso "Guardado em …" some sozinho ao fim de uns segundos.
+  useEffect(() => {
+    if (!notice) return
+    const timer = setTimeout(() => useFileStore.getState().clearNotice(), 3500)
+    return () => clearTimeout(timer)
+  }, [notice])
+  // Dicas que explicam a diferença entre Guardar e Guardar como.
+  const pickFolder = canChooseFolder()
+  const saveHint = !pickFolder
+    ? t('file.downloadHint')
+    : fileName
+      ? t('file.saveHint', { file: fileName })
+      : t('file.saveHintNew')
+  const saveAsHint = pickFolder ? t('file.saveAsHint') : t('file.downloadHint')
+  const noticeText = notice
+    ? t(
+        notice.kind === 'saved'
+          ? 'file.saved'
+          : notice.kind === 'saved-as'
+            ? 'file.savedAs'
+            : 'file.downloaded',
+        { file: notice.file },
+      )
+    : null
   // O <input type="file"> escondido (guardado em estado, para o botão Abrir clicar nele).
   const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -177,6 +205,7 @@ export function TopBar() {
         onClick: () => void onSave(),
         disabled: false,
         badge: unsaved,
+        hint: `${t('action.save')}: ${saveHint}`,
       },
       {
         label: t('action.saveAs'),
@@ -184,6 +213,7 @@ export function TopBar() {
         shortcut: 'Ctrl+Shift+S',
         onClick: () => void onSaveAs(),
         disabled: false,
+        hint: `${t('action.saveAs')}: ${saveAsHint}`,
       },
     ],
     [
@@ -244,6 +274,18 @@ export function TopBar() {
       {/* No telemóvel só "GEII": o resto do espaço é para os botões. */}
       <span className="shrink-0 font-semibold tracking-tight text-slate-100">
         <span className="hidden md:inline">{t('app.title')} </span>GEII
+      </span>
+
+      {/* O ficheiro aberto: é onde "Guardar" grava (o "Guardar como…" pergunta sempre). */}
+      <span
+        data-testid="current-file"
+        title={fileName ? t('file.current', { file: fileName }) : t('file.none')}
+        className={`hidden max-w-44 shrink-0 truncate rounded px-1.5 py-0.5 text-xs xl:inline ${
+          fileName ? 'bg-slate-700/60 text-slate-300' : 'text-slate-500 italic'
+        }`}
+      >
+        {fileName ?? t('file.none')}
+        {unsaved && fileName ? ' •' : ''}
       </span>
 
       {/* Se não couber (telemóvel), a barra de ações desliza para o lado com o dedo. */}
@@ -323,6 +365,17 @@ export function TopBar() {
       />
 
       {transientOpen && <TransientDialog onClose={() => setTransientOpen(false)} />}
+
+      {noticeText && !fileError && (
+        <div
+          key={notice?.id}
+          role="status"
+          data-testid="save-notice"
+          className="absolute top-full left-1/2 z-40 mt-2 -translate-x-1/2 rounded border border-emerald-500/50 bg-slate-900 px-3 py-1.5 text-sm text-emerald-200 shadow-xl shadow-black/40"
+        >
+          {noticeText}
+        </div>
+      )}
 
       {fileError && (
         <div
