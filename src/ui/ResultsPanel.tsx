@@ -14,6 +14,7 @@ import { useSimulationStore } from '../store/simulationStore'
 import { formatSi } from './formatSi'
 import { decimalSeparator, useT } from './i18n'
 import { issueText } from './issueText'
+import { WaveformChart } from './WaveformChart'
 
 interface Props {
   open: boolean
@@ -109,64 +110,75 @@ function SimulationOutput() {
         </p>
       )}
 
-      {rows.length > 0 && (
-        <table className="w-full max-w-2xl text-left tabular-nums" data-testid="results-table">
-          <thead className="text-xs text-slate-400">
-            <tr>
-              <th className="py-1 pr-3 font-medium">{t('results.component')}</th>
-              <th className="py-1 pr-3 font-medium">U</th>
-              <th className="py-1 pr-3 font-medium">I</th>
-              <th className="py-1 pr-3 font-medium">R</th>
-              <th className="py-1 font-medium">P</th>
-            </tr>
-          </thead>
-          <tbody className="text-slate-200">
-            {rows.map(({ component, result: r }) => (
-              <tr
-                key={component.id}
-                data-component={component.name}
-                // Valores exatos em unidades SI (V, A, W), para os testes compararem com o
-                // cálculo à mão com a tolerância da planilha (a tabela só mostra 3 algarismos).
-                data-u={r.voltage}
-                data-i={r.current}
-                data-p={r.power}
-                className="border-t border-slate-700"
-              >
-                <th scope="row" className="py-1 pr-3 font-semibold">
-                  {component.name}
-                  {r.ledState && (
-                    <span
-                      className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
-                        r.ledState === 'on'
-                          ? 'bg-amber-400/20 text-amber-300'
-                          : 'bg-slate-700 text-slate-400'
-                      }`}
-                    >
-                      {r.ledState === 'on' ? t('results.ledOn') : t('results.ledOff')}
-                    </span>
-                  )}
-                  {r.diodeState && (
-                    <span
-                      data-diode-state={r.diodeState}
-                      className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
-                        r.diodeState === 'conducting'
-                          ? 'bg-emerald-400/20 text-emerald-300'
-                          : 'bg-slate-700 text-slate-400'
-                      }`}
-                    >
-                      {r.diodeState === 'conducting' ? t('results.diodeOn') : t('results.diodeOff')}
-                    </span>
-                  )}
-                </th>
-                <td className="py-1 pr-3">{formatSi(r.voltage, 'V', 3, decimal)}</td>
-                <td className="py-1 pr-3">{formatSi(r.current, 'A', 3, decimal)}</td>
-                <td className="py-1 pr-3">{resistanceText(component, decimal)}</td>
-                <td className="py-1">{formatSi(r.power, 'W', 3, decimal)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div className="@container">
+        {/* Lado a lado quando o PAINEL tem ≥ 48rem; senão o gráfico fica por baixo da tabela. */}
+        <div className="flex flex-col gap-4 @3xl:flex-row @3xl:items-start">
+          {rows.length > 0 && (
+            <table
+              className="w-full max-w-2xl text-left tabular-nums @3xl:w-auto @3xl:shrink-0"
+              data-testid="results-table"
+            >
+              <thead className="text-xs text-slate-400">
+                <tr>
+                  <th className="py-1 pr-3 font-medium">{t('results.component')}</th>
+                  <th className="py-1 pr-3 font-medium">U</th>
+                  <th className="py-1 pr-3 font-medium">I</th>
+                  <th className="py-1 pr-3 font-medium">R</th>
+                  <th className="py-1 font-medium">P</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-200">
+                {rows.map(({ component, result: r }) => (
+                  <tr
+                    key={component.id}
+                    data-component={component.name}
+                    // Valores exatos em unidades SI (V, A, W), para os testes compararem com o
+                    // cálculo à mão com a tolerância da planilha (a tabela só mostra 3 algarismos).
+                    data-u={r.voltage}
+                    data-i={r.current}
+                    data-p={r.power}
+                    className="border-t border-slate-700"
+                  >
+                    <th scope="row" className="py-1 pr-3 font-semibold">
+                      {component.name}
+                      {r.ledState && (
+                        <span
+                          className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
+                            r.ledState === 'on'
+                              ? 'bg-amber-400/20 text-amber-300'
+                              : 'bg-slate-700 text-slate-400'
+                          }`}
+                        >
+                          {r.ledState === 'on' ? t('results.ledOn') : t('results.ledOff')}
+                        </span>
+                      )}
+                      {r.diodeState && (
+                        <span
+                          data-diode-state={r.diodeState}
+                          className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
+                            r.diodeState === 'conducting'
+                              ? 'bg-emerald-400/20 text-emerald-300'
+                              : 'bg-slate-700 text-slate-400'
+                          }`}
+                        >
+                          {r.diodeState === 'conducting'
+                            ? t('results.diodeOn')
+                            : t('results.diodeOff')}
+                        </span>
+                      )}
+                    </th>
+                    <td className="py-1 pr-3">{formatSi(r.voltage, 'V', 3, decimal)}</td>
+                    <td className="py-1 pr-3">{formatSi(r.current, 'A', 3, decimal)}</td>
+                    <td className="py-1 pr-3">{resistanceText(component, decimal)}</td>
+                    <td className="py-1">{formatSi(r.power, 'W', 3, decimal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {transient && <WaveformChart />}
+        </div>
+      </div>
     </div>
   )
 }

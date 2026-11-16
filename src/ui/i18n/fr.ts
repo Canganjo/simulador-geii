@@ -26,6 +26,10 @@ export const fr: Messages = {
     '{steps} pas, c’est trop (maximum {max}). Augmentez le pas ou réduisez la durée.',
   'results.transientInfo':
     'Transitoire de 0 à {duration} ({steps} pas) : valeurs à l’instant final.',
+  'chart.component': 'Composant',
+  'chart.voltage': 'Tension u(t)',
+  'chart.current': 'Courant i(t)',
+  'chart.tau': 'τ ≈ {tau} (63 %)',
   'action.reset': 'RAZ', // remise à zéro
   'action.nodes': 'Nœuds',
   'action.nodesHint': 'Afficher le numéro du nœud de chaque borne (débogage)',

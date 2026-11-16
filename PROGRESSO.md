@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #67 (câmara inclinada e modelos como no mockup).
+Última atualização: 2026-11-16 — issue #69 (gráfico u(t) / i(t) do transitório).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -45,6 +45,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #63   | Modelos 3D dos 7 componentes (script do Blender → .blend + .glb), caixa escondida                                        | E7    | feito  | `feature/modelos-3d`           | PR #64              |
 | #65   | E10-4: condensador e bobina na interface + modo Transitório                                                              | E10   | feito  | `feature/condensador-bobina`   | PR #66              |
 | #67   | Como no mockup: câmara inclinada (~55°) e mais perto, LED/fonte/lâmpada/GND revistos, visor com a tensão, auréola de luz | E7    | feito  | `feature/como-no-desenho`      | PR #68              |
+| #69   | E10-5: gráfico u(t) / i(t) do transitório (cursor, valor final, τ)                                                       | E10   | feito  | `feature/grafico-transitorio`  | PR #70              |
 
 ### Tarefas extra
 
@@ -132,6 +133,7 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `641e6ee` | Preparar os modelos 3D do Blender (issue #59)                               | #60 |
 | `f2eb5dd` | Organizar os fios: arrastar troços (issue #61)                              | #62 |
 | `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64 |
-| (squash)  | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
-| (squash)  | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
+| `2fa047f` | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
+| `fd9e495` | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
+| (squash)  | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
 | (squash)  | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
