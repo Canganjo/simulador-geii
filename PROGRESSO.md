@@ -44,6 +44,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #61   | Organizar os fios: arrastar troços (como no Tinkercad), endireitar                     | E2    | feito  | `feature/arrastar-fios`        | PR #62              |
 | #63   | Modelos 3D dos 7 componentes (script do Blender → .blend + .glb), caixa escondida      | E7    | feito  | `feature/modelos-3d`           | PR #64              |
 | #65   | E10-4: condensador e bobina na interface + modo Transitório                            | E10   | feito  | `feature/condensador-bobina`   | PR #66              |
+| #69   | E10-5: gráfico u(t) / i(t) do transitório (cursor, valor final, τ)                     | E10   | feito  | `feature/grafico-transitorio`  | PR #70              |
 
 ### Tarefas extra
 
@@ -131,4 +132,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `641e6ee` | Preparar os modelos 3D do Blender (issue #59)                               | #60 |
 | `f2eb5dd` | Organizar os fios: arrastar troços (issue #61)                              | #62 |
 | `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64 |
-| (squash)  | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
+| `2fa047f` | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
+| (squash)  | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |

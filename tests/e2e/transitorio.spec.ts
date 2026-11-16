@@ -52,12 +52,8 @@ async function value(page: Page, name: string, attr: 'data-u' | 'data-i') {
   return Number(await row(page, name).getAttribute(attr))
 }
 
-test('RC: Simular (DC) → u_C = 10 V; Transitório 0,5 s → u_C ≈ 9,93 V', async ({ page }) => {
-  await page.goto('/')
-  // Os dois componentes novos estão no menu, em Passivos.
-  await expect(menu(page).getByRole('button', { name: 'Condensador' })).toBeVisible()
-  await expect(menu(page).getByRole('button', { name: 'Bobina' })).toBeVisible()
-
+/** Monta o circuito RC pela interface (V1 = 10 V, R1 = 1 kΩ, C1 = 100 µF, GND). */
+async function buildRc(page: Page) {
   await menu(page).getByRole('button', { name: 'Resistência' }).click()
   await setParam(page, 'Resistência', '1k')
   await dropAt(page, 'Fonte DC', -160, 0)
@@ -73,6 +69,14 @@ test('RC: Simular (DC) → u_C = 10 V; Transitório 0,5 s → u_C ≈ 9,93 V', a
   await connect(page, 'R1:b', 'C1:a')
   await connect(page, 'C1:b', 'GND1:gnd')
   await connect(page, 'GND1:gnd', 'V1:-')
+}
+
+test('RC: Simular (DC) → u_C = 10 V; Transitório 0,5 s → u_C ≈ 9,93 V', async ({ page }) => {
+  await page.goto('/')
+  // Os dois componentes novos estão no menu, em Passivos.
+  await expect(menu(page).getByRole('button', { name: 'Condensador' })).toBeVisible()
+  await expect(menu(page).getByRole('button', { name: 'Bobina' })).toBeVisible()
+  await buildRc(page)
 
   // DC: o condensador é um circuito aberto.
   await page.getByRole('button', { name: 'Simular', exact: true }).click()
@@ -100,4 +104,51 @@ test('RC: Simular (DC) → u_C = 10 V; Transitório 0,5 s → u_C ≈ 9,93 V', a
   await expect(dialog.getByRole('alert')).toContainText('500000 passos')
   await dialog.getByRole('button', { name: 'Cancelar' }).first().click()
   await expect(dialog).toHaveCount(0)
+})
+
+test('gráfico (E10-5): u(t) e i(t) do C1, τ ≈ 0,1 s, cursor e troca para R1', async ({ page }) => {
+  await page.goto('/')
+  await buildRc(page)
+  await page.getByRole('button', { name: 'Transitório' }).click()
+  await page.getByRole('button', { name: 'Simular no tempo' }).click()
+
+  const chart = page.getByTestId('waveform-chart')
+  await expect(chart).toBeVisible()
+  // O GND1 ficou selecionado (foi o último largado) e não tem curvas → mostra o 1.º condensador.
+  await expect(chart).toHaveAttribute('data-component', 'C1')
+  await expect(chart.locator('[data-plot="voltage"]')).toBeVisible()
+  await expect(chart.locator('[data-plot="current"]')).toBeVisible()
+  // O painel cresceu para o gráfico caber.
+  const panel = await page.getByRole('region', { name: 'Resultados' }).boundingBox()
+  expect(panel?.height ?? 0).toBeGreaterThanOrEqual(300)
+
+  // τ medido na curva: R·C = 1000 × 100e-6 = 0,1 s (Euler com h = 1 ms dá ≈ 0,1005 s).
+  const tau = Number(await chart.getByTestId('chart-tau').getAttribute('data-tau'))
+  expect(Math.abs(tau - 0.1)).toBeLessThan(0.002)
+
+  // Sem cursor, os valores são os do fim: u = 9,93085 V.
+  const readout = chart.getByTestId('chart-readout')
+  expect(Math.abs(Number(await readout.getAttribute('data-u')) - 9.93085)).toBeLessThan(1e-4)
+
+  // Cursor a meio do gráfico (t ≈ 0,25 s): u = 10·(1 − 1,01^(−k)) no passo k = t / 1 ms.
+  const area = await chart.getByTestId('chart-area-voltage').boundingBox()
+  if (!area) throw new Error('gráfico sem área')
+  await page.mouse.move(area.x + area.width / 2, area.y + area.height / 2, { steps: 3 })
+  await expect
+    .poll(async () => Math.abs(Number(await readout.getAttribute('data-t')) - 0.25))
+    .toBeLessThan(0.01)
+  const time = Number(await readout.getAttribute('data-t'))
+  const k = Math.round(time / 1e-3)
+  expect(Number(await readout.getAttribute('data-u'))).toBeCloseTo(10 * (1 - 1.01 ** -k), 6)
+  // i = (10 − u) / R (mesma corrente em R1 e C1)
+  expect(Number(await readout.getAttribute('data-i'))).toBeCloseTo((10 * 1.01 ** -k) / 1000, 9)
+
+  // Escolher R1 na lista → o gráfico mostra o R1 (e o R1 fica selecionado na cena).
+  await chart.getByRole('combobox').selectOption({ label: 'R1' })
+  await expect(chart).toHaveAttribute('data-component', 'R1')
+  await expect(scene(page).locator('[data-component-label="R1"]')).toHaveAttribute(
+    'data-selected',
+    'true',
+  )
+  await expect(chart.getByTestId('chart-tau')).toHaveCount(0) // τ só para C e L
 })

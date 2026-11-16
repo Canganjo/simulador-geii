@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { MAX_TRANSIENT_STEPS } from '../core/solver'
 import { useLanguageStore } from '../store/languageStore'
 import { useSimulationStore } from '../store/simulationStore'
+import { useUiStore } from '../store/uiStore'
 import { decimalSeparator, useT } from './i18n'
 import { parseSi } from './parseSi'
 
@@ -16,6 +17,18 @@ import { parseSi } from './parseSi'
 
 interface Props {
   onClose: () => void
+}
+
+/** Altura mínima do painel de resultados para o gráfico caber (2 gráficos + valores). */
+export const CHART_PANEL_HEIGHT = 340
+
+/** Abre o painel de resultados e, se for baixo, aumenta-o (no máximo 60 % da janela). */
+function showResultsForChart() {
+  const ui = useUiStore.getState()
+  if (!ui.resultsOpen) ui.toggleResults()
+  if (ui.sizes.results < CHART_PANEL_HEIGHT) {
+    ui.setPanelSize('results', CHART_PANEL_HEIGHT, window.innerHeight * 0.6)
+  }
 }
 
 /** Últimos valores usados (ficam enquanto a página estiver aberta). */
@@ -45,6 +58,8 @@ export function TransientDialog({ onClose }: Props) {
     lastDuration = duration
     lastStep = step
     useSimulationStore.getState().runTransient({ duration: d, step: h })
+    // O gráfico (E10-5) precisa de espaço: abre o painel de resultados e dá-lhe altura.
+    if (useSimulationStore.getState().transient) showResultsForChart()
     onClose()
   }
 

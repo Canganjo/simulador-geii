@@ -32,6 +32,10 @@ export const pt = {
     '{steps} passos é demais (máximo {max}). Aumenta o passo ou reduz a duração.',
   'results.transientInfo':
     'Transitório de 0 a {duration} ({steps} passos): valores no instante final.',
+  'chart.component': 'Componente',
+  'chart.voltage': 'Tensão u(t)',
+  'chart.current': 'Corrente i(t)',
+  'chart.tau': 'τ ≈ {tau} (63 %)',
   'action.reset': 'Reset',
   'action.nodes': 'Nós',
   'action.nodesHint': 'Mostrar o número do nó de cada terminal (debug)',
