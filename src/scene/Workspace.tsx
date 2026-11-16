@@ -14,6 +14,7 @@ import { useCircuitStore } from '../store/circuitStore'
 import { useT } from '../ui/i18n'
 import { SourceStepper } from '../ui/SourceStepper'
 import { ComponentBox } from './ComponentBox'
+import { terminalMark, wireCounts } from './terminalMarks'
 import { labelBase, labelHeight } from './componentShape'
 import { NO_VISUAL, visualState } from './visualState'
 import { nodeLabels } from './nodeLabels'
@@ -126,6 +127,7 @@ export function Workspace() {
   }
 
   const connected = useMemo(() => new Set(wires.flatMap((w) => [w.from, w.to])), [wires])
+  const counts = useMemo(() => wireCounts(wires), [wires])
   // Opção de debug "Nós" (E3): número do nó elétrico de cada terminal, calculado pelo core.
   const showNodes = useUiStore((s) => s.showNodes)
   const nodes = useMemo(
@@ -421,7 +423,7 @@ export function Workspace() {
             component={c}
             selected={selectedSet.has(c.id)}
             onGrab={onGrab}
-            connected={connected}
+            wireCounts={counts}
             wiringFrom={wiringFrom}
             onTerminalClick={onTerminalClick}
             visual={visuals.get(c.id) ?? NO_VISUAL}
@@ -490,6 +492,7 @@ export function Workspace() {
               data-terminal-state={
                 t.id === wiringFrom ? 'active' : connected.has(t.id) ? 'connected' : 'loose'
               }
+              data-terminal-mark={terminalMark(counts.get(t.id) ?? 0)}
               data-node={nodes?.get(t.id)}
               className="absolute top-0 left-0 size-1"
             >

@@ -149,4 +149,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `a161ff5` | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |
 | `1e7adfd` | Voltímetro e amperímetro (issue #88)                                        | #89 |
 | `36f8293` | Barras de deslocamento da zona livre (issue #90)                            | #91 |
+| `a1214a3` | Pinos de ligação ao estilo do LTspice (issue #93)                           | #94 |
 | (squash)  | Exportar resultados em CSV (issue #92)                                      | #95 |
