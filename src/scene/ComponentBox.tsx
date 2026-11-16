@@ -1,15 +1,17 @@
 import { Edges } from '@react-three/drei'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { useRef, useState } from 'react'
+import { Suspense, useCallback, useRef, useState } from 'react'
 import type { MeshStandardMaterial } from 'three'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
 import { boxSize } from './componentShape'
+import { ComponentModel, ModelErrorBoundary } from './ComponentModel'
+import { modelUrl } from './models3d'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
 import { LED_LIGHT, type VisualState } from './visualState'
 
 /**
- * Um componente na cena, ainda como CAIXA SIMPLES (regra 8: primeiro funcional, depois bonito;
- * os modelos 3D .glb chegam na etapa E7).
+ * Um componente na cena: CAIXA SIMPLES, ou o modelo 3D (.glb) do Blender se existir
+ * (ver models3d.ts). A caixa fica sempre lá para receber os cliques; com modelo fica invisível.
  */
 
 /** Cor de cada tipo (as mesmas ideias que nos esquemas: fonte vermelha, LED verde…). */
@@ -67,6 +69,11 @@ export function ComponentBox({
   const { kind, position, rotation } = component
   const [length, height, width] = boxSize(kind)
   const material = useRef<MeshStandardMaterial>(null)
+  const [failed, setFailed] = useState(false)
+  const [modelReady, setModelReady] = useState(false)
+  const onModelError = useCallback(() => setFailed(true), [])
+  const url = failed ? null : modelUrl(kind, import.meta.env.BASE_URL)
+  const boxVisible = url === null || !modelReady
 
   // Luz própria: o brilho da simulação (LED/lâmpada) tem prioridade sobre o da seleção.
   const lit = visual.glow > 0 && visual.glowColor !== null
@@ -112,10 +119,31 @@ export function ComponentBox({
           color={bodyColor(component)}
           emissive={emissive ?? '#000000'}
           emissiveIntensity={intensity}
+          transparent={!boxVisible}
+          opacity={boxVisible ? 1 : 0}
+          depthWrite={boxVisible}
         />
         {/* Contorno: azul se selecionado; senão vermelho (erro) ou âmbar (aviso) após Simular. */}
         {outline && <Edges scale={1.12} color={outline} />}
       </mesh>
+
+      {/* Modelo 3D (só aspeto): mesma rotação da caixa, assente no chão (y = 0). */}
+      {url !== null && (
+        <group rotation={[0, (rotation * Math.PI) / 180, 0]}>
+          <ModelErrorBoundary onError={onModelError}>
+            <Suspense fallback={null}>
+              <ComponentModel
+                url={url}
+                color={bodyColor(component)}
+                emissive={emissive ?? '#000000'}
+                intensity={intensity}
+                blink={visual.blink}
+                onReady={setModelReady}
+              />
+            </Suspense>
+          </ModelErrorBoundary>
+        </group>
+      )}
 
       {/* Terminais: clicar num e depois noutro liga-os com um fio. */}
       {terminalOffsets(kind).map((offset, i) => {
