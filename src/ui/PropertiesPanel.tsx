@@ -6,8 +6,10 @@ import {
   RotateCw,
   SlidersHorizontal,
   Spline,
+  Tag,
   Trash2,
 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { CATALOG, type ParamSpec } from '../core/library'
 import type { Component } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
@@ -17,7 +19,13 @@ import { useLanguageStore } from '../store/languageStore'
 import { useSimulationStore } from '../store/simulationStore'
 import { formatSi } from './formatSi'
 import { IecSymbol } from './IecSymbol'
-import { BooleanParamField, ChoiceParamField, NameField, NumberParamField } from './ParamFields'
+import {
+  BooleanParamField,
+  ChoiceParamField,
+  NameField,
+  NumberParamField,
+  RatedPowerField,
+} from './ParamFields'
 import { SourceStepper } from './SourceStepper'
 
 interface Props {
@@ -152,12 +160,45 @@ function SelectedWire() {
   )
 }
 
+/** Uma secção do painel (título pequeno em maiúsculas + conteúdo). */
+function Section({
+  title,
+  testId,
+  children,
+}: {
+  title: string
+  testId: string
+  children: ReactNode
+}) {
+  return (
+    <section
+      aria-label={title}
+      data-testid={testId}
+      className="flex flex-col gap-2 border-t border-slate-700 pt-2"
+    >
+      <h4 className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">{title}</h4>
+      {children}
+    </section>
+  )
+}
+
+/**
+ * Um componente selecionado, em 3 secções (o conteúdo adapta-se ao tipo):
+ *   Identificação             — símbolo, nome (editável) e tipo;
+ *   Parâmetros elétricos      — valores com unidade (e o que a simulação diz sobre eles);
+ *   Parâmetros complementares — aspeto e posição: cor do LED, posição, rotação, ações.
+ */
 function SelectedComponent({ component }: { component: Component }) {
   const t = useT()
-  const { rotateComponent, duplicateComponent, removeComponent } = useCircuitStore.getState()
+  const { rotateComponent, duplicateComponent, removeComponent, moveLabel } =
+    useCircuitStore.getState()
   const definition = CATALOG[component.kind]
   const specs: Readonly<Record<string, ParamSpec>> = definition.params
   const params: Readonly<Record<string, unknown>> = component.params
+  const entries = Object.entries(specs)
+  // A cor do LED é aspeto (não muda o cálculo): vai para os complementares.
+  const electrical = entries.filter(([, spec]) => spec.type !== 'choice')
+  const visual = entries.filter(([, spec]) => spec.type === 'choice')
 
   const actions = [
     {
@@ -180,74 +221,133 @@ function SelectedComponent({ component }: { component: Component }) {
     },
   ]
 
+  const field = ([param, spec]: [string, ParamSpec]) => {
+    // A `key` dos campos não numéricos inclui o valor guardado: se ele mudar por fora (Ctrl+Z),
+    // o campo recomeça com o valor novo. Os numéricos acompanham o valor sozinhos (para os
+    // botões − / + não serem recriados a meio de um clique).
+    const key = `${component.id}:${param}:${String(params[param])}`
+    if (spec.type === 'number') {
+      if (component.kind === 'resistor' && param === 'ratedPower') {
+        return <RatedPowerField key={key} component={component} param={param} spec={spec} />
+      }
+      const stepper =
+        component.kind === 'dc-source' && param === 'voltage' ? (
+          <SourceStepper componentId={component.id} variant="panel" />
+        ) : undefined
+      return (
+        <NumberParamField
+          key={`${component.id}:${param}`}
+          component={component}
+          param={param}
+          spec={spec}
+          after={stepper}
+        />
+      )
+    }
+    if (spec.type === 'boolean') {
+      return <BooleanParamField key={key} component={component} param={param} spec={spec} />
+    }
+    return <ChoiceParamField key={key} component={component} param={param} spec={spec} />
+  }
+
   return (
     <div className="flex flex-col gap-3 overflow-y-auto px-3 pb-3 text-sm">
-      <div className="flex items-center gap-3">
-        <IecSymbol kind={component.kind} className="h-6 w-10 shrink-0 text-amber-300" />
-        <div>
-          <h3 className="text-base font-semibold text-slate-100" data-testid="selected-name">
-            {component.name}
-          </h3>
-          <p className="text-slate-400">{t(`kind.${component.kind}`)}</p>
+      <Section title={t('props.sectionIdentity')} testId="props-identity">
+        <div className="flex items-center gap-3">
+          <IecSymbol kind={component.kind} className="h-6 w-10 shrink-0 text-amber-300" />
+          <div>
+            <h3 className="text-base font-semibold text-slate-100" data-testid="selected-name">
+              {component.name}
+            </h3>
+            <p className="text-slate-400" data-testid="selected-type">
+              {t(`kind.${component.kind}`)}
+            </p>
+          </div>
         </div>
-      </div>
-
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-300">
-        <dt className="text-slate-400">{t('props.position')}</dt>
-        <dd data-testid="selected-position">
-          ({component.position.x}, {component.position.y})
-        </dd>
-        <dt className="text-slate-400">{t('props.rotation')}</dt>
-        <dd data-testid="selected-rotation">{component.rotation}°</dd>
-      </dl>
-
-      {/* Campos editáveis. A `key` inclui o valor guardado: se ele mudar por fora (Ctrl+Z),
-          o campo recomeça com o valor novo em vez de ficar com o rascunho antigo. Os campos
-          numéricos acompanham o valor sozinhos (para os botões − / + não serem recriados a meio
-          de um clique). */}
-      <div className="flex flex-col gap-2" data-testid="param-fields">
         <NameField key={`${component.id}:name:${component.name}`} component={component} />
-        {Object.entries(specs).map(([param, spec]) => {
-          const key = `${component.id}:${param}:${String(params[param])}`
-          if (spec.type === 'number') {
-            const stepper =
-              component.kind === 'dc-source' && param === 'voltage' ? (
-                <SourceStepper componentId={component.id} variant="panel" />
-              ) : undefined
-            return (
-              <NumberParamField
-                key={`${component.id}:${param}`}
-                component={component}
-                param={param}
-                spec={spec}
-                after={stepper}
-              />
-            )
-          }
-          if (spec.type === 'boolean') {
-            return <BooleanParamField key={key} component={component} param={param} spec={spec} />
-          }
-          return <ChoiceParamField key={key} component={component} param={param} spec={spec} />
-        })}
-      </div>
+      </Section>
 
-      {component.kind === 'dc-source' && <SourceInfo component={component} />}
+      <Section title={t('props.sectionElectrical')} testId="props-electrical">
+        <div className="flex flex-col gap-2" data-testid="param-fields">
+          {electrical.length > 0 ? (
+            electrical.map(field)
+          ) : (
+            <p className="text-slate-400">{t('props.noElectrical')}</p>
+          )}
+        </div>
+        {component.kind === 'dc-source' && <SourceInfo component={component} />}
+        {component.kind === 'resistor' && <ResistorPower component={component} />}
+      </Section>
 
-      <div className="flex flex-wrap gap-1">
-        {actions.map(({ label, shortcut, icon: Icon, run }) => (
-          <button
-            key={label}
-            type="button"
-            onClick={run}
-            title={`${label} (${shortcut})`}
-            className="flex items-center gap-1.5 rounded border border-slate-600 px-2 py-1 text-slate-200 hover:bg-slate-700"
-          >
-            <Icon className="size-4" aria-hidden />
-            {label}
-          </button>
-        ))}
-      </div>
+      <Section title={t('props.sectionOther')} testId="props-other">
+        {visual.length > 0 && <div className="flex flex-col gap-2">{visual.map(field)}</div>}
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-300">
+          <dt className="text-slate-400">{t('props.position')}</dt>
+          <dd data-testid="selected-position">
+            ({component.position.x}, {component.position.y})
+          </dd>
+          <dt className="text-slate-400">{t('props.rotation')}</dt>
+          <dd data-testid="selected-rotation">{component.rotation}°</dd>
+        </dl>
+        <div className="flex flex-wrap gap-1">
+          {actions.map(({ label, shortcut, icon: Icon, run }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={run}
+              title={`${label} (${shortcut})`}
+              className="flex items-center gap-1.5 rounded border border-slate-600 px-2 py-1 text-slate-200 hover:bg-slate-700"
+            >
+              <Icon className="size-4" aria-hidden />
+              {label}
+            </button>
+          ))}
+          {component.labelOffset && (
+            <button
+              type="button"
+              onClick={() => moveLabel(component.id, { x: 0, y: 0 })}
+              title={t('props.labelReset')}
+              className="flex items-center gap-1.5 rounded border border-slate-600 px-2 py-1 text-slate-200 hover:bg-slate-700"
+            >
+              <Tag className="size-4" aria-hidden />
+              {t('props.labelReset')}
+            </button>
+          )}
+        </div>
+      </Section>
     </div>
+  )
+}
+
+/**
+ * Resistência depois de Simular: quanto dissipa e se passa da potência nominal (aquece demais).
+ * Sem resultados não mostra nada.
+ */
+function ResistorPower({ component }: { component: Extract<Component, { kind: 'resistor' }> }) {
+  const t = useT()
+  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
+  const power = useSimulationStore((s) =>
+    s.result?.ok ? s.result.results.get(component.id)?.power : undefined,
+  )
+  if (power === undefined) return null
+  const rated = component.params.ratedPower
+  const hot = rated !== undefined && power > rated * (1 + 1e-9)
+  const vars = {
+    power: formatSi(Math.abs(power), 'W', 3, decimal),
+    max: rated === undefined ? '—' : formatSi(rated, 'W', 3, decimal),
+  }
+  return (
+    <p
+      data-testid="resistor-power"
+      data-overheat={hot}
+      className={`rounded border px-2 py-1.5 text-xs ${
+        hot
+          ? 'border-amber-500/60 bg-amber-500/10 text-amber-200'
+          : 'border-slate-700 bg-slate-900/50 text-slate-400'
+      }`}
+    >
+      {hot ? t('props.overheat', vars) : t('props.dissipates', vars)}
+    </p>
   )
 }
 

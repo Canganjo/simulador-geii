@@ -49,6 +49,20 @@ describe('issueText: mensagens do motor na língua escolhida', () => {
     expect(issueText(issue, tr('en'), '.')).toContain('25.5 mA')
   })
 
+  it('resistência a aquecer: potências com prefixo (1,44 W acima de 250 mW)', () => {
+    const issue: SimulationIssue = {
+      severity: 'warning',
+      code: 'resistor-overpower',
+      message: '…',
+      componentIds: ['r1'],
+      params: { name: 'R1', power: 1.44, max: 0.25 },
+    }
+    expect(issueText(issue, tr('pt'), ',')).toContain(
+      'R1: dissipa 1,44 W, acima da potência nominal (250 mW)',
+    )
+    expect(issueText(issue, tr('fr'), ',')).toContain('1,44 W')
+  })
+
   it('fonte em limitação de corrente (CC): 100 mA e 4,7 V com prefixos', () => {
     const issue: SimulationIssue = {
       severity: 'warning',

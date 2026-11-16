@@ -143,3 +143,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Ícones modernos no menu de componentes (issue #75)                          | #76 |
 | (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
 | (squash)  | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80 |
+| (squash)  | Propriedades em secções + potência da resistência em lista (issue #81)      | #82 |
