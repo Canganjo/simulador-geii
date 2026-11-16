@@ -1,12 +1,12 @@
-import { Edges } from '@react-three/drei'
+import { Edges, useGLTF } from '@react-three/drei'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { Suspense, useCallback, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { MeshStandardMaterial } from 'three'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
 import { boxSize } from './componentShape'
 import { ComponentModel, ModelErrorBoundary } from './ComponentModel'
 import { Halo } from './Halo'
-import { modelUrl } from './models3d'
+import { modelUrl, modelUrlFor, STATE_MODEL_FILES } from './models3d'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
 import { LED_LIGHT, type VisualState } from './visualState'
 
@@ -93,8 +93,17 @@ export function ComponentBox({
   const [failed, setFailed] = useState(false)
   const [modelReady, setModelReady] = useState(false)
   const onModelError = useCallback(() => setFailed(true), [])
-  const url = failed ? null : modelUrl(kind, import.meta.env.BASE_URL)
+  const url = failed ? null : modelUrlFor(component, import.meta.env.BASE_URL)
   const boxVisible = url === null || !modelReady
+
+  // Interruptor: carrega já os dois modelos (aberto e fechado), para o clique trocar sem piscar.
+  useEffect(() => {
+    if (kind !== 'switch') return
+    const base = import.meta.env.BASE_URL
+    for (const u of [modelUrl(kind, base), modelUrl(kind, base, STATE_MODEL_FILES)]) {
+      if (u) useGLTF.preload(u)
+    }
+  }, [kind])
 
   // Luz própria: o brilho da simulação (LED/lâmpada) tem prioridade sobre o da seleção.
   const lit = visual.glow > 0 && visual.glowColor !== null

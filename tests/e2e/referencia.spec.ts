@@ -175,6 +175,22 @@ test('referência 7 — interruptor aberto: I = 0 A e a fonte não fornece nada'
   expectClose(await value(page, 'V1', 'p'), 0)
   // A tensão toda fica aos terminais do interruptor aberto: U(S1) = 12 V.
   expectClose(await value(page, 'S1', 'u'), 12)
+
+  // Clicar no interruptor (na cena) fecha-o e o circuito volta a ser calculado sozinho:
+  //   I = 12 V / 1 kΩ = 12 mA ; U(S1) = 0 V.
+  const a = await anchor(page, '[data-terminal="S1:a"]')
+  const b = await anchor(page, '[data-terminal="S1:b"]')
+  const middle = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  await page.mouse.click(middle.x, middle.y)
+  await expect(props(page).getByRole('checkbox', { name: 'Fechado' })).toBeChecked()
+  await expect.poll(async () => value(page, 'R1', 'i')).toBeCloseTo(12 / 1000, 6)
+  // O interruptor fechado tem uma resistência pequenina (1 mΩ): U(S1) ≈ 12 µV, quase 0.
+  expect(Math.abs(await value(page, 'S1', 'u'))).toBeLessThan(1e-4)
+
+  // Outro clique abre-o outra vez: I = 0 A.
+  await page.mouse.click(middle.x, middle.y)
+  await expect(props(page).getByRole('checkbox', { name: 'Fechado' })).not.toBeChecked()
+  await expect.poll(async () => value(page, 'R1', 'i')).toBeCloseTo(0, 6)
 })
 
 // ─── Demonstração de referência (secção 20) ──────────────────────────────────────────────────

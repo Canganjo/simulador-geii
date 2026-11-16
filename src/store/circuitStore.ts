@@ -59,6 +59,8 @@ export interface CircuitState {
    * Devolve os problemas encontrados; se houver algum, NADA muda.
    */
   updateParams: (id: string, changes: Readonly<Record<string, unknown>>) => ParamIssue[]
+  /** Interruptor: abre se estiver fechado e fecha se estiver aberto (clique na cena). */
+  toggleSwitch: (id: string) => void
   /**
    * Muda o nome (ex.: "R1" → "Rcarga"). Devolve null se mudou, ou o motivo da recusa:
    * 'empty' (vazio) ou 'taken' (já há outro componente com esse nome).
@@ -163,6 +165,12 @@ export const useCircuitStore = create<CircuitState>()(
           ),
         }))
         return []
+      },
+
+      toggleSwitch: (id) => {
+        const component = get().components.find((c) => c.id === id)
+        if (component?.kind !== 'switch') return
+        get().updateParams(id, { closed: !component.params.closed })
       },
 
       renameComponent: (id, name) => {

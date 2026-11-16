@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { isBodyMaterial, isGlowMaterial, MODEL_FILES, modelUrl } from './models3d'
+import type { Component } from '../core/model'
+import { isBodyMaterial, isGlowMaterial, MODEL_FILES, modelUrl, modelUrlFor } from './models3d'
 
 describe('modelUrl', () => {
   const files = { resistor: 'resistor.glb' }
@@ -61,5 +62,19 @@ describe('nomes dos materiais do Blender', () => {
       'resistor',
       'switch',
     ])
+  })
+
+  it('o interruptor aberto usa o seu próprio modelo', () => {
+    const sw = (closed: boolean): Component => ({
+      id: 's1',
+      kind: 'switch',
+      name: 'S1',
+      position: { x: 0, y: 0 },
+      rotation: 0,
+      terminals: [],
+      params: { closed },
+    })
+    expect(modelUrlFor(sw(true), '/')).toBe('/models/switch.glb')
+    expect(modelUrlFor(sw(false), '/')).toBe('/models/switch-open.glb')
   })
 })

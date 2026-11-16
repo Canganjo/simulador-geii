@@ -1,4 +1,4 @@
-import type { ComponentKind } from '../core/model'
+import type { Component, ComponentKind } from '../core/model'
 
 /**
  * Modelos 3D (.glb, feitos no Blender pela Pessoa 3) — ver public/models/LEIAME.md.
@@ -37,6 +37,23 @@ export function modelUrl(
   if (!file) return null
   const root = base.endsWith('/') ? base : `${base}/`
   return `${root}models/${file}`
+}
+
+/**
+ * Modelos que mudam com o ESTADO do componente (além do modelo normal de MODEL_FILES).
+ * O interruptor tem dois: fechado (switch.glb) e aberto (switch-open.glb), para se ver
+ * na cena se deixa passar a corrente.
+ */
+export const STATE_MODEL_FILES: Partial<Record<ComponentKind, string>> = {
+  switch: 'switch-open.glb',
+}
+
+/** Endereço do modelo de UM componente, conforme o seu estado (ex.: interruptor aberto). */
+export function modelUrlFor(component: Component, base: string): string | null {
+  if (component.kind === 'switch' && !component.params.closed) {
+    return modelUrl('switch', base, STATE_MODEL_FILES)
+  }
+  return modelUrl(component.kind, base)
 }
 
 /**

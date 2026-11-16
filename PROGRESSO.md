@@ -139,3 +139,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
 | (squash)  | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
 | (squash)  | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
+| (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |

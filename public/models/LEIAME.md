@@ -19,7 +19,7 @@ Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se par
 | Fonte DC    | `dc-source.glb` |
 | GND (massa) | `ground.glb`    |
 | Resistência | `resistor.glb`  |
-| Interruptor | `switch.glb`    |
+| Interruptor | `switch.glb` (fechado) e `switch-open.glb` (aberto) |
 | LED         | `led.glb`       |
 | Díodo       | `diode.glb`     |
 | Lâmpada     | `lamp.glb`      |
