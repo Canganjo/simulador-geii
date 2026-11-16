@@ -4,7 +4,8 @@
  * Passa do circuito "desenhado" (componentes, terminais, fios) para a descrição puramente
  * elétrica que o solver MNA lê: elementos entre nós numerados (0 = GND).
  *
- *   Fonte DC            → fonte de tensão entre + e −
+ *   Fonte DC (CV)       → fonte de tensão entre + e −
+ *   Fonte DC (CC)       → fonte de corrente Imax, que sai pelo + (limite de corrente atingido)
  *   Resistência         → resistência R
  *   Lâmpada             → resistência R = U² / P  (12 V / 1 W → 144 Ω)
  *   Interruptor fechado → resistência muito pequena (CLOSED_SWITCH_RESISTANCE)
@@ -16,7 +17,8 @@
  *   Bobina              → DC: fio (resistência de 1 mΩ) · transitório: elemento 'inductor'
  *
  * Quem decide se cada LED conduz é o `simulateDc` (supõe e verifica); aqui só se recebe a lista
- * dos LED bloqueados em `options.ledOff`.
+ * dos LED bloqueados em `options.ledOff`. O mesmo para as fontes em limitação de corrente
+ * (`options.sourceCc`).
  */
 
 import { buildNodes } from '../graph'
@@ -40,6 +42,11 @@ export const ledResistorId = (componentId: string) => `${componentId}#rs`
 export interface BuildNetlistOptions {
   /** IDs dos LED bloqueados (não conduzem). Os outros são tratados como a conduzir. */
   ledOff?: ReadonlySet<string>
+  /**
+   * IDs das fontes DC em modo CC (corrente constante = o seu `currentLimit`). As outras ficam em
+   * CV (tensão constante). Uma fonte sem `currentLimit` fica sempre em CV.
+   */
+  sourceCc?: ReadonlySet<string>
   /** 'dc' (por defeito) ou 'transient' (condensadores e bobinas com o seu modelo no tempo). */
   mode?: 'dc' | 'transient'
 }
@@ -83,6 +90,17 @@ export function buildNetlist(
   for (const c of project.components) {
     switch (c.kind) {
       case 'dc-source':
+        if (options.sourceCc?.has(c.id) && c.params.currentLimit !== undefined) {
+          // A corrente Imax sai pelo + (entra no circuito pelo +, volta pelo −).
+          elements.push({
+            type: 'current-source',
+            id: c.id,
+            from: nodeAt(c, '-'),
+            to: nodeAt(c, '+'),
+            current: c.params.currentLimit,
+          })
+          break
+        }
         elements.push({
           type: 'voltage-source',
           id: c.id,

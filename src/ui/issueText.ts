@@ -40,6 +40,18 @@ export function issueText(issue: SimulationIssue, t: Translate, decimal: ',' | '
         current: amps(params.current, decimal),
         max: amps(params.max, decimal),
       })
+    case 'source-current-limit':
+      return text('issue.source-current-limit', {
+        ...params,
+        limit: amps(params.limit, decimal),
+        voltage: volts(params.voltage, decimal),
+      })
+    case 'source-limit-transient':
+      return text('issue.source-limit-transient', {
+        ...params,
+        current: amps(params.current, decimal),
+        max: amps(params.max, decimal),
+      })
     default:
       return text(`issue.${issue.code}`)
   }
@@ -52,4 +64,8 @@ function translated(key: string, fallback: string, t: Translate): string {
 
 function amps(value: string | number | undefined, decimal: ',' | '.'): string {
   return typeof value === 'number' ? formatSi(value, 'A', 3, decimal) : String(value ?? '')
+}
+
+function volts(value: string | number | undefined, decimal: ',' | '.'): string {
+  return typeof value === 'number' ? formatSi(value, 'V', 3, decimal) : String(value ?? '')
 }

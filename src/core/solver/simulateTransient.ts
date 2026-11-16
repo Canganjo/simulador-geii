@@ -109,6 +109,21 @@ export function simulateTransient(
     if (c.kind === 'diode') {
       result.diodeState = result.current >= DIODE_ON_CURRENT ? 'conducting' : 'blocked'
     }
+    if (c.kind === 'dc-source' && c.params.currentLimit !== undefined) {
+      // No tempo a fonte fica ideal (CV): só se avisa se passou o limite em algum instante.
+      const peak = w.current.reduce((m, i) => Math.max(m, i), -Infinity)
+      if (peak > c.params.currentLimit * (1 + 1e-9)) {
+        issues.push({
+          severity: 'warning',
+          code: 'source-limit-transient',
+          message:
+            `${c.name}: no transitório a fonte não limita a corrente — pico de ` +
+            `${Number(peak.toPrecision(4))} A acima do limite (${c.params.currentLimit} A).`,
+          componentIds: [c.id],
+          params: { name: c.name, current: peak, max: c.params.currentLimit },
+        })
+      }
+    }
     final.set(c.id, result)
   }
 

@@ -16,9 +16,17 @@ export interface VisualState {
   issue: 'error' | 'warning' | null
   /** LED acima da corrente máxima: pisca ("queimava"). */
   blink: boolean
+  /** Só fontes DC depois de Simular: tensão de saída medida e modo (CV / CC), para o visor. */
+  source: { voltage: number; mode: 'cv' | 'cc' } | null
 }
 
-export const NO_VISUAL: VisualState = { glow: 0, glowColor: null, issue: null, blink: false }
+export const NO_VISUAL: VisualState = {
+  glow: 0,
+  glowColor: null,
+  issue: null,
+  blink: false,
+  source: null,
+}
 
 /** Cor da luz de cada cor de LED (os valores guardados no projeto estão em português). */
 export const LED_LIGHT: Readonly<Record<string, string>> = {
@@ -56,7 +64,10 @@ export function visualState(c: Component, result: SimulationResult | null): Visu
     glowColor = glow > 0 ? LAMP_LIGHT : null
   }
 
-  return { glow, glowColor, issue, blink }
+  const source =
+    r && c.kind === 'dc-source' && r.sourceMode ? { voltage: r.voltage, mode: r.sourceMode } : null
+
+  return { glow, glowColor, issue, blink, source }
 }
 
 function clamp01(x: number): number {

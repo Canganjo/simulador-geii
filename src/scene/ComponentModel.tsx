@@ -31,6 +31,8 @@ interface Props {
   blink: boolean
   /** Texto do visor (material "visor"), ex.: "12.0 V". */
   display?: string
+  /** Etiqueta pequena ao lado do texto do visor (fonte: "CV" ou "CC" depois de Simular). */
+  displayTag?: string
   /** Chamado quando o modelo já está na cena (a caixa pode ficar invisível). */
   onReady: (ready: boolean) => void
 }
@@ -42,6 +44,7 @@ export function ComponentModel({
   intensity,
   blink,
   display,
+  displayTag,
   onReady,
 }: Props) {
   const { scene } = useGLTF(url)
@@ -63,7 +66,7 @@ export function ComponentModel({
     if (display === undefined) return
     const screens = displayMaterials(root)
     if (screens.length === 0) return
-    const texture = displayTexture(display)
+    const texture = displayTexture(display, displayTag)
     for (const m of screens) {
       m.map = texture
       m.emissiveMap = texture
@@ -73,7 +76,7 @@ export function ComponentModel({
       m.needsUpdate = true
     }
     return () => texture.dispose()
-  }, [root, display])
+  }, [root, display, displayTag])
 
   useLayoutEffect(() => {
     onReady(true)
@@ -145,8 +148,11 @@ function displayMaterials(root: Object3D): MeshStandardMaterial[] {
   return found
 }
 
-/** Imagem de um visor de cristais líquidos verde com o texto (ex.: "12.0 V"). */
-function displayTexture(text: string): CanvasTexture {
+/**
+ * Imagem de um visor de cristais líquidos verde com o texto (ex.: "12.0 V") e, se houver, uma
+ * etiqueta à direita ("CV" a verde, "CC" a âmbar — como os LED de modo de uma fonte de bancada).
+ */
+function displayTexture(text: string, tag?: string): CanvasTexture {
   const canvas = document.createElement('canvas')
   canvas.width = 512
   canvas.height = 160
@@ -159,8 +165,18 @@ function displayTexture(text: string): CanvasTexture {
     g.shadowBlur = 18
     g.textAlign = 'center'
     g.textBaseline = 'middle'
-    g.font = 'bold 104px Consolas, "Courier New", monospace'
-    g.fillText(text, canvas.width / 2, canvas.height / 2 + 4)
+    if (tag) {
+      g.font = 'bold 88px Consolas, "Courier New", monospace'
+      g.fillText(text, canvas.width * 0.4, canvas.height / 2 + 4)
+      const color = tag === 'CC' ? '#fbbf24' : '#5dff8f'
+      g.fillStyle = color
+      g.shadowColor = color
+      g.font = 'bold 60px Consolas, "Courier New", monospace'
+      g.fillText(tag, canvas.width * 0.87, canvas.height / 2 + 4)
+    } else {
+      g.font = 'bold 104px Consolas, "Courier New", monospace'
+      g.fillText(text, canvas.width / 2, canvas.height / 2 + 4)
+    }
   }
   const texture = new CanvasTexture(canvas)
   texture.colorSpace = SRGBColorSpace

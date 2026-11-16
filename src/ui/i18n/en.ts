@@ -81,6 +81,11 @@ export const en: Messages = {
   'param.initialVoltage': 'Initial voltage',
   'param.inductance': 'Inductance',
   'param.initialCurrent': 'Initial current',
+  'param.currentLimit': 'Current limit (Imax)',
+  'source.increase': 'Increase voltage (+0.1 V · Shift: +1 V · hold to repeat)',
+  'source.decrease': 'Decrease voltage (−0.1 V · Shift: −1 V · hold to repeat)',
+  'source.maxPower': 'Maximum power (U × Imax): {power}',
+  'source.modeHint': 'CV = constant voltage · CC = current limited to Imax (the voltage drops).',
 
   'color.vermelho': 'red',
   'color.verde': 'green',
@@ -126,6 +131,10 @@ export const en: Messages = {
   'results.ledOn': 'on',
   'results.ledOff': 'off',
   'results.diodeOn': 'conducting',
+  'results.sourceCv': 'CV',
+  'results.sourceCc': 'CC',
+  'results.sourceCvTitle': 'Constant voltage (below the current limit)',
+  'results.sourceCcTitle': 'Current limited to Imax (the voltage dropped)',
   'results.diodeOff': 'blocked',
   'results.error': 'Error',
   'results.warning': 'Warning',
@@ -152,6 +161,10 @@ export const en: Messages = {
   'issue.loose-terminal': '{name}: terminal {terminal} is not connected.',
   'issue.led-overcurrent':
     '{name}: current of {current} above the maximum current ({max}) — the LED would burn out.',
+  'issue.source-current-limit':
+    '{name}: current limit reached (CC) — the source only delivers {limit} and the voltage drops to {voltage}.',
+  'issue.source-limit-transient':
+    '{name}: in the transient the source does not limit the current — peak of {current} above the limit ({max}).',
 
   'resize.menu': 'Resize menu',
   'resize.results': 'Resize results',

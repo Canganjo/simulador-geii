@@ -58,6 +58,26 @@ describe('guardar e abrir', () => {
   })
 })
 
+describe('fonte DC com limite de corrente (D-013)', () => {
+  it('ficheiro antigo sem currentLimit → abre com o limite por defeito (3 A)', () => {
+    const text = mutated((d) => {
+      const source = (d.components as { params: Record<string, unknown> }[])[0]
+      if (source) delete source.params.currentLimit
+    })
+    const result = parseProjectFile(text)
+    if (!result.ok) throw new Error('devia abrir')
+    expect(result.project.components[0]?.params).toEqual({ voltage: 12, currentLimit: 3 })
+  })
+
+  it('limite fora dos limites (0 A) → recusado', () => {
+    const text = mutated((d) => {
+      const source = (d.components as { params: Record<string, unknown> }[])[0]
+      if (source) source.params.currentLimit = 0
+    })
+    expect(parseProjectFile(text).ok).toBe(false)
+  })
+})
+
 describe('díodo real (E10)', () => {
   it('um projeto com um díodo guarda-se e abre-se igual (Is e n incluídos)', () => {
     const project = sample()
