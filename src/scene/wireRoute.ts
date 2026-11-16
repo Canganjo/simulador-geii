@@ -108,3 +108,8 @@ export function segmentMiddles(points: readonly Vec2[]): Vec2[] {
     return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }
   })
 }
+
+/** Cantos de um traçado (os pontos do meio): aí desenha-se uma junta redonda no fio. */
+export function wireCorners(points: readonly Vec2[]): Vec2[] {
+  return points.slice(1, -1).map((p) => ({ x: p.x, y: p.y }))
+}

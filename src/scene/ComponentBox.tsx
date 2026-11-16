@@ -3,9 +3,10 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { MeshStandardMaterial } from 'three'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
-import { boxSize } from './componentShape'
+import { boxSize, shadowSize } from './componentShape'
 import { ComponentModel, ModelErrorBoundary } from './ComponentModel'
 import { Halo } from './Halo'
+import { SoftShadow } from './SoftShadow'
 import { modelUrl, modelUrlFor, STATE_MODEL_FILES } from './models3d'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
 import { LED_LIGHT, type VisualState } from './visualState'
@@ -157,6 +158,11 @@ export function ComponentBox({
         {/* Contorno: azul se selecionado; senão vermelho (erro) ou âmbar (aviso) após Simular. */}
         {outline && <Edges scale={1.12} color={outline} />}
       </mesh>
+
+      {/* Sombra suave no chão (relevo); roda com o componente, um pouco para trás da luz. */}
+      <group rotation={[0, (rotation * Math.PI) / 180, 0]}>
+        <SoftShadow size={shadowSize(kind)} offset={[0, -0.08]} opacity={selected ? 0.9 : 0.8} />
+      </group>
 
       {/* Modelo 3D (só aspeto): mesma rotação da caixa, assente no chão (y = 0). */}
       {url !== null && (

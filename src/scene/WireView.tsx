@@ -1,6 +1,7 @@
 import type { Vec2 } from '../core/model'
 import { modelToScene } from './coordinates'
-import { segmentMiddles } from './wireRoute'
+import { SoftShadow } from './SoftShadow'
+import { segmentMiddles, wireCorners } from './wireRoute'
 
 const WIRE_HEIGHT = 0.05
 const WIRE_THICKNESS = 0.1
@@ -80,6 +81,28 @@ export function WireView({ id, points, selected, onGrabSegment, onStraighten }: 
             />
             <meshStandardMaterial color={color} />
           </mesh>
+        </mesh>
+      ))}
+
+      {/* Sombra por baixo de cada troço (o fio parece pousado na bancada). */}
+      {segments.map(({ middle, length, horizontal }, i) => {
+        const [x, , z] = modelToScene(middle)
+        const along = length + WIRE_THICKNESS
+        return (
+          <group key={`s${i}`} position={[x, 0, z + 0.04]}>
+            <SoftShadow
+              size={horizontal ? [along, WIRE_THICKNESS * 1.6] : [WIRE_THICKNESS * 1.6, along]}
+              opacity={0.7}
+            />
+          </group>
+        )
+      })}
+
+      {/* Juntas redondas nos cantos: o fio dobra sem "degraus". */}
+      {wireCorners(points).map((p, i) => (
+        <mesh key={`j${i}`} position={modelToScene(p, WIRE_HEIGHT)} raycast={() => undefined}>
+          <cylinderGeometry args={[WIRE_THICKNESS * 0.62, WIRE_THICKNESS * 0.62, 0.045, 16]} />
+          <meshStandardMaterial color={color} />
         </mesh>
       ))}
 
