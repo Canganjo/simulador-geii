@@ -16,30 +16,31 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 
 ### Tarefas seguintes (issues da E5 e da E2)
 
-| Issue | Tarefa                                                                                | Etapa | Estado | Ramo                           | PR                  |
-| ----- | ------------------------------------------------------------------------------------- | ----- | ------ | ------------------------------ | ------------------- |
-| #15   | Netlist: do projeto para o solver (teste 7 OK)                                        | E5    | feito  | `feature/netlist`              | PR #18              |
-| #16   | Validações antes do cálculo (erros e avisos)                                          | E5    | feito  | `feature/validacoes`           | PR #19              |
-| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK                                          | E5    | feito  | `feature/led-simples`          | PR #20              |
-| #4    | Estado do circuito com Zustand + zundo                                                | E2    | feito  | `feature/estado-circuito`      | PR #22              |
-| #5    | Arrastar do menu para a zona livre (snap à grelha)                                    | E2    | feito  | `feature/arrastar-componentes` | PR #23              |
-| #6    | Selecionar, mover, rodar, duplicar e apagar                                           | E2    | feito  | `feature/selecao-edicao`       | PR #24              |
-| #25   | Ligar fios entre terminais (ortogonais)                                               | E2    | feito  | `feature/fios`                 | PR #26              |
-| #27   | Layout em telemóvel (iPhone)                                                          | E1    | feito  | `fix/layout-telemovel`         | PR #28              |
-| #29   | Trocar de língua: PT · FR · EN                                                        | E1    | feito  | `feature/idiomas`              | PR #30              |
-| #32   | Botão Simular e resultados U, I, R, P                                                 | E2    | feito  | `feature/simular`              | PR #33              |
-| #35   | Editar os valores e o nome dos componentes                                            | E2    | feito  | `feature/editar-valores`       | PR #36              |
-| #37   | Novo, Abrir e Guardar projetos (.geii.json)                                           | E2    | feito  | `feature/guardar-abrir`        | PR #38              |
-| #39   | O nome por cima do componente aparece sempre                                          | E2    | feito  | `fix/etiquetas-nomes`          | PR #40              |
-| #41   | LED e lâmpada acendem na cena; erros destacados                                       | E7    | feito  | `feature/feedback-cena`        | PR #42              |
-| #43   | Opção de debug: número do nó em cada terminal                                         | E3    | feito  | `feature/debug-nos`            | PR #44              |
-| #45   | Critérios v1.0: testes de referência e demonstração pela interface                    | E9    | feito  | `test/criterios-v1`            | PR #46              |
-| #47   | Publicar a v1.0 do MVP DC (tag e Release)                                             | E9    | feito  | `docs/versao-v1`               | PR #48 · tag `v1.0` |
-| #49   | Díodo real (Shockley) com Newton-Raphson no motor                                     | E10   | feito  | `feature/diodo-newton`         | PR #50              |
-| #51   | Díodo na interface: menu, cena, propriedades, resultados e JSON                       | E10   | feito  | `feature/diodo-interface`      | PR #52              |
-| #53   | Motor do transitório: condensador e bobina (Euler implícito)                          | E10   | feito  | `feature/transitorio-motor`    | PR #56              |
-| #54   | Selecionar vários componentes (retângulo, Ctrl+clique, Ctrl+A) e apagá-los de uma vez | E2    | feito  | `feature/selecao-multipla`     | PR #57              |
-| #55   | Guardar e Guardar como… perguntando onde guardar no disco                             | E8    | feito  | `feature/guardar-como`         | PR #58              |
+| Issue | Tarefa                                                                                 | Etapa | Estado | Ramo                           | PR                  |
+| ----- | -------------------------------------------------------------------------------------- | ----- | ------ | ------------------------------ | ------------------- |
+| #15   | Netlist: do projeto para o solver (teste 7 OK)                                         | E5    | feito  | `feature/netlist`              | PR #18              |
+| #16   | Validações antes do cálculo (erros e avisos)                                           | E5    | feito  | `feature/validacoes`           | PR #19              |
+| #17   | LED no modelo simples (Vf + Rs) · teste 6 OK                                           | E5    | feito  | `feature/led-simples`          | PR #20              |
+| #4    | Estado do circuito com Zustand + zundo                                                 | E2    | feito  | `feature/estado-circuito`      | PR #22              |
+| #5    | Arrastar do menu para a zona livre (snap à grelha)                                     | E2    | feito  | `feature/arrastar-componentes` | PR #23              |
+| #6    | Selecionar, mover, rodar, duplicar e apagar                                            | E2    | feito  | `feature/selecao-edicao`       | PR #24              |
+| #25   | Ligar fios entre terminais (ortogonais)                                                | E2    | feito  | `feature/fios`                 | PR #26              |
+| #27   | Layout em telemóvel (iPhone)                                                           | E1    | feito  | `fix/layout-telemovel`         | PR #28              |
+| #29   | Trocar de língua: PT · FR · EN                                                         | E1    | feito  | `feature/idiomas`              | PR #30              |
+| #32   | Botão Simular e resultados U, I, R, P                                                  | E2    | feito  | `feature/simular`              | PR #33              |
+| #35   | Editar os valores e o nome dos componentes                                             | E2    | feito  | `feature/editar-valores`       | PR #36              |
+| #37   | Novo, Abrir e Guardar projetos (.geii.json)                                            | E2    | feito  | `feature/guardar-abrir`        | PR #38              |
+| #39   | O nome por cima do componente aparece sempre                                           | E2    | feito  | `fix/etiquetas-nomes`          | PR #40              |
+| #41   | LED e lâmpada acendem na cena; erros destacados                                        | E7    | feito  | `feature/feedback-cena`        | PR #42              |
+| #43   | Opção de debug: número do nó em cada terminal                                          | E3    | feito  | `feature/debug-nos`            | PR #44              |
+| #45   | Critérios v1.0: testes de referência e demonstração pela interface                     | E9    | feito  | `test/criterios-v1`            | PR #46              |
+| #47   | Publicar a v1.0 do MVP DC (tag e Release)                                              | E9    | feito  | `docs/versao-v1`               | PR #48 · tag `v1.0` |
+| #49   | Díodo real (Shockley) com Newton-Raphson no motor                                      | E10   | feito  | `feature/diodo-newton`         | PR #50              |
+| #51   | Díodo na interface: menu, cena, propriedades, resultados e JSON                        | E10   | feito  | `feature/diodo-interface`      | PR #52              |
+| #53   | Motor do transitório: condensador e bobina (Euler implícito)                           | E10   | feito  | `feature/transitorio-motor`    | PR #56              |
+| #54   | Selecionar vários componentes (retângulo, Ctrl+clique, Ctrl+A) e apagá-los de uma vez  | E2    | feito  | `feature/selecao-multipla`     | PR #57              |
+| #55   | Guardar e Guardar como… perguntando onde guardar no disco                              | E8    | feito  | `feature/guardar-como`         | PR #58              |
+| #59   | Preparar os modelos 3D do Blender (ficha técnica + carregar .glb com caixa de recurso) | E7    | feito  | `feature/modelos-blender`      | PR #60              |
 
 ### Tarefas extra
 
@@ -123,4 +124,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `a0a99ef` | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52 |
 | `1f80066` | Motor do transitório: condensador e bobina (issue #53)                      | #56 |
 | `d158115` | Selecionar vários componentes e apagá-los de uma vez (issue #54)            | #57 |
-| (squash)  | Guardar e Guardar como… perguntando onde guardar (issue #55)                | #58 |
+| `1248111` | Guardar e Guardar como… perguntando onde guardar (issue #55)                | #58 |
+| (squash)  | Preparar os modelos 3D do Blender (issue #59)                               | #60 |
