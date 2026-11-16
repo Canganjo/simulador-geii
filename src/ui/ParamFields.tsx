@@ -7,6 +7,7 @@ import { formatSi } from './formatSi'
 import { decimalSeparator, isMessageKey, useT } from './i18n'
 import { formatSiInput, paramLabel } from './paramText'
 import { parseSi } from './parseSi'
+import { ratedPowerLabel, ratedPowerOptions } from './ratedPower'
 
 /**
  * Campos editáveis do painel de propriedades: nome, números (com prefixos SI), sim/não e opções.
@@ -181,6 +182,36 @@ export function ChoiceParamField({ component, param, spec }: ParamProps<ChoicePa
             </option>
           )
         })}
+      </select>
+    </Field>
+  )
+}
+
+/** Potência nominal da resistência: escolhida na série comercial (1/8 W … 2 W). */
+export function RatedPowerField({ component, param, spec }: ParamProps<NumberParamSpec>) {
+  const t = useT()
+  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
+  const value = (component.params as Readonly<Record<string, unknown>>)[param]
+  const current = typeof value === 'number' ? value : undefined
+  const label = paramLabel(param, spec, t)
+  return (
+    <Field label={label} error={null}>
+      <select
+        value={current === undefined ? '' : String(current)}
+        aria-label={label}
+        data-param={param}
+        title={t('props.ratedPowerHint')}
+        onChange={(e) =>
+          useCircuitStore.getState().updateParams(component.id, { [param]: Number(e.target.value) })
+        }
+        className={INPUT}
+      >
+        {current === undefined && <option value="">—</option>}
+        {ratedPowerOptions(current).map((w) => (
+          <option key={w} value={String(w)}>
+            {ratedPowerLabel(w, decimal)}
+          </option>
+        ))}
       </select>
     </Field>
   )

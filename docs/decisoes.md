@@ -7,6 +7,20 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-015 · 2026-11-16 · Painel de Propriedades em secções e aviso de sobreaquecimento da resistência ✅
+
+- **Painel:** três secções que se adaptam ao componente: **Identificação** (símbolo, nome, tipo),
+  **Parâmetros elétricos** (valores com unidade + o que a simulação diz deles) e **Parâmetros
+  complementares** (cor do LED, posição, rotação, ações, repor etiqueta).
+- **Potência nominal da resistência:** escolhida numa lista da série comercial (1/8, 1/4, 1/2, 1 e
+  2 W). Um valor fora da série (ficheiro antigo) continua a aparecer na lista. A lâmpada mantém o
+  campo numérico (a sua potência nominal define a resistência equivalente).
+- **Motor:** novo aviso `resistor-overpower` quando P > potência nominal (P = U·I da resistência).
+  É só um aviso (o cálculo não muda); a resistência fica com contorno âmbar e o painel diz
+  quanto dissipa. Sem potência nominal, não avisa.
+- **Porquê:** é a pergunta que o estudante tem de fazer no laboratório ("esta resistência aguenta?");
+  escrever um número qualquer não ensinava a escolher um valor que existe à venda.
+
 ## D-014 · 2026-11-16 · Etiquetas móveis e interruptor com clique na cena ✅
 
 - **Etiquetas:** cada componente pode ter `labelOffset` (opcional, em quadrados da grelha) no

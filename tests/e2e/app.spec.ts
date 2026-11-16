@@ -755,3 +755,46 @@ test('a etiqueta (R1) arrasta-se para outro sítio; Ctrl+Z e duplo clique repõe
   await label.dblclick()
   await expect.poll(async () => (await label.boundingBox())?.x ?? 0).toBeCloseTo(before.x, 0)
 })
+
+test('propriedades em 3 secções; potência da resistência numa lista e aviso de sobreaquecimento', async ({
+  page,
+}) => {
+  //   V1 (12 V) ── R1 (1 kΩ) ── GND :  P(R1) = 12² / 1000 = 144 mW
+  //   1/4 W (250 mW) aguenta ; 1/8 W (125 mW) não → aquece demais ; 1/2 W volta a aguentar.
+  await page.goto('/')
+  const props = page.getByRole('complementary', { name: 'Propriedades' })
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  for (const section of ['Identificação', 'Parâmetros elétricos', 'Parâmetros complementares']) {
+    await expect(props.getByRole('region', { name: section })).toBeVisible()
+  }
+  await expect(props.getByTestId('selected-type')).toHaveText('Resistência')
+  const rated = props.getByRole('combobox', { name: 'Potência nominal' })
+  await expect(rated.locator('option')).toHaveText(['1/8 W', '1/4 W', '1/2 W', '1 W', '2 W'])
+  await expect(rated).toHaveValue('0.25')
+
+  await dropAt(page, 'Fonte DC', -160, 0)
+  await dropAt(page, 'GND', 0, 120)
+  await connect(page, 'V1:+', 'R1:a')
+  await connect(page, 'R1:b', 'GND1:gnd')
+  await connect(page, 'GND1:gnd', 'V1:-')
+  await page.getByRole('button', { name: 'Simular' }).click()
+
+  // Selecionar R1 (clique no meio, entre os dois terminais).
+  const a = await anchor(page, '[data-terminal="R1:a"]')
+  const b = await anchor(page, '[data-terminal="R1:b"]')
+  await page.mouse.click((a.x + b.x) / 2, (a.y + b.y) / 2)
+  await expect(props.getByTestId('selected-name')).toHaveText('R1')
+  const power = props.getByTestId('resistor-power')
+  await expect(power).toHaveAttribute('data-overheat', 'false')
+  await expect(power).toContainText('144 mW')
+
+  await rated.selectOption('0.125')
+  await expect(power).toHaveAttribute('data-overheat', 'true')
+  await expect(page.getByRole('region', { name: 'Resultados' })).toContainText('aquecia demais')
+
+  await rated.selectOption('0.5')
+  await expect(power).toHaveAttribute('data-overheat', 'false')
+})

@@ -127,9 +127,11 @@ describe('simulateDc — LED no modelo simples (Vf + Rs)', () => {
 
   it('12 V + 100 Ω: I = 100 mA > 20 mA → aviso led-overcurrent', () => {
     // I = (12 − 2) / 100 = 0,1 A, cinco vezes a corrente máxima (0,02 A)
+    // (e a resistência de 1/4 W dissipa 100 × 0,1² = 1 W → também avisa, ver resistor-overpower)
     const r = ok(ledCircuit({ resistance: 100 }))
     expectRelative(result(r, 'D1').current, 0.1)
     expect(r.issues).toEqual([
+      expect.objectContaining({ code: 'resistor-overpower', componentIds: ['R1'] }),
       expect.objectContaining({
         severity: 'warning',
         code: 'led-overcurrent',
@@ -137,7 +139,7 @@ describe('simulateDc — LED no modelo simples (Vf + Rs)', () => {
       }),
     ])
     // Os dados da mensagem (correntes em A), para a interface a escrever noutra língua.
-    const params = r.issues[0]?.params
+    const params = r.issues.find((i) => i.code === 'led-overcurrent')?.params
     expect(params?.name).toBe('D1')
     expect(params?.current).toBeCloseTo(0.1, 9)
     expect(params?.max).toBeCloseTo(0.02, 9)
@@ -204,6 +206,45 @@ describe('simulateDc — resto do circuito', () => {
     const r = simulateDc({ components: c, wires: [wire('V1:+', 'R1:a'), wire('R1:b', 'V1:-')] })
     expect(r.ok).toBe(false)
     expect(r.issues.map((i) => i.code)).toEqual(['no-ground'])
+  })
+})
+
+describe('simulateDc — potência nominal da resistência', () => {
+  /** V1 ── R1 ── GND (uma só resistência aos terminais da fonte). */
+  function single(voltage: number, resistance: number, ratedPower?: number) {
+    const c: Component[] = []
+    part(c, 'dc-source', { voltage })
+    part(c, 'resistor', { resistance, ratedPower })
+    part(c, 'ground')
+    return ok(
+      simulateDc({
+        components: c,
+        wires: [wire('V1:+', 'R1:a'), wire('R1:b', 'GND1:gnd'), wire('V1:-', 'GND1:gnd')],
+      }),
+    )
+  }
+
+  it('12 V em 100 Ω com 1/4 W: P = 12² / 100 = 1,44 W > 0,25 W → aviso', () => {
+    const r = single(12, 100, 0.25)
+    expectRelative(result(r, 'R1').power, 1.44)
+    expect(r.issues).toEqual([
+      expect.objectContaining({
+        severity: 'warning',
+        code: 'resistor-overpower',
+        componentIds: ['R1'],
+      }),
+    ])
+    expect(r.issues[0]?.params?.power).toBeCloseTo(1.44, 9)
+    expect(r.issues[0]?.params?.max).toBe(0.25)
+  })
+
+  it('com 2 W chega (1,44 W < 2 W): sem aviso; sem potência nominal também não avisa', () => {
+    expect(single(12, 100, 2).issues).toEqual([])
+    expect(single(12, 100, undefined).issues).toEqual([])
+  })
+
+  it('12 V em 1 kΩ com 1/8 W: P = 144 / 1000 = 0,144 W > 0,125 W → aviso', () => {
+    expect(single(12, 1000, 0.125).issues.map((i) => i.code)).toEqual(['resistor-overpower'])
   })
 })
 

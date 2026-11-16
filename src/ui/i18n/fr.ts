@@ -116,6 +116,16 @@ export const fr: Messages = {
   'props.deleteAll': 'Supprimer les {count}',
   'props.empty':
     'Sélectionne un composant pour voir et modifier le nom, la valeur, l’unité et la rotation.',
+  'props.sectionIdentity': 'Identification',
+  'props.sectionElectrical': 'Paramètres électriques',
+  'props.sectionOther': 'Paramètres complémentaires',
+  'props.noElectrical': 'Aucun paramètre : c’est la référence 0 V du circuit.',
+  'props.ratedPowerHint':
+    'Puissance que la résistance supporte sans trop chauffer (série commerciale).',
+  'props.dissipates': 'Dissipe {power} (supporte jusqu’à {max}).',
+  'props.overheat':
+    'Chauffe trop : dissipe {power}, au-dessus de {max}. Choisis une puissance plus grande.',
+  'props.labelReset': 'Replacer l’étiquette',
   'props.position': 'Position',
   'props.rotation': 'Rotation',
   'props.rotate': 'Tourner',
@@ -177,6 +187,8 @@ export const fr: Messages = {
   'issue.loose-terminal': '{name} : la borne {terminal} n’est pas reliée.',
   'issue.led-overcurrent':
     '{name} : courant de {current} au-dessus du courant maximal ({max}) — la LED grillerait.',
+  'issue.resistor-overpower':
+    '{name} : dissipe {power}, au-dessus de la puissance nominale ({max}) — la résistance chaufferait trop (choisis-en une plus puissante).',
   'issue.source-current-limit':
     '{name} : limite de courant atteinte (CC) — la source ne fournit que {limit} et la tension descend à {voltage}.',
   'issue.source-limit-transient':

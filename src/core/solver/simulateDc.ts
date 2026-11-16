@@ -58,6 +58,15 @@ export type SimulationIssue =
       params?: Readonly<Record<string, string | number>>
     }
   | {
+      /** Resistência a dissipar mais do que a potência nominal: aquecia demais (queimava). */
+      severity: 'warning'
+      code: 'resistor-overpower'
+      message: string
+      componentIds: string[]
+      /** { name, power, max } — W. */
+      params?: Readonly<Record<string, string | number>>
+    }
+  | {
       /** Fonte em CC: atingiu o limite de corrente e a tensão caiu abaixo da regulada. */
       severity: 'warning'
       code: 'source-current-limit'
@@ -186,6 +195,18 @@ export function simulateDc(project: Pick<Project, 'components' | 'wires'>): Simu
             `(${c.params.maxCurrent} A) — o LED queimava.`,
           componentIds: [c.id],
           params: { name: c.name, current: r.current, max: c.params.maxCurrent },
+        })
+      }
+      const rated = c.kind === 'resistor' ? c.params.ratedPower : undefined
+      if (rated !== undefined && r.power > rated * (1 + 1e-9)) {
+        issues.push({
+          severity: 'warning',
+          code: 'resistor-overpower',
+          message:
+            `${c.name}: dissipa ${round(r.power)} W, acima da potência nominal ` +
+            `(${rated} W) — a resistência aquecia demais.`,
+          componentIds: [c.id],
+          params: { name: c.name, power: r.power, max: rated },
         })
       }
     }

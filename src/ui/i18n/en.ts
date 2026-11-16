@@ -113,6 +113,14 @@ export const en: Messages = {
     'Delete removes them all at once (Ctrl+Z brings them back). Ctrl+click adds or removes a component.',
   'props.deleteAll': 'Delete all {count}',
   'props.empty': 'Select a component to see and edit its name, value, unit and rotation.',
+  'props.sectionIdentity': 'Identification',
+  'props.sectionElectrical': 'Electrical parameters',
+  'props.sectionOther': 'Additional parameters',
+  'props.noElectrical': 'No parameters: it is the circuit’s 0 V reference.',
+  'props.ratedPowerHint': 'Power the resistor can take without overheating (commercial series).',
+  'props.dissipates': 'Dissipates {power} (rated up to {max}).',
+  'props.overheat': 'Overheating: dissipates {power}, above {max}. Choose a higher power rating.',
+  'props.labelReset': 'Reset label',
   'props.position': 'Position',
   'props.rotation': 'Rotation',
   'props.rotate': 'Rotate',
@@ -173,6 +181,8 @@ export const en: Messages = {
   'issue.loose-terminal': '{name}: terminal {terminal} is not connected.',
   'issue.led-overcurrent':
     '{name}: current of {current} above the maximum current ({max}) — the LED would burn out.',
+  'issue.resistor-overpower':
+    '{name}: dissipates {power}, above the rated power ({max}) — the resistor would overheat (choose a higher power rating).',
   'issue.source-current-limit':
     '{name}: current limit reached (CC) — the source only delivers {limit} and the voltage drops to {voltage}.',
   'issue.source-limit-transient':

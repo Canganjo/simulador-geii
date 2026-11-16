@@ -127,6 +127,15 @@ export const pt = {
   'props.deleteAll': 'Apagar os {count}',
   'props.empty':
     'Seleciona um componente para ver e editar o nome, o valor, a unidade e a rotação.',
+  'props.sectionIdentity': 'Identificação',
+  'props.sectionElectrical': 'Parâmetros elétricos',
+  'props.sectionOther': 'Parâmetros complementares',
+  'props.noElectrical': 'Sem parâmetros: é a referência dos 0 V do circuito.',
+  'props.ratedPowerHint':
+    'Potência que a resistência aguenta sem aquecer demais (série comercial).',
+  'props.dissipates': 'Dissipa {power} (aguenta até {max}).',
+  'props.overheat': 'Aquece demais: dissipa {power}, acima de {max}. Escolhe uma potência maior.',
+  'props.labelReset': 'Repor etiqueta',
   'props.position': 'Posição',
   'props.rotation': 'Rotação',
   'props.rotate': 'Rodar',
@@ -191,6 +200,8 @@ export const pt = {
   'issue.loose-terminal': '{name}: o terminal {terminal} não está ligado.',
   'issue.led-overcurrent':
     '{name}: corrente de {current} acima da corrente máxima ({max}) — o LED queimava.',
+  'issue.resistor-overpower':
+    '{name}: dissipa {power}, acima da potência nominal ({max}) — a resistência aquecia demais (escolhe uma de maior potência).',
   'issue.source-current-limit':
     '{name}: limite de corrente atingido (CC) — a fonte dá só {limit} e a tensão cai para {voltage}.',
   'issue.source-limit-transient':
