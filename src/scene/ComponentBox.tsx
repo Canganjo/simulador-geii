@@ -119,9 +119,10 @@ export function ComponentBox({
           color={bodyColor(component)}
           emissive={emissive ?? '#000000'}
           emissiveIntensity={intensity}
-          transparent={!boxVisible}
-          opacity={boxVisible ? 1 : 0}
-          depthWrite={boxVisible}
+          // Com modelo 3D a caixa deixa de ser desenhada, mas continua a receber os cliques
+          // (o raycast do three.js não olha para material.visible). Mudar `transparent`/`opacity`
+          // depois do 1.º desenho não chegava: o three.js não recompila o material sozinho.
+          visible={boxVisible}
         />
         {/* Contorno: azul se selecionado; senão vermelho (erro) ou âmbar (aviso) após Simular. */}
         {outline && <Edges scale={1.12} color={outline} />}

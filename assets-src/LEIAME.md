@@ -15,3 +15,16 @@ Resumo rápido:
 - ≤ 2 000 triângulos, ≤ 200 KB; exportar glTF Binary com +Y Up, sem Draco.
 - Antes do primeiro `git add` de um `.blend`/`.glb`, confirmar que o Git LFS está instalado:
   `git lfs install` (só uma vez por computador).
+
+## Gerar os modelos com o script
+
+`build_models.py` constrói os 7 componentes no Blender a partir de código (formas simples:
+cilindros, esferas, caixas e tubos para as patas), guarda cada `.blend` aqui e exporta cada `.glb`
+para `public/models/`. No fim mostra, para cada modelo, os triângulos, o tamanho e as medidas.
+
+```bash
+"C:/Program Files/Blender Foundation/Blender 5.3/blender.exe" --background --factory-startup --python assets-src/build_models.py
+```
+
+Só alguns componentes: acrescentar `-- resistor led` no fim. Depois de correr, `pnpm test`
+verifica os `.glb` contra a ficha técnica (`src/scene/models3d.files.test.ts`).

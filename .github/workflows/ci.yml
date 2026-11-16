@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Obter o código
         uses: actions/checkout@v5
+        with:
+          lfs: true # os modelos .glb estão no Git LFS (testados em models3d.files.test.ts)
 
       - name: Instalar pnpm (versão do campo packageManager)
         uses: pnpm/action-setup@v4

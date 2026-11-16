@@ -5,20 +5,24 @@ Os ficheiros fonte `.blend` ficam em `assets-src/` (ver `assets-src/LEIAME.md`).
 
 Responsável: Pessoa 3.
 
+Os 7 modelos atuais são **gerados por um script do Blender**: `assets-src/build_models.py`
+(ver `assets-src/LEIAME.md`). Para mudar um modelo, alterar o script e voltar a corrê-lo, ou abrir
+o `.blend` em `assets-src/`, melhorar à mão e exportar como na secção 5.
+
 Enquanto um componente não tiver modelo, a aplicação mostra a **caixa colorida** de sempre.
 Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se parte.
 
 ## 1. Nome dos ficheiros (um por tipo de componente)
 
-| Componente     | Ficheiro         |
-| -------------- | ---------------- |
-| Fonte DC       | `dc-source.glb`  |
-| GND (massa)    | `ground.glb`     |
-| Resistência    | `resistor.glb`   |
-| Interruptor    | `switch.glb`     |
-| LED            | `led.glb`        |
-| Díodo          | `diode.glb`      |
-| Lâmpada        | `lamp.glb`       |
+| Componente  | Ficheiro        |
+| ----------- | --------------- |
+| Fonte DC    | `dc-source.glb` |
+| GND (massa) | `ground.glb`    |
+| Resistência | `resistor.glb`  |
+| Interruptor | `switch.glb`    |
+| LED         | `led.glb`       |
+| Díodo       | `diode.glb`     |
+| Lâmpada     | `lamp.glb`      |
 
 ## 2. Medidas e posição (o mais importante)
 
@@ -34,13 +38,13 @@ Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se par
          -Y (para baixo no ecrã)
 ```
 
-| Regra                    | Dipolos (resistência, LED, fonte…)      | GND                          |
-| ------------------------ | --------------------------------------- | ---------------------------- |
-| Origem (ponto 0,0,0)     | centro do componente, **no chão**       | centro do símbolo, no chão   |
-| Comprimento              | ao longo de **X**                       | —                            |
-| Terminais                | **a em X = −1**, **b em X = +1** (Y=0)  | terminal em **Y = +1** (em cima) |
-| Caixa máxima (X × Y × Z) | 2 × 0,8 × 0,8                           | 1 × 1 × 0,5                  |
-| Altura                   | nada abaixo de Z = 0                    | nada abaixo de Z = 0         |
+| Regra                    | Dipolos (resistência, LED, fonte…)     | GND                              |
+| ------------------------ | -------------------------------------- | -------------------------------- |
+| Origem (ponto 0,0,0)     | centro do componente, **no chão**      | centro do símbolo, no chão       |
+| Comprimento              | ao longo de **X**                      | —                                |
+| Terminais                | **a em X = −1**, **b em X = +1** (Y=0) | terminal em **Y = +1** (em cima) |
+| Caixa máxima (X × Y × Z) | 2 × 0,8 × 0,8                          | 1 × 1 × 0,5                      |
+| Altura                   | nada abaixo de Z = 0                   | nada abaixo de Z = 0             |
 
 - Ordem dos terminais = a do catálogo: fonte **+ em X = −1**, − em X = +1;
   LED e díodo **ânodo em X = −1**, cátodo em X = +1.
@@ -50,11 +54,12 @@ Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se par
 
 ## 3. Materiais com nome especial
 
-| Nome do material | O que a aplicação faz                                                      |
-| ---------------- | -------------------------------------------------------------------------- |
+| Nome do material | O que a aplicação faz                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
 | `luz`            | acende-se: LED/lâmpada a funcionar, componente selecionado; pisca em sobrecorrente |
-| `corpo`          | recebe a cor do componente (ex.: a cor do LED escolhida no painel)          |
-| outros nomes     | ficam com as cores do Blender (ex.: `metal`, `plastico`)                    |
+| `corpo`          | recebe a cor do componente (ex.: a cor do LED escolhida no painel)                 |
+| `corpo-luz`      | as duas coisas: recebe a cor e acende-se (ex.: a cúpula do LED)                    |
+| outros nomes     | ficam com as cores do Blender (ex.: `metal`, `plastico`)                           |
 
 - Usar só o shader **Principled BSDF** (é o que passa para o `.glb`).
 - Cores simples (Base Color). Texturas só se forem pequenas (≤ 512 × 512 px).
