@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { sx, sy } from './grelha.ts'
 
 /**
  * Selecionar vários componentes e apagá-los de uma vez (issue #54):
@@ -27,7 +28,7 @@ async function threeResistors(page: Page) {
   const { box } = await center(page)
   for (const dx of [160, -160]) {
     await menu.getByRole('button', { name: 'Resistência' }).dragTo(scene(page), {
-      targetPosition: { x: box.width / 2 + dx, y: box.height / 2 },
+      targetPosition: { x: box.width / 2 + sx(dx), y: box.height / 2 },
     })
   }
   await expect(label(page, 'R3')).toBeVisible()
@@ -49,10 +50,10 @@ test('retângulo com o rato: seleciona R1 e R2; Delete apaga os dois; Ctrl+Z rep
   const c = await center(page)
 
   // Arrastar no VAZIO (botão esquerdo) de cima-esquerda de R1 até baixo-direita de R2.
-  await page.mouse.move(c.x - 60, c.y - 70)
+  await page.mouse.move(c.x - sx(60), c.y - sy(70))
   await page.mouse.down()
-  await page.mouse.move(c.x + 60, c.y, { steps: 5 })
-  await page.mouse.move(c.x + 230, c.y + 60, { steps: 5 })
+  await page.mouse.move(c.x + sx(60), c.y, { steps: 5 })
+  await page.mouse.move(c.x + sx(230), c.y + sy(60), { steps: 5 })
   await expect(page.getByTestId('selection-box')).toBeVisible()
   await page.mouse.up()
   await expect(page.getByTestId('selection-box')).toHaveCount(0)
@@ -75,9 +76,9 @@ test('retângulo com o rato: seleciona R1 e R2; Delete apaga os dois; Ctrl+Z rep
 test('arrastar da direita para a esquerda também seleciona', async ({ page }) => {
   await threeResistors(page)
   const c = await center(page)
-  await page.mouse.move(c.x + 60, c.y + 60)
+  await page.mouse.move(c.x + sx(60), c.y + sy(60))
   await page.mouse.down()
-  await page.mouse.move(c.x - 230, c.y - 70, { steps: 8 })
+  await page.mouse.move(c.x - sx(230), c.y - sy(70), { steps: 8 })
   await page.mouse.up()
   await expect(label(page, 'R1')).toHaveAttribute('data-selected', 'true')
   await expect(label(page, 'R3')).toHaveAttribute('data-selected', 'true')
@@ -103,7 +104,7 @@ test('Ctrl+clique junta e tira; clique no vazio tira tudo', async ({ page }) => 
   await expect(props(page).getByTestId('selected-name')).toHaveText('R2')
 
   const c = await center(page)
-  await page.mouse.click(c.x, c.y + 150) // vazio
+  await page.mouse.click(c.x, c.y + sy(150)) // vazio
   await expect(label(page, 'R2')).toHaveAttribute('data-selected', 'false')
 })
 

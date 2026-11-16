@@ -59,6 +59,7 @@ Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se par
 | `luz`            | acende-se: LED/lâmpada a funcionar, componente selecionado; pisca em sobrecorrente |
 | `corpo`          | recebe a cor do componente (ex.: a cor do LED escolhida no painel)                 |
 | `corpo-luz`      | as duas coisas: recebe a cor e acende-se (ex.: a cúpula do LED)                    |
+| `visor`          | ecrã onde a aplicação escreve um texto (a fonte DC mostra a sua tensão, ex.: "12.0 V") |
 | outros nomes     | ficam com as cores do Blender (ex.: `metal`, `plastico`)                           |
 
 - Usar só o shader **Principled BSDF** (é o que passa para o `.glb`).

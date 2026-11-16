@@ -5,6 +5,7 @@ import type { MeshStandardMaterial } from 'three'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
 import { boxSize } from './componentShape'
 import { ComponentModel, ModelErrorBoundary } from './ComponentModel'
+import { Halo } from './Halo'
 import { modelUrl } from './models3d'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
 import { LED_LIGHT, type VisualState } from './visualState'
@@ -35,6 +36,18 @@ const MAX_GLOW = 1.6
 function bodyColor(component: Component): string {
   if (component.kind === 'led') return LED_LIGHT[component.params.color] ?? COLORS.led
   return COLORS[component.kind]
+}
+
+/** Texto do visor do modelo 3D: a fonte DC mostra a sua tensão (ex.: "12.0 V"). */
+function displayText(component: Component): string | undefined {
+  if (component.kind !== 'dc-source') return undefined
+  return `${component.params.voltage.toFixed(1)} V`
+}
+
+/** Onde fica a auréola (altura do centro da luz no modelo) e o seu tamanho máximo. */
+const HALO: Partial<Record<ComponentKind, { height: number; size: number }>> = {
+  led: { height: 0.62, size: 1.3 },
+  lamp: { height: 0.56, size: 2.2 },
 }
 
 interface Props {
@@ -139,11 +152,22 @@ export function ComponentBox({
                 emissive={emissive ?? '#000000'}
                 intensity={intensity}
                 blink={visual.blink}
+                display={displayText(component)}
                 onReady={setModelReady}
               />
             </Suspense>
           </ModelErrorBoundary>
         </group>
+      )}
+
+      {/* Auréola de luz por cima do LED / da lâmpada acesos. */}
+      {lit && visual.glowColor !== null && HALO[kind] && (
+        <Halo
+          color={visual.glowColor}
+          strength={visual.glow}
+          height={HALO[kind].height}
+          size={HALO[kind].size}
+        />
       )}
 
       {/* Terminais: clicar num e depois noutro liga-os com um fio. */}

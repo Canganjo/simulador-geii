@@ -56,3 +56,11 @@ export function isGlowMaterial(name: string): boolean {
 export function isBodyMaterial(name: string): boolean {
   return /^corpo(-luz)?(\.\d+)?$/i.test(name.trim())
 }
+
+/**
+ * Nome do material do VISOR (ex.: o ecrã da fonte de bancada): "visor" (ou "visor.001"…).
+ * A aplicação escreve lá um texto, ex.: a tensão da fonte "12.0 V".
+ */
+export function isDisplayMaterial(name: string): boolean {
+  return /^visor(\.\d+)?$/i.test(name.trim())
+}
