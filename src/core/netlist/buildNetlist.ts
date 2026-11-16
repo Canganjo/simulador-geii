@@ -12,6 +12,8 @@
  *   GND                 → não é um elemento: é o nó 0
  *   LED a conduzir      → fonte Vf (ânodo → cátodo) + resistência Rs em série (se Rs > 0)
  *   LED bloqueado       → não entra (como um interruptor aberto)
+ *   Condensador         → DC: não entra (circuito aberto) · transitório: elemento 'capacitor'
+ *   Bobina              → DC: fio (resistência de 1 mΩ) · transitório: elemento 'inductor'
  *
  * Quem decide se cada LED conduz é o `simulateDc` (supõe e verifica); aqui só se recebe a lista
  * dos LED bloqueados em `options.ledOff`.
@@ -38,13 +40,15 @@ export const ledResistorId = (componentId: string) => `${componentId}#rs`
 export interface BuildNetlistOptions {
   /** IDs dos LED bloqueados (não conduzem). Os outros são tratados como a conduzir. */
   ledOff?: ReadonlySet<string>
+  /** 'dc' (por defeito) ou 'transient' (condensadores e bobinas com o seu modelo no tempo). */
+  mode?: 'dc' | 'transient'
 }
 
 /** Componente que ficou fora da netlist, e porquê. */
 export interface SkippedComponent {
   componentId: string
   name: string
-  reason: 'open-switch' | 'led-off'
+  reason: 'open-switch' | 'led-off' | 'capacitor-open'
 }
 
 export type NetlistResult =
@@ -142,6 +146,35 @@ export function buildNetlist(
           saturationCurrent: c.params.saturationCurrent,
           emissionCoefficient: c.params.emissionCoefficient,
         })
+        break
+      case 'capacitor':
+        if (options.mode === 'transient') {
+          elements.push({
+            type: 'capacitor',
+            id: c.id,
+            nodeA: nodeAt(c, 'a'),
+            nodeB: nodeAt(c, 'b'),
+            capacitance: c.params.capacitance,
+            initialVoltage: c.params.initialVoltage,
+          })
+        } else {
+          skipped.push({ componentId: c.id, name: c.name, reason: 'capacitor-open' })
+        }
+        break
+      case 'inductor':
+        if (options.mode === 'transient') {
+          elements.push({
+            type: 'inductor',
+            id: c.id,
+            nodeA: nodeAt(c, 'a'),
+            nodeB: nodeAt(c, 'b'),
+            inductance: c.params.inductance,
+            initialCurrent: c.params.initialCurrent,
+          })
+        } else {
+          // Em DC (corrente constante) a bobina é um fio: como um interruptor fechado.
+          elements.push(resistor(c, nodeAt(c, 'a'), nodeAt(c, 'b'), CLOSED_SWITCH_RESISTANCE))
+        }
         break
       case 'ground':
         break // o GND é o nó 0

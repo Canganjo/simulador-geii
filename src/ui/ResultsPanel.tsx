@@ -63,6 +63,7 @@ export function ResultsPanel({ open, onToggle, height }: Props) {
 function SimulationOutput() {
   const t = useT()
   const result = useSimulationStore((s) => s.result)
+  const transient = useSimulationStore((s) => s.transient)
   const components = useCircuitStore((s) => s.components)
   const decimal = decimalSeparator(useLanguageStore((s) => s.language))
 
@@ -97,6 +98,15 @@ function SimulationOutput() {
             </li>
           )}
         </ul>
+      )}
+
+      {transient && (
+        <p className="text-sky-300" data-testid="transient-info">
+          {t('results.transientInfo', {
+            duration: formatSi(transient.duration, 's', 3, decimal),
+            steps: transient.times.length - 1,
+          })}
+        </p>
       )}
 
       {rows.length > 0 && (

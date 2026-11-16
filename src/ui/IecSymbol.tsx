@@ -54,6 +54,20 @@ const PATHS: Record<ComponentKind, ReactNode> = {
       <path d="M26 6v12" />
     </>
   ),
+  // Condensador: duas placas paralelas
+  capacitor: (
+    <>
+      <path d="M2 12h15M23 12h15" />
+      <path d="M17 4v16M23 4v16" />
+    </>
+  ),
+  // Bobina IEC: quatro meias-voltas (arcos)
+  inductor: (
+    <>
+      <path d="M2 14h6M32 14h6" />
+      <path d="M8 14a3 3 0 0 1 6 0a3 3 0 0 1 6 0a3 3 0 0 1 6 0a3 3 0 0 1 6 0" />
+    </>
+  ),
   // Lâmpada: círculo com uma cruz
   lamp: (
     <>

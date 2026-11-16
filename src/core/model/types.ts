@@ -8,9 +8,17 @@
  * Unidades SI em todo o lado: V, A, Ω, W. Posições em unidades da grelha.
  */
 
-/** Tipos de componente (MVP + díodo real da E10). */
+/** Tipos de componente (MVP + díodo real, condensador e bobina da E10). */
 export type ComponentKind =
-  'dc-source' | 'ground' | 'resistor' | 'switch' | 'led' | 'lamp' | 'diode'
+  | 'dc-source'
+  | 'ground'
+  | 'resistor'
+  | 'switch'
+  | 'led'
+  | 'lamp'
+  | 'diode'
+  | 'capacitor'
+  | 'inductor'
 
 /** Posição no plano da zona livre (x para a direita, y para cima), em unidades da grelha. */
 export interface Vec2 {
@@ -47,6 +55,10 @@ export interface ComponentParamsByKind {
   lamp: { ratedVoltage: number; ratedPower: number }
   /** Díodo real (E10): modelo de Shockley I = Is · (e^(U/(n·Vt)) − 1). Ver docs/decisoes.md, D-009. */
   diode: { saturationCurrent: number; emissionCoefficient: number }
+  /** Condensador (E10): C em F; tensão inicial u(0) em V (de a para b). DC: circuito aberto. */
+  capacitor: { capacitance: number; initialVoltage: number }
+  /** Bobina (E10): L em H; corrente inicial i(0) em A (de a para b). DC: curto-circuito (fio). */
+  inductor: { inductance: number; initialCurrent: number }
 }
 
 interface ComponentBase<K extends ComponentKind> {

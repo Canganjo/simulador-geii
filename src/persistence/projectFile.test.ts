@@ -69,6 +69,20 @@ describe('díodo real (E10)', () => {
   })
 })
 
+describe('condensador e bobina (E10)', () => {
+  it('guardam-se e abrem-se iguais (C, L e valores iniciais incluídos)', () => {
+    const project = sample()
+    const c = createComponent('capacitor', { x: 4, y: 0 }, { existing: project.components })
+    const capacitor: Component = { ...c, params: { capacitance: 47e-6, initialVoltage: 2.5 } }
+    project.components.push(capacitor)
+    const l = createComponent('inductor', { x: 8, y: 0 }, { existing: project.components })
+    project.components.push(l)
+    expect(parseProjectFile(toProjectFile(project))).toEqual({ ok: true, project })
+    expect(l.params).toEqual({ inductance: 10e-3, initialCurrent: 0 })
+    expect([capacitor.name, l.name]).toEqual(['C1', 'L1'])
+  })
+})
+
 describe('ficheiros recusados', () => {
   it('não é JSON', () => {
     expect(parseProjectFile('isto não é JSON')).toEqual({ ok: false, error: { code: 'not-json' } })

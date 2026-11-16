@@ -13,9 +13,19 @@ function sequentialIds() {
 }
 
 describe('catálogo', () => {
-  it('tem os 6 componentes do MVP + o díodo real (E10)', () => {
+  it('tem os 6 componentes do MVP + díodo real, condensador e bobina (E10)', () => {
     expect([...ALL_KINDS].sort()).toEqual(
-      ['dc-source', 'ground', 'lamp', 'led', 'resistor', 'switch', 'diode'].sort(),
+      [
+        'dc-source',
+        'ground',
+        'lamp',
+        'led',
+        'resistor',
+        'switch',
+        'diode',
+        'capacitor',
+        'inductor',
+      ].sort(),
     )
   })
 
@@ -26,7 +36,7 @@ describe('catálogo', () => {
     }
   })
 
-  it('nomes de base: V, GND, R, S, D, L (o LED e o díodo partilham o D, como nos esquemas)', () => {
+  it('nomes de base: V, GND, R, S, D, L, C (D: LED e díodo; L: lâmpada e bobina)', () => {
     expect(CATALOG['dc-source'].namePrefix).toBe('V')
     expect(CATALOG.ground.namePrefix).toBe('GND')
     expect(CATALOG.resistor.namePrefix).toBe('R')
@@ -34,9 +44,11 @@ describe('catálogo', () => {
     expect(CATALOG.led.namePrefix).toBe('D')
     expect(CATALOG.diode.namePrefix).toBe('D')
     expect(CATALOG.lamp.namePrefix).toBe('L')
-    // Fora o D, todos diferentes.
+    expect(CATALOG.inductor.namePrefix).toBe('L')
+    expect(CATALOG.capacitor.namePrefix).toBe('C')
+    // Fora os partilhados (díodo e bobina), todos diferentes.
     const prefixes = Object.values(CATALOG)
-      .filter((d) => d.kind !== 'diode')
+      .filter((d) => d.kind !== 'diode' && d.kind !== 'inductor')
       .map((d) => d.namePrefix)
     expect(new Set(prefixes).size).toBe(prefixes.length)
   })
@@ -72,7 +84,7 @@ describe('catálogo', () => {
       const specs: Record<string, ParamSpec> = def.params
       for (const [param, spec] of Object.entries(specs)) {
         if (spec.type !== 'number') continue
-        expect(['V', 'A', 'Ω', 'W', ''], `${def.kind}.${param}`).toContain(spec.unit)
+        expect(['V', 'A', 'Ω', 'W', 'F', 'H', ''], `${def.kind}.${param}`).toContain(spec.unit)
         expect(spec.min, `${def.kind}.${param}`).toBeLessThanOrEqual(spec.max)
       }
     }

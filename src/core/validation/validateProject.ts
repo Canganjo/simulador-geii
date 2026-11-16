@@ -46,7 +46,23 @@ export interface ValidationResult {
   issues: ValidationIssue[]
 }
 
-export function validateProject(project: Pick<Project, 'components' | 'wires'>): ValidationResult {
+/**
+ * Regime a verificar (E10):
+ *   'dc'        → botão Simular: condensador = circuito aberto, bobina = fio (curto-circuito);
+ *   'transient' → botão Transitório: condensador e bobina entram com o seu comportamento no tempo.
+ */
+export type AnalysisMode = 'dc' | 'transient'
+
+export interface ValidateOptions {
+  mode?: AnalysisMode
+}
+
+export function validateProject(
+  project: Pick<Project, 'components' | 'wires'>,
+  options: ValidateOptions = {},
+): ValidationResult {
+  const mode = options.mode ?? 'dc'
+  const entersCalculation = (c: Component) => entersAnalysis(c, mode)
   const issues: ValidationIssue[] = []
   const error = (
     code: IssueCode,
@@ -88,9 +104,15 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
   }
 
   // 4. Curto-circuito da fonte: + e − no mesmo nó, por um fio ou por um interruptor fechado.
+  //    Em DC uma bobina também é um fio (u = L·di/dt = 0 com corrente constante).
   const viaSwitches = new NodeSets()
+  const viaInductors = new NodeSets()
   for (const c of components) {
-    if (c.kind === 'switch' && c.params.closed) viaSwitches.union(node(c, 'a'), node(c, 'b'))
+    if (c.kind === 'switch' && c.params.closed) {
+      viaSwitches.union(node(c, 'a'), node(c, 'b'))
+      viaInductors.union(node(c, 'a'), node(c, 'b'))
+    }
+    if (c.kind === 'inductor' && mode === 'dc') viaInductors.union(node(c, 'a'), node(c, 'b'))
   }
   const shorted = new Set<string>()
   for (const v of sources) {
@@ -110,6 +132,14 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
         `${v.name} está em curto-circuito: o + e o − estão ligados por um interruptor fechado.`,
         [v.id],
         { name: v.name, via: 'switch' },
+      )
+      shorted.add(v.id)
+    } else if (viaInductors.same(plus, minus)) {
+      error(
+        'source-short',
+        `${v.name} está em curto-circuito: em DC uma bobina é um fio entre o + e o −.`,
+        [v.id],
+        { name: v.name, via: 'inductor' },
       )
       shorted.add(v.id)
     }
@@ -186,9 +216,14 @@ export function validateProject(project: Pick<Project, 'components' | 'wires'>):
   return { ok: issues.every((i) => i.severity !== 'error'), issues }
 }
 
-/** O interruptor aberto não entra no cálculo (é um corte); os outros componentes entram. */
-function entersCalculation(c: Component): boolean {
-  return !(c.kind === 'switch' && !c.params.closed)
+/**
+ * O interruptor aberto não entra no cálculo (é um corte); em DC o condensador também não
+ * (circuito aberto: i = C·du/dt = 0 com tensão constante). Os outros componentes entram.
+ */
+function entersAnalysis(c: Component, mode: AnalysisMode): boolean {
+  if (c.kind === 'switch') return c.params.closed
+  if (c.kind === 'capacitor') return mode === 'transient'
+  return true
 }
 
 /** Conjuntos de nós (union-find simples): `same(a, b)` diz se estão ligados. */

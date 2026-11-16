@@ -13,6 +13,19 @@ export const en: Messages = {
   'action.redo': 'Redo',
   'action.simulate': 'Simulate',
   'action.stop': 'Stop',
+  'action.transient': 'Transient',
+  'transient.title': 'Time simulation (transient)',
+  'transient.hint':
+    'Capacitors and inductors evolve from t = 0 to the end (implicit Euler, fixed step).',
+  'transient.duration': 'Duration',
+  'transient.step': 'Step',
+  'transient.run': 'Simulate over time',
+  'transient.cancel': 'Cancel',
+  'transient.invalid': 'Enter a time greater than 0, e.g. 0.5 s or 1 ms.',
+  'transient.tooMany':
+    '{steps} steps is too many (maximum {max}). Increase the step or reduce the duration.',
+  'results.transientInfo':
+    'Transient from 0 to {duration} ({steps} steps): values at the final instant.',
   'action.reset': 'Reset',
   'action.nodes': 'Nodes',
   'action.nodesHint': 'Show the node number of each terminal (debug)',
@@ -46,6 +59,8 @@ export const en: Messages = {
   'kind.led': 'LED',
   'kind.lamp': 'Lamp',
   'kind.diode': 'Diode',
+  'kind.capacitor': 'Capacitor',
+  'kind.inductor': 'Inductor',
 
   'param.voltage': 'Voltage',
   'param.resistance': 'Resistance',
@@ -58,6 +73,10 @@ export const en: Messages = {
   'param.ratedVoltage': 'Rated voltage',
   'param.saturationCurrent': 'Saturation current (Is)',
   'param.emissionCoefficient': 'Emission coefficient (n)',
+  'param.capacitance': 'Capacitance',
+  'param.initialVoltage': 'Initial voltage',
+  'param.inductance': 'Inductance',
+  'param.initialCurrent': 'Initial current',
 
   'color.vermelho': 'red',
   'color.verde': 'green',
@@ -118,6 +137,10 @@ export const en: Messages = {
   'issue.source-short-wire': '{name} is short-circuited: + and − are connected by a wire.',
   'issue.source-short-switch':
     '{name} is short-circuited: + and − are connected by a closed switch.',
+  'issue.source-short-inductor':
+    '{name} is short-circuited: in DC an inductor is a wire between + and −.',
+  'issue.led-in-transient':
+    '{name}: the simple LED is not supported in transient mode. Use a diode (Semiconductors menu).',
   'issue.parallel-sources':
     '{a} and {b} are in parallel (two sources connected to the same two nodes).',
   'issue.floating-part': '{name} is not connected to the rest of the circuit with GND.',

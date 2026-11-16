@@ -51,6 +51,15 @@ export type SimulationIssue =
       /** { name, current, max } — correntes em A. */
       params?: Readonly<Record<string, string | number>>
     }
+  | {
+      /** Transitório (E10): o LED simples (conduz/bloqueado) não tem modelo no tempo. */
+      severity: 'error'
+      code: 'led-in-transient'
+      message: string
+      componentIds: string[]
+      /** { name } */
+      params?: Readonly<Record<string, string | number>>
+    }
 
 export type SimulationResult =
   | {
@@ -166,7 +175,11 @@ function componentResult(
     case 'dc-source':
     case 'resistor':
     case 'lamp':
+    case 'inductor': // em DC é um fio de 1 mΩ: a corrente é a que passa por ele
       return solution.elements.get(c.id)
+    case 'capacitor':
+      // Em DC é um circuito aberto: tensão aos terminais, corrente nula.
+      return { voltage: voltageAcross(vAt, c, 'a', 'b') ?? 0, current: 0, power: 0 }
     case 'diode': {
       const r = solution.elements.get(c.id)
       if (!r) return undefined

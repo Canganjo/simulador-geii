@@ -18,8 +18,14 @@ export {
   type TransientResult,
 } from './transient'
 export {
+  DIODE_ON_CURRENT,
   simulateDc,
   type ComponentResult,
   type SimulationIssue,
   type SimulationResult,
 } from './simulateDc'
+export {
+  simulateTransient,
+  type TransientSimulationOptions,
+  type TransientSimulationResult,
+} from './simulateTransient'

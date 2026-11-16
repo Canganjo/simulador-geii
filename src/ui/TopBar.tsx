@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import {
+  Activity,
   CircleHelp,
   FilePlus,
   FolderOpen,
@@ -22,6 +23,7 @@ import { useUiStore } from '../store/uiStore'
 import { AccountMenu } from './AccountMenu'
 import { useT, type Translate } from './i18n'
 import { isTyping } from './keyboard'
+import { TransientDialog } from './TransientDialog'
 import {
   confirmDiscard,
   forgetCurrentFile,
@@ -44,6 +46,8 @@ interface Action {
   hint?: string
   /** Bolinha âmbar no ícone (ex.: Guardar com alterações por guardar). */
   badge?: boolean
+  /** Só o ícone até ecrãs muito largos (≥ 1536 px), para a barra caber a 1366 px. */
+  compact?: boolean
 }
 
 const undo = () => useCircuitStore.temporal.getState().undo()
@@ -116,6 +120,7 @@ export function TopBar() {
   // O <input type="file"> escondido (guardado em estado, para o botão Abrir clicar nele).
   const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
+  const [transientOpen, setTransientOpen] = useState(false)
 
   const onNew = () => {
     if (!confirmDiscard(t('file.confirmDiscard'))) return
@@ -154,7 +159,7 @@ export function TopBar() {
   )
 
   // Ações do dossier (secção 6).
-  // Parar e RAZ limpam os resultados (no MVP só DC não há simulação a correr no tempo).
+  // Parar e RAZ limpam os resultados. Transitório abre a janela com a duração e o passo (E10).
   const groups: Action[][] = [
     [
       { label: t('action.new'), icon: FilePlus, onClick: onNew, disabled: false },
@@ -199,8 +204,28 @@ export function TopBar() {
     ],
     [
       { label: t('action.simulate'), icon: Play, onClick: run, disabled: !hasComponents },
-      { label: t('action.stop'), icon: Square, onClick: clear, disabled: !hasResult },
-      { label: t('action.reset'), icon: RotateCcw, onClick: clear, disabled: !hasResult },
+      {
+        label: t('action.transient'),
+        icon: Activity,
+        onClick: () => setTransientOpen((open) => !open),
+        disabled: !hasComponents,
+        pressed: transientOpen,
+        hint: t('transient.title'),
+      },
+      {
+        label: t('action.stop'),
+        icon: Square,
+        onClick: clear,
+        disabled: !hasResult,
+        compact: true,
+      },
+      {
+        label: t('action.reset'),
+        icon: RotateCcw,
+        onClick: clear,
+        disabled: !hasResult,
+        compact: true,
+      },
     ],
     [
       {
@@ -232,7 +257,17 @@ export function TopBar() {
             className="flex shrink-0 items-center gap-1 border-l border-slate-700 pl-2 first:border-0"
           >
             {group.map(
-              ({ label, icon: Icon, shortcut, onClick, disabled, badge, pressed, hint }) => (
+              ({
+                label,
+                icon: Icon,
+                shortcut,
+                onClick,
+                disabled,
+                badge,
+                pressed,
+                hint,
+                compact,
+              }) => (
                 <button
                   key={label}
                   type="button"
@@ -255,7 +290,9 @@ export function TopBar() {
                       />
                     )}
                   </span>
-                  <span className="hidden lg:inline">{label}</span>
+                  <span className={compact ? 'hidden 2xl:inline' : 'hidden lg:inline'}>
+                    {label}
+                  </span>
                 </button>
               ),
             )}
@@ -284,6 +321,8 @@ export function TopBar() {
         data-testid="open-project-input"
         onChange={(e) => void onFileChosen(e)}
       />
+
+      {transientOpen && <TransientDialog onClose={() => setTransientOpen(false)} />}
 
       {fileError && (
         <div
