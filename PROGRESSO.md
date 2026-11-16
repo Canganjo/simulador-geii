@@ -144,4 +144,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
 | (squash)  | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80 |
 | (squash)  | Propriedades em secções + potência da resistência em lista (issue #81)      | #82 |
+| (squash)  | Zona livre: sombras, grelha técnica, juntas nos fios (issue #83)            | #84 |
 | (squash)  | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |

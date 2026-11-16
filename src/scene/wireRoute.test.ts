@@ -3,6 +3,7 @@ import {
   isHorizontal,
   moveSegment,
   segmentMiddles,
+  wireCorners,
   simplifyRoute,
   waypointsOf,
   wireRoute,
@@ -102,5 +103,27 @@ describe('waypointsOf e segmentMiddles', () => {
   it('guardar os cantos e voltar a calcular dá o mesmo traçado', () => {
     const route = moveSegment([p(0, 0), p(4, 0)], 0, 2)
     expect(wireRoute(p(0, 0), p(4, 0), waypointsOf(route))).toEqual(route)
+  })
+})
+
+describe('wireCorners', () => {
+  it('só os pontos do meio (onde o fio dobra) recebem junta; um fio reto não tem nenhuma', () => {
+    expect(
+      wireCorners([
+        { x: 0, y: 0 },
+        { x: 2, y: 0 },
+        { x: 2, y: 3 },
+        { x: 5, y: 3 },
+      ]),
+    ).toEqual([
+      { x: 2, y: 0 },
+      { x: 2, y: 3 },
+    ])
+    expect(
+      wireCorners([
+        { x: 0, y: 0 },
+        { x: 4, y: 0 },
+      ]),
+    ).toEqual([])
   })
 })

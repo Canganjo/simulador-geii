@@ -351,7 +351,7 @@ export function Workspace() {
           select(null)
         }}
       >
-        <color attach="background" args={['#1a1f27']} />
+        <color attach="background" args={['#171c24']} />
         {/* Luz de "sala": céu claro por cima, chão escuro; mais uma luz forte de frente-cima. */}
         <hemisphereLight args={['#f1f5f9', '#1e293b', 0.9]} />
         <directionalLight position={[4, 10, 8]} intensity={1.6} />
@@ -362,10 +362,12 @@ export function Workspace() {
           infiniteGrid
           cellSize={1}
           sectionSize={5}
-          cellColor="#353d49"
-          sectionColor="#566070"
-          cellThickness={1}
-          sectionThickness={1.4}
+          // Grelha técnica (papel milimétrico azulado): linhas finas discretas e, a cada 5,
+          // linhas mais marcadas para contar distâncias depressa.
+          cellColor="#323c4a"
+          sectionColor="#4d6684"
+          cellThickness={0.9}
+          sectionThickness={1.5}
           fadeDistance={200}
           fadeStrength={1}
         />
