@@ -63,12 +63,15 @@ export const fr: Messages = {
   'menu.summary.ground': 'référence 0 V',
   'menu.summary.switch': 'ouvert',
   'menu.summary.diode': 'Si · 1N4148',
+  'menu.summary.voltmeter': 'en parallèle · 10 MΩ',
+  'menu.summary.ammeter': 'en série · 1 mΩ',
 
   'category.Fontes': 'Sources',
   'category.Passivos': 'Passifs',
   'category.Comando': 'Commande',
   'category.Semicondutores': 'Semi-conducteurs',
   'category.Cargas': 'Charges',
+  'category.Instrumentos': 'Instruments',
 
   'kind.dc-source': 'Source DC',
   'kind.ground': 'GND',
@@ -79,6 +82,8 @@ export const fr: Messages = {
   'kind.diode': 'Diode',
   'kind.capacitor': 'Condensateur',
   'kind.inductor': 'Bobine',
+  'kind.voltmeter': 'Voltmètre',
+  'kind.ammeter': 'Ampèremètre',
 
   'param.voltage': 'Tension',
   'param.resistance': 'Résistance',
@@ -176,6 +181,8 @@ export const fr: Messages = {
   'issue.source-short-wire': '{name} est en court-circuit : le + et le − sont reliés par un fil.',
   'issue.source-short-switch':
     '{name} est en court-circuit : le + et le − sont reliés par un interrupteur fermé.',
+  'issue.source-short-ammeter':
+    '{name} est en court-circuit : l’ampèremètre est en parallèle avec la source (branche-le en série, sur le chemin du courant).',
   'issue.source-short-inductor':
     '{name} est en court-circuit : en continu une bobine est un fil entre le + et le −.',
   'issue.led-in-transient':

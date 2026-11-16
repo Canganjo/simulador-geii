@@ -19,6 +19,8 @@ const SUMMARY_PARAMS: { readonly [K in ComponentKind]: readonly string[] } = {
   capacitor: ['capacitance'],
   inductor: ['inductance'],
   lamp: ['ratedVoltage', 'ratedPower'],
+  voltmeter: [],
+  ammeter: [],
 }
 
 /**
@@ -29,6 +31,8 @@ export function defaultSummary(kind: ComponentKind, t: Translate, decimal: ',' |
   if (kind === 'ground') return t('menu.summary.ground')
   if (kind === 'switch') return t('menu.summary.switch')
   if (kind === 'diode') return t('menu.summary.diode')
+  if (kind === 'voltmeter') return t('menu.summary.voltmeter')
+  if (kind === 'ammeter') return t('menu.summary.ammeter')
   const def = CATALOG[kind]
   const params: Readonly<Record<string, unknown>> = def.defaultParams
   const specs: Readonly<Record<string, { type: string; unit?: string }>> = def.params
@@ -70,5 +74,10 @@ export const CATEGORY_STYLE: Readonly<
     badge: 'from-emerald-400/25 to-emerald-600/10 border-emerald-400/40',
     symbol: 'text-emerald-300',
     heading: 'text-emerald-300',
+  },
+  Instrumentos: {
+    badge: 'from-lime-400/25 to-lime-600/10 border-lime-400/40',
+    symbol: 'text-lime-300',
+    heading: 'text-lime-300',
   },
 }

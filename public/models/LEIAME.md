@@ -25,6 +25,8 @@ Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se par
 | Lâmpada     | `lamp.glb`      |
 | Condensador | `capacitor.glb` |
 | Bobina      | `inductor.glb`  |
+| Voltímetro  | `voltmeter.glb` |
+| Amperímetro | `ammeter.glb`   |
 
 ## 2. Medidas e posição (o mais importante)
 

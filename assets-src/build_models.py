@@ -381,6 +381,53 @@ def build_inductor():
         lead(side * 0.4, z, side, copper)
 
 
+def build_meter(unit):
+    """Multímetro de bancada pequeno (voltímetro "V" ou amperímetro "A"): capa de borracha amarela,
+    frente escura virada para a câmara (-Y) com o visor verde, o comutador e os bornes.
+
+    O visor usa o material "visor": a aplicação escreve lá a leitura depois de Simular (ex.: 8.00 V).
+    Borne + (vermelho) do lado X = -1, borne - (preto, COM) do lado X = +1 (ordem do catálogo).
+    """
+    w, d, h = 0.9, 0.42, 0.78
+    holster = material("capa", "#f2c230", roughness=0.7)
+    rounded_box((w, d, h), (0, 0, h / 2), holster, bevel=0.07)
+    front = -d / 2
+    panel = material("painel", "#24282e", roughness=0.4)
+    rounded_box((w - 0.14, 0.02, h - 0.14), (0, front - 0.005, h / 2), panel, bevel=0.015)
+    # Visor: moldura + ecrã verde (plano com UV 0..1, virado para -Y).
+    box((0.62, 0.02, 0.2), (0, front - 0.02, 0.58), material("moldura", "#0c120e", roughness=0.3))
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, front - 0.031, 0.58), rotation=(math.pi / 2, 0, 0))
+    screen = bpy.context.active_object
+    screen.scale = (0.56, 0.16, 1)
+    screen.data.materials.append(material("visor", "#0b2e15", roughness=0.25, emission=0.4))
+    # Comutador rotativo com a marca a apontar para a grandeza medida (V à esquerda, A à direita).
+    knob = material("comutador", "#3d424a", roughness=0.35)
+    cylinder(0.12, 0.05, (0, front - 0.035, 0.32), knob, axis="Y", vertices=20)
+    mark = material("marcas", "#f5f5f5")
+    angle = math.radians(40 if unit == "V" else -40)
+    box((0.02, 0.01, 0.09), (-math.sin(angle) * 0.06, front - 0.065, 0.32 + math.cos(angle) * 0.06), mark, rotation=(0, angle, 0))
+    # Letra da grandeza (V ou A) por cima do comutador.
+    bpy.ops.object.text_add(location=(0, front - 0.022, 0.44), rotation=(math.pi / 2, 0, 0))
+    text = bpy.context.active_object
+    text.data.body = unit
+    text.data.size = 0.11
+    text.data.align_x = "CENTER"
+    text.data.align_y = "CENTER"
+    text.data.extrude = 0.004
+    text.data.resolution_u = 2
+    bpy.ops.object.convert(target="MESH")
+    text = bpy.context.active_object
+    text.data.materials.append(mark)
+    # Bornes em baixo: + vermelho (X = -1), - preto (X = +1).
+    m = metal()
+    for x, mat in ((-0.27, material("borne-mais", "#d62828", roughness=0.3)), (0.27, material("borne-menos", "#141414", roughness=0.3))):
+        cylinder(0.06, 0.07, (x, front - 0.04, 0.14), mat, axis="Y", vertices=16)
+        cylinder(0.024, 0.04, (x, front - 0.08, 0.14), m, axis="Y", vertices=8)
+        s = -1 if x < 0 else 1
+        # Patas dentro do limite de 0,4 à frente (|Y| <= 0,4).
+        wire([(x, -0.34, 0.14), (x, -0.34, LEAD_Z), (s * 0.85, -0.34, LEAD_Z), (s * 0.85, 0, LEAD_Z), (s * 1.0, 0, LEAD_Z)], m)
+
+
 def build_ground():
     """Símbolo de massa (GND) em metal, como no mockup: três barras numa placa; terminal em Y = +1."""
     plate = material("placa", "#3a3f47", roughness=0.6)
@@ -403,6 +450,8 @@ BUILDERS = {
     "lamp": build_lamp,
     "capacitor": build_capacitor,
     "inductor": build_inductor,
+    "voltmeter": lambda: build_meter("V"),
+    "ammeter": lambda: build_meter("A"),
 }
 
 

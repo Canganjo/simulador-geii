@@ -262,6 +262,8 @@ function componentResult(
     case 'resistor':
     case 'lamp':
     case 'inductor': // em DC é um fio de 1 mΩ: a corrente é a que passa por ele
+    case 'voltmeter': // 10 MΩ: U é a leitura
+    case 'ammeter': // 1 mΩ: I é a leitura (positiva se entra pelo +)
       return solution.elements.get(c.id)
     case 'capacitor':
       // Em DC é um circuito aberto: tensão aos terminais, corrente nula.

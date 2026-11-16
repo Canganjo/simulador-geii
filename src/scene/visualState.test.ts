@@ -91,6 +91,7 @@ describe('visualState', () => {
       issue: 'warning',
       blink: true,
       source: null,
+      reading: null,
     })
   })
 
@@ -113,5 +114,32 @@ describe('visualState', () => {
       wires: [wire('V1:+', 'V1:-'), wire('V1:-', 'GND1:gnd')],
     })
     expect(visualState(v, result).issue).toBe('error')
+  })
+
+  it('instrumentos: o voltímetro lê V e o amperímetro lê A (para o visor)', () => {
+    //   V1 (12 V) + ── AM1 ── R1 (1 kΩ) ── GND, VM1 aos terminais de R1
+    //   I = 12 / 1000 = 12 mA ; U(R1) = 12 V (o 1 mΩ do amperímetro é desprezável).
+    const c: Component[] = []
+    part(c, 'dc-source', { voltage: 12 })
+    const am = part(c, 'ammeter')
+    part(c, 'resistor', { resistance: 1000 })
+    const vm = part(c, 'voltmeter')
+    part(c, 'ground')
+    const result = simulateDc({
+      components: c,
+      wires: [
+        wire('V1:+', 'AM1:+'),
+        wire('AM1:-', 'R1:a'),
+        wire('R1:b', 'GND1:gnd'),
+        wire('VM1:+', 'R1:a'),
+        wire('VM1:-', 'GND1:gnd'),
+        wire('GND1:gnd', 'V1:-'),
+      ],
+    })
+    expect(visualState(vm, result).reading).toBeCloseTo(12, 3)
+    // O amperímetro também conta os 1,2 µA do voltímetro (12 V / 10 MΩ): 12,0012 mA.
+    expect(visualState(am, result).reading).toBeCloseTo(0.012, 5)
+    // Antes de Simular não há leitura.
+    expect(visualState(vm, null).reading).toBeNull()
   })
 })

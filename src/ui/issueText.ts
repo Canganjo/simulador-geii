@@ -22,7 +22,9 @@ export function issueText(issue: SimulationIssue, t: Translate, decimal: ',' | '
           ? 'issue.source-short-switch'
           : params.via === 'inductor'
             ? 'issue.source-short-inductor'
-            : 'issue.source-short-wire',
+            : params.via === 'ammeter'
+              ? 'issue.source-short-ammeter'
+              : 'issue.source-short-wire',
       )
     case 'invalid-params':
       return text('issue.invalid-params', {

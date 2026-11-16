@@ -1,5 +1,6 @@
 import {
   Cpu,
+  Gauge,
   Lightbulb,
   PanelLeftClose,
   PanelLeftOpen,
@@ -29,6 +30,7 @@ const CATEGORY_ICON: Readonly<Record<ComponentCategory, LucideIcon>> = {
   Comando: ToggleLeft,
   Semicondutores: Cpu,
   Cargas: Lightbulb,
+  Instrumentos: Gauge,
 }
 
 interface Props {

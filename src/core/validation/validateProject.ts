@@ -105,12 +105,20 @@ export function validateProject(
 
   // 4. Curto-circuito da fonte: + e − no mesmo nó, por um fio ou por um interruptor fechado.
   //    Em DC uma bobina também é um fio (u = L·di/dt = 0 com corrente constante).
+  //    Um amperímetro também é (quase) um fio: ligado aos terminais da fonte, curto-circuita-a
+  //    (o erro clássico de pôr o amperímetro em paralelo).
   const viaSwitches = new NodeSets()
+  const viaAmmeters = new NodeSets()
   const viaInductors = new NodeSets()
   for (const c of components) {
     if (c.kind === 'switch' && c.params.closed) {
       viaSwitches.union(node(c, 'a'), node(c, 'b'))
+      viaAmmeters.union(node(c, 'a'), node(c, 'b'))
       viaInductors.union(node(c, 'a'), node(c, 'b'))
+    }
+    if (c.kind === 'ammeter') {
+      viaAmmeters.union(node(c, '+'), node(c, '-'))
+      viaInductors.union(node(c, '+'), node(c, '-'))
     }
     if (c.kind === 'inductor' && mode === 'dc') viaInductors.union(node(c, 'a'), node(c, 'b'))
   }
@@ -132,6 +140,15 @@ export function validateProject(
         `${v.name} está em curto-circuito: o + e o − estão ligados por um interruptor fechado.`,
         [v.id],
         { name: v.name, via: 'switch' },
+      )
+      shorted.add(v.id)
+    } else if (viaAmmeters.same(plus, minus)) {
+      error(
+        'source-short',
+        `${v.name} está em curto-circuito: o amperímetro está em paralelo com a fonte ` +
+          '(liga-o em série, no caminho da corrente).',
+        [v.id],
+        { name: v.name, via: 'ammeter' },
       )
       shorted.add(v.id)
     } else if (viaInductors.same(plus, minus)) {

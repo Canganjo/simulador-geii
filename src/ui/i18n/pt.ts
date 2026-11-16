@@ -69,6 +69,8 @@ export const pt = {
   'menu.summary.ground': 'referência 0 V',
   'menu.summary.switch': 'aberto',
   'menu.summary.diode': 'Si · 1N4148',
+  'menu.summary.voltmeter': 'em paralelo · 10 MΩ',
+  'menu.summary.ammeter': 'em série · 1 mΩ',
 
   // Categorias (o nome técnico vem do catálogo, em src/core/library)
   'category.Fontes': 'Fontes',
@@ -76,6 +78,7 @@ export const pt = {
   'category.Comando': 'Comando',
   'category.Semicondutores': 'Semicondutores',
   'category.Cargas': 'Cargas',
+  'category.Instrumentos': 'Instrumentos',
 
   // Componentes (pelo tipo: ComponentKind)
   'kind.dc-source': 'Fonte DC',
@@ -87,6 +90,8 @@ export const pt = {
   'kind.diode': 'Díodo',
   'kind.capacitor': 'Condensador',
   'kind.inductor': 'Bobina',
+  'kind.voltmeter': 'Voltímetro',
+  'kind.ammeter': 'Amperímetro',
 
   // Parâmetros (pelo nome técnico no catálogo)
   'param.voltage': 'Tensão',
@@ -189,6 +194,8 @@ export const pt = {
   'issue.source-short-wire': '{name} está em curto-circuito: o + e o − estão ligados por um fio.',
   'issue.source-short-switch':
     '{name} está em curto-circuito: o + e o − estão ligados por um interruptor fechado.',
+  'issue.source-short-ammeter':
+    '{name} está em curto-circuito: o amperímetro está em paralelo com a fonte (liga-o em série, no caminho da corrente).',
   'issue.source-short-inductor':
     '{name} está em curto-circuito: em DC uma bobina é um fio entre o + e o −.',
   'issue.led-in-transient':

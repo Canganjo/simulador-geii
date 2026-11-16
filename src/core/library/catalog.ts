@@ -17,6 +17,7 @@ export const COMPONENT_CATEGORIES = [
   'Comando',
   'Semicondutores',
   'Cargas',
+  'Instrumentos',
 ] as const
 
 export type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number]
@@ -264,6 +265,33 @@ export const CATALOG: { readonly [K in ComponentKind]: ComponentDefinition<K> } 
       ratedVoltage: { type: 'number', label: 'Tensão nominal', unit: 'V', min: 0.1, max: 1000 },
       ratedPower: { type: 'number', label: 'Potência nominal', unit: 'W', min: 0.01, max: 10000 },
     },
+  },
+  voltmeter: {
+    kind: 'voltmeter',
+    label: 'Voltímetro',
+    category: 'Instrumentos',
+    // VM1, VM2… (V sozinho já é das fontes)
+    namePrefix: 'VM',
+    terminals: [
+      { name: '+', label: '+' },
+      { name: '-', label: '−' },
+    ],
+    // Liga-se em PARALELO com o que se quer medir. Sem parâmetros: 10 MΩ fixos (D-016).
+    defaultParams: {},
+    params: {},
+  },
+  ammeter: {
+    kind: 'ammeter',
+    label: 'Amperímetro',
+    category: 'Instrumentos',
+    namePrefix: 'AM',
+    terminals: [
+      { name: '+', label: '+' },
+      { name: '-', label: '−' },
+    ],
+    // Liga-se em SÉRIE (o circuito passa por dentro dele). Sem parâmetros: 1 mΩ fixo (D-016).
+    defaultParams: {},
+    params: {},
   },
 }
 

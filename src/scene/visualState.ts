@@ -18,6 +18,8 @@ export interface VisualState {
   blink: boolean
   /** Só fontes DC depois de Simular: tensão de saída medida e modo (CV / CC), para o visor. */
   source: { voltage: number; mode: 'cv' | 'cc' } | null
+  /** Só instrumentos depois de Simular: a leitura (V do voltímetro, A do amperímetro). */
+  reading: number | null
 }
 
 export const NO_VISUAL: VisualState = {
@@ -26,6 +28,7 @@ export const NO_VISUAL: VisualState = {
   issue: null,
   blink: false,
   source: null,
+  reading: null,
 }
 
 /** Cor da luz de cada cor de LED (os valores guardados no projeto estão em português). */
@@ -67,7 +70,10 @@ export function visualState(c: Component, result: SimulationResult | null): Visu
   const source =
     r && c.kind === 'dc-source' && r.sourceMode ? { voltage: r.voltage, mode: r.sourceMode } : null
 
-  return { glow, glowColor, issue, blink, source }
+  const reading =
+    r && c.kind === 'voltmeter' ? r.voltage : r && c.kind === 'ammeter' ? r.current : null
+
+  return { glow, glowColor, issue, blink, source, reading }
 }
 
 function clamp01(x: number): number {
