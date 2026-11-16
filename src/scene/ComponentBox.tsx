@@ -11,6 +11,7 @@ import { SoftShadow } from './SoftShadow'
 import { modelUrl, modelUrlFor, STATE_MODEL_FILES } from './models3d'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
 import { LED_LIGHT, type VisualState } from './visualState'
+import { terminalHighlight, terminalMark, type TerminalMark } from './terminalMarks'
 
 /**
  * Um componente na cena: CAIXA SIMPLES, ou o modelo 3D (.glb) do Blender se existir
@@ -73,8 +74,8 @@ interface Props {
    * `additive` = Ctrl/Shift/⌘ carregado: junta/tira o componente da seleção (sem arrastar).
    */
   onGrab: (component: Component, clientX: number, clientY: number, additive: boolean) => void
-  /** Terminais com pelo menos um fio (ficam verdes; os soltos ficam brancos). */
-  connected: ReadonlySet<TerminalId>
+  /** Número de fios em cada terminal (0 = quadrado aberto, 2+ = ponto de junção). */
+  wireCounts: ReadonlyMap<TerminalId, number>
   /** Terminal de onde parte o fio que se está a desenhar (ou null). */
   wiringFrom: TerminalId | null
   /** Clique num terminal: começa ou termina um fio. */
@@ -83,13 +84,11 @@ interface Props {
   visual: VisualState
 }
 
-const TERMINAL_COLORS = { loose: '#e2e8f0', connected: '#4ade80', active: '#38bdf8' }
-
 export function ComponentBox({
   component,
   selected,
   onGrab,
-  connected,
+  wireCounts,
   wiringFrom,
   onTerminalClick,
   visual,
@@ -209,13 +208,8 @@ export function ComponentBox({
             key={terminal.id}
             id={terminal.id}
             position={modelToScene(rotateOffset(offset, rotation), 0.06)}
-            state={
-              terminal.id === wiringFrom
-                ? 'active'
-                : connected.has(terminal.id)
-                  ? 'connected'
-                  : 'loose'
-            }
+            mark={terminalMark(wireCounts.get(terminal.id) ?? 0)}
+            wiringFrom={wiringFrom}
             onClick={onTerminalClick}
           />
         )
@@ -227,17 +221,50 @@ export function ComponentBox({
   )
 }
 
+/** Cores dos pinos (as do fio: âmbar; realce: azul da seleção). */
+const PIN_COLORS = {
+  open: '#e2e8f0',
+  junction: '#f59e0b',
+  hover: '#7dd3fc',
+  origin: '#38bdf8',
+  target: '#38bdf8',
+}
+/** Altura das marcas planas (quadrado, anéis): um pouco acima da pata e do fio. */
+const MARK_HEIGHT = 0.1
+/** Meio lado do quadradinho aberto e espessura do traço (unidades da grelha). */
+const SQUARE_HALF = 0.13
+const SQUARE_LINE = 0.045
+/** Um anel de 4 lados com o 1.º vértice a 45° é um quadrado; o raio vai até ao canto (×√2). */
+const SQUARE_RING: [number, number, number, number, number] = [
+  (SQUARE_HALF - SQUARE_LINE) * Math.SQRT2,
+  SQUARE_HALF * Math.SQRT2,
+  4,
+  1,
+  Math.PI / 4,
+]
+/** Deitado no chão (o anel do three.js nasce de pé, no plano XY). */
+const FLAT: [number, number, number] = [-Math.PI / 2, 0, 0]
+
 interface TerminalDotProps {
   id: TerminalId
   position: [number, number, number]
-  state: keyof typeof TERMINAL_COLORS
+  mark: TerminalMark
+  wiringFrom: TerminalId | null
   onClick: (terminal: TerminalId) => void
 }
 
-/** Um terminal: ponto visível pequeno + zona de clique maior (invisível) à volta. */
-function TerminalDot({ id, position, state, onClick }: TerminalDotProps) {
+/**
+ * Um pino de ligação, como no LTspice: quadradinho aberto se está livre, nada se tem um fio
+ * (o fio continua a pata), bola cheia se é ponto de junção. Por cima, o realce: anel claro com
+ * o rato em cima, anel azul cheio na origem do fio, anel azul fino nos terminais que o podem
+ * receber. A zona de clique (invisível) é maior do que a marca.
+ */
+function TerminalDot({ id, position, mark, wiringFrom, onClick }: TerminalDotProps) {
   const [hover, setHover] = useState(false)
-  const big = hover || state === 'active'
+  const highlight = terminalHighlight(id, hover, wiringFrom)
+  // As marcas são finas: desenham-se sempre por cima (depthTest desligado) para não ficarem
+  // escondidas dentro da pata do modelo 3D.
+  const overlay = { depthTest: false, depthWrite: false, transparent: true } as const
 
   return (
     <group position={position}>
@@ -260,10 +287,52 @@ function TerminalDot({ id, position, state, onClick }: TerminalDotProps) {
         <sphereGeometry args={[0.3, 12, 8]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <mesh scale={big ? 1.6 : 1}>
-        <sphereGeometry args={[0.12, 16, 12]} />
-        <meshStandardMaterial color={TERMINAL_COLORS[state]} />
-      </mesh>
+
+      {/* Terminal livre: quadradinho aberto (fica azul com o rato ou na origem do fio). */}
+      {mark === 'open' && (
+        <mesh
+          position={[0, MARK_HEIGHT - position[1], 0]}
+          rotation={FLAT}
+          scale={highlight === 'hover' || highlight === 'origin' ? 1.25 : 1}
+          renderOrder={3}
+          raycast={() => undefined}
+        >
+          <ringGeometry args={SQUARE_RING} />
+          <meshBasicMaterial
+            {...overlay}
+            color={
+              highlight === 'hover' || highlight === 'origin'
+                ? PIN_COLORS[highlight]
+                : PIN_COLORS.open
+            }
+          />
+        </mesh>
+      )}
+
+      {/* Ponto de junção: bola cheia da cor do fio, por cima das pontas dos fios. */}
+      {mark === 'junction' && (
+        <mesh position={[0, 0.07 - position[1], 0]} raycast={() => undefined}>
+          <cylinderGeometry args={[0.15, 0.15, 0.05, 20]} />
+          <meshStandardMaterial color={PIN_COLORS.junction} />
+        </mesh>
+      )}
+
+      {/* Realce: anel à volta do pino. */}
+      {highlight !== 'none' && (
+        <mesh
+          position={[0, MARK_HEIGHT - position[1], 0]}
+          rotation={FLAT}
+          renderOrder={2}
+          raycast={() => undefined}
+        >
+          <ringGeometry args={highlight === 'target' ? [0.2, 0.235, 32] : [0.2, 0.27, 32]} />
+          <meshBasicMaterial
+            {...overlay}
+            color={PIN_COLORS[highlight]}
+            opacity={highlight === 'target' ? 0.55 : 0.9}
+          />
+        </mesh>
+      )}
     </group>
   )
 }

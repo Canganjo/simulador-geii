@@ -1,7 +1,7 @@
 import type { Vec2 } from '../core/model'
 import { modelToScene } from './coordinates'
 import { SoftShadow } from './SoftShadow'
-import { segmentMiddles, wireCorners } from './wireRoute'
+import { segmentMiddles, wireCorners, wireEnds } from './wireRoute'
 
 const WIRE_HEIGHT = 0.05
 const WIRE_THICKNESS = 0.1
@@ -98,8 +98,9 @@ export function WireView({ id, points, selected, onGrabSegment, onStraighten }: 
         )
       })}
 
-      {/* Juntas redondas nos cantos: o fio dobra sem "degraus". */}
-      {wireCorners(points).map((p, i) => (
+      {/* Juntas redondas nos cantos (o fio dobra sem "degraus") e nas duas pontas (o fio
+          continua a pata do componente sem falha, como no LTspice). */}
+      {[...wireEnds(points), ...wireCorners(points)].map((p, i) => (
         <mesh key={`j${i}`} position={modelToScene(p, WIRE_HEIGHT)} raycast={() => undefined}>
           <cylinderGeometry args={[WIRE_THICKNESS * 0.62, WIRE_THICKNESS * 0.62, 0.045, 16]} />
           <meshStandardMaterial color={color} />
