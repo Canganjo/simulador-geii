@@ -67,6 +67,11 @@ export interface CircuitState {
   /** Liga dois terminais. Devolve o ID do fio, ou null se o fio for recusado. */
   addWire: (from: TerminalId, to: TerminalId) => string | null
   removeWire: (id: string) => void
+  /**
+   * Guarda os cantos de um fio (o traçado sem os terminais, ver scene/wireRoute.ts).
+   * Lista vazia = traçado automático outra vez ("Endireitar fio").
+   */
+  setWireWaypoints: (id: string, waypoints: readonly Vec2[]) => void
   /** Seleciona SÓ este componente (e tira a seleção do fio); null tira tudo. */
   select: (id: string | null) => void
   /** Ctrl+clique: junta o componente à seleção, ou tira-o se já lá estava. */
@@ -226,6 +231,15 @@ export const useCircuitStore = create<CircuitState>()(
         set((s) => ({
           wires: s.wires.filter((w) => w.id !== id),
           selectedWireId: s.selectedWireId === id ? null : s.selectedWireId,
+        })),
+
+      setWireWaypoints: (id, waypoints) =>
+        set((s) => ({
+          wires: s.wires.map((w) => {
+            if (w.id !== id) return w
+            if (waypoints.length === 0) return { id: w.id, from: w.from, to: w.to }
+            return { ...w, waypoints: waypoints.map((p) => ({ x: p.x, y: p.y })) }
+          }),
         })),
 
       select: (id) =>

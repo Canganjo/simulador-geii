@@ -91,6 +91,11 @@ export const pt = {
   'props.rotation': 'Rotação',
   'props.rotate': 'Rodar',
   'props.duplicate': 'Duplicar',
+  'props.wireTitle': 'Fio',
+  'props.wireHint':
+    'Arraste um troço do fio para o deslocar (para cima/baixo ou para os lados) e organizar o circuito. Duplo clique no fio endireita-o.',
+  'props.straighten': 'Endireitar fio',
+  'props.deleteWire': 'Apagar fio',
   'props.delete': 'Apagar',
   'props.name': 'Nome',
   'props.nameEmpty': 'O nome não pode ficar vazio.',

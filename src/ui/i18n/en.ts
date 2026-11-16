@@ -77,6 +77,11 @@ export const en: Messages = {
   'props.rotation': 'Rotation',
   'props.rotate': 'Rotate',
   'props.duplicate': 'Duplicate',
+  'props.wireTitle': 'Wire',
+  'props.wireHint':
+    'Drag a segment of the wire to move it (up/down or sideways) and tidy up the circuit. Double-click the wire to straighten it.',
+  'props.straighten': 'Straighten wire',
+  'props.deleteWire': 'Delete wire',
   'props.delete': 'Delete',
   'props.name': 'Name',
   'props.nameEmpty': 'The name cannot be empty.',
