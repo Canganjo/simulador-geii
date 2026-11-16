@@ -8,6 +8,7 @@ export const fr: Messages = {
   'action.new': 'Nouveau',
   'action.open': 'Ouvrir',
   'action.save': 'Enregistrer',
+  'action.saveAs': 'Enregistrer sous…',
   'action.undo': 'Annuler',
   'action.redo': 'Rétablir',
   'action.simulate': 'Simuler',
