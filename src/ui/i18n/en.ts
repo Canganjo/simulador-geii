@@ -26,6 +26,10 @@ export const en: Messages = {
     '{steps} steps is too many (maximum {max}). Increase the step or reduce the duration.',
   'results.transientInfo':
     'Transient from 0 to {duration} ({steps} steps): values at the final instant.',
+  'chart.component': 'Component',
+  'chart.voltage': 'Voltage u(t)',
+  'chart.current': 'Current i(t)',
+  'chart.tau': 'τ ≈ {tau} (63 %)',
   'action.reset': 'Reset',
   'action.nodes': 'Nodes',
   'action.nodesHint': 'Show the node number of each terminal (debug)',
