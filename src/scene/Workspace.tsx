@@ -453,6 +453,8 @@ export function Workspace() {
               // Para os testes E2E: brilho (0 a 1) e problema depois de Simular.
               data-glow={(visuals.get(c.id)?.glow ?? 0).toFixed(2)}
               data-issue={visuals.get(c.id)?.issue ?? 'none'}
+              // Instrumentos: a leitura do visor (V ou A), em número, depois de Simular.
+              data-reading={visuals.get(c.id)?.reading ?? undefined}
               // A etiqueta agarra-se e arrasta-se; duplo clique volta ao sítio normal.
               // Só a etiqueta do componente SELECIONADO se agarra: as outras deixam passar o clique
               // (uma etiqueta por cima de um terminal não pode atrapalhar a ligação dos fios).

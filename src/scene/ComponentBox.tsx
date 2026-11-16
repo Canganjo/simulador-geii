@@ -6,6 +6,7 @@ import type { Component, ComponentKind, TerminalId } from '../core/model'
 import { boxSize, shadowSize } from './componentShape'
 import { ComponentModel, ModelErrorBoundary } from './ComponentModel'
 import { Halo } from './Halo'
+import { meterDisplay } from './meterDisplay'
 import { SoftShadow } from './SoftShadow'
 import { modelUrl, modelUrlFor, STATE_MODEL_FILES } from './models3d'
 import { modelToScene, rotateOffset, terminalOffsets } from './coordinates'
@@ -27,6 +28,8 @@ const COLORS: Record<ComponentKind, string> = {
   diode: '#a855f7', // violeta: distingue-se do LED e vê-se bem no fundo escuro
   capacitor: '#0ea5e9', // azul-claro (condensador eletrolítico)
   inductor: '#b45309', // cor de cobre (fio enrolado)
+  voltmeter: '#facc15', // multímetro amarelo
+  ammeter: '#facc15',
 }
 
 const SELECTION_COLOR = '#38bdf8'
@@ -46,6 +49,9 @@ function bodyColor(component: Component): string {
  * tensão regulada ("12.0 V"); depois, a tensão de saída medida e o modo ("4.70 V" + "CC").
  */
 function displayText(component: Component, visual: VisualState): string | undefined {
+  // Instrumentos: a leitura depois de Simular ("8.00 V", "4.00 mA"); antes, traços.
+  if (component.kind === 'voltmeter') return meterDisplay('V', visual.reading)
+  if (component.kind === 'ammeter') return meterDisplay('A', visual.reading)
   if (component.kind !== 'dc-source') return undefined
   const voltage = visual.source?.voltage ?? component.params.voltage
   // 3 algarismos significativos: 4.70 V, 12.0 V, 230 V.

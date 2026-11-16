@@ -15,6 +15,8 @@
  *   LED bloqueado       → não entra (como um interruptor aberto)
  *   Condensador         → DC: não entra (circuito aberto) · transitório: elemento 'capacitor'
  *   Bobina              → DC: fio (resistência de 1 mΩ) · transitório: elemento 'inductor'
+ *   Voltímetro          → resistência interna de 10 MΩ (quase não tira corrente ao circuito)
+ *   Amperímetro         → shunt de 1 mΩ (quase não tira tensão ao circuito)
  *
  * Quem decide se cada LED conduz é o `simulateDc` (supõe e verifica); aqui só se recebe a lista
  * dos LED bloqueados em `options.ledOff`. O mesmo para as fontes em limitação de corrente
@@ -34,6 +36,12 @@ import {
 
 /** Resistência de um interruptor fechado: 1 mΩ (o mínimo aceite para uma resistência). */
 export const CLOSED_SWITCH_RESISTANCE = 1e-3
+
+/** Resistência interna do voltímetro: 10 MΩ, como num multímetro digital (D-016). */
+export const VOLTMETER_RESISTANCE = 10e6
+
+/** Resistência do amperímetro (shunt): 1 mΩ, a mesma de um interruptor fechado (D-016). */
+export const AMMETER_RESISTANCE = 1e-3
 
 /** IDs dos elementos de um LED a conduzir: "D1#vf" (fonte Vf) e "D1#rs" (resistência série). */
 export const ledSourceId = (componentId: string) => `${componentId}#vf`
@@ -193,6 +201,12 @@ export function buildNetlist(
           // Em DC (corrente constante) a bobina é um fio: como um interruptor fechado.
           elements.push(resistor(c, nodeAt(c, 'a'), nodeAt(c, 'b'), CLOSED_SWITCH_RESISTANCE))
         }
+        break
+      case 'voltmeter':
+        elements.push(resistor(c, nodeAt(c, '+'), nodeAt(c, '-'), VOLTMETER_RESISTANCE))
+        break
+      case 'ammeter':
+        elements.push(resistor(c, nodeAt(c, '+'), nodeAt(c, '-'), AMMETER_RESISTANCE))
         break
       case 'ground':
         break // o GND é o nó 0

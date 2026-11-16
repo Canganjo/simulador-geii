@@ -24,8 +24,8 @@ test('menu recolhido: fica uma coluna de ícones que também cria componentes', 
   await menu(page).getByRole('button', { name: 'Recolher menu' }).click()
   const rail = menu(page).locator('[data-menu-rail]')
   await expect(rail).toBeVisible()
-  // Um ícone por tipo do catálogo (9), sem a pesquisa nem os nomes à vista.
-  await expect(rail.locator('[data-menu-item]')).toHaveCount(9)
+  // Um ícone por tipo do catálogo (11), sem a pesquisa nem os nomes à vista.
+  await expect(rail.locator('[data-menu-item]')).toHaveCount(11)
   await expect(menu(page).getByPlaceholder('Pesquisar…')).toHaveCount(0)
 
   await rail.getByRole('button', { name: 'Resistência', exact: true }).click()

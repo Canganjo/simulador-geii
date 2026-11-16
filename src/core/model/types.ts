@@ -8,7 +8,7 @@
  * Unidades SI em todo o lado: V, A, Ω, W. Posições em unidades da grelha.
  */
 
-/** Tipos de componente (MVP + díodo real, condensador e bobina da E10). */
+/** Tipos de componente (MVP + díodo real, condensador, bobina e instrumentos da E10). */
 export type ComponentKind =
   | 'dc-source'
   | 'ground'
@@ -19,6 +19,8 @@ export type ComponentKind =
   | 'diode'
   | 'capacitor'
   | 'inductor'
+  | 'voltmeter'
+  | 'ammeter'
 
 /** Posição no plano da zona livre (x para a direita, y para cima), em unidades da grelha. */
 export interface Vec2 {
@@ -63,6 +65,10 @@ export interface ComponentParamsByKind {
   capacitor: { capacitance: number; initialVoltage: number }
   /** Bobina (E10): L em H; corrente inicial i(0) em A (de a para b). DC: curto-circuito (fio). */
   inductor: { inductance: number; initialCurrent: number }
+  /** Voltímetro (E10): mede U = V(+) − V(−). Modelo: resistência interna de 10 MΩ (D-016). */
+  voltmeter: Record<string, never>
+  /** Amperímetro (E10): mede I que entra pelo + e sai pelo −. Modelo: shunt de 1 mΩ (D-016). */
+  ammeter: Record<string, never>
 }
 
 interface ComponentBase<K extends ComponentKind> {

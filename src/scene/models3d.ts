@@ -23,6 +23,8 @@ export const MODEL_FILES: Partial<Record<ComponentKind, string>> = {
   lamp: 'lamp.glb',
   capacitor: 'capacitor.glb',
   inductor: 'inductor.glb',
+  voltmeter: 'voltmeter.glb',
+  ammeter: 'ammeter.glb',
 }
 
 /**

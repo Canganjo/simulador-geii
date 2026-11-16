@@ -61,12 +61,15 @@ export const en: Messages = {
   'menu.summary.ground': '0 V reference',
   'menu.summary.switch': 'open',
   'menu.summary.diode': 'Si · 1N4148',
+  'menu.summary.voltmeter': 'in parallel · 10 MΩ',
+  'menu.summary.ammeter': 'in series · 1 mΩ',
 
   'category.Fontes': 'Sources',
   'category.Passivos': 'Passive',
   'category.Comando': 'Control',
   'category.Semicondutores': 'Semiconductors',
   'category.Cargas': 'Loads',
+  'category.Instrumentos': 'Instruments',
 
   'kind.dc-source': 'DC source',
   'kind.ground': 'GND',
@@ -77,6 +80,8 @@ export const en: Messages = {
   'kind.diode': 'Diode',
   'kind.capacitor': 'Capacitor',
   'kind.inductor': 'Inductor',
+  'kind.voltmeter': 'Voltmeter',
+  'kind.ammeter': 'Ammeter',
 
   'param.voltage': 'Voltage',
   'param.resistance': 'Resistance',
@@ -170,6 +175,8 @@ export const en: Messages = {
   'issue.source-short-wire': '{name} is short-circuited: + and − are connected by a wire.',
   'issue.source-short-switch':
     '{name} is short-circuited: + and − are connected by a closed switch.',
+  'issue.source-short-ammeter':
+    '{name} is short-circuited: the ammeter is in parallel with the source (connect it in series, in the current path).',
   'issue.source-short-inductor':
     '{name} is short-circuited: in DC an inductor is a wire between + and −.',
   'issue.led-in-transient':

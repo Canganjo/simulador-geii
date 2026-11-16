@@ -13,7 +13,7 @@ function sequentialIds() {
 }
 
 describe('catálogo', () => {
-  it('tem os 6 componentes do MVP + díodo real, condensador e bobina (E10)', () => {
+  it('tem os 6 componentes do MVP + díodo real, condensador, bobina e instrumentos (E10)', () => {
     expect([...ALL_KINDS].sort()).toEqual(
       [
         'dc-source',
@@ -25,6 +25,8 @@ describe('catálogo', () => {
         'diode',
         'capacitor',
         'inductor',
+        'voltmeter',
+        'ammeter',
       ].sort(),
     )
   })

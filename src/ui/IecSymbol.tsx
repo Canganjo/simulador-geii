@@ -68,6 +68,22 @@ const PATHS: Record<ComponentKind, ReactNode> = {
       <path d="M8 14a3 3 0 0 1 6 0a3 3 0 0 1 6 0a3 3 0 0 1 6 0a3 3 0 0 1 6 0" />
     </>
   ),
+  // Voltímetro IEC: círculo com V
+  voltmeter: (
+    <>
+      <path d="M2 12h10M28 12h10" />
+      <circle cx="20" cy="12" r="8" />
+      <path d="M16.5 8l3.5 8 3.5-8" />
+    </>
+  ),
+  // Amperímetro IEC: círculo com A
+  ammeter: (
+    <>
+      <path d="M2 12h10M28 12h10" />
+      <circle cx="20" cy="12" r="8" />
+      <path d="M16.5 16l3.5-8 3.5 8M17.8 13.2h4.4" />
+    </>
+  ),
   // Lâmpada: círculo com uma cruz
   lamp: (
     <>

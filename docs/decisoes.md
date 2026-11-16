@@ -7,6 +7,23 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-016 · 2026-11-16 · Voltímetro e amperímetro como resistências (10 MΩ e 1 mΩ) ✅
+
+- **Modelo:** o voltímetro entra na netlist como uma resistência de 10 MΩ entre + e − (valor típico
+  de um multímetro digital) e o amperímetro como uma resistência de 1 mΩ. Não têm parâmetros.
+  O motor não precisou de nada novo: a leitura é a tensão (voltímetro) ou a corrente (amperímetro)
+  dessa resistência.
+- **Efeito na medida:** num divisor de 1 kΩ + 2 kΩ, o voltímetro muda U(R2) em cerca de 0,007 % e o
+  amperímetro tira 4 µV. O estudante pode ver este efeito em circuitos com resistências muito
+  grandes (MΩ), onde o voltímetro já pesa.
+- **Erro de montagem:** um amperímetro ligado diretamente aos bornes de uma fonte (em paralelo) dá o
+  erro `source-short` com `via: 'ammeter'` e uma mensagem própria ("liga-o em série"). Fora deste
+  caso, um amperímetro mal ligado não bloqueia o cálculo: mostra a corrente que passaria por 1 mΩ.
+- **Cena:** modelo 3D de multímetro amarelo com o visor; depois de Simular o visor mostra a leitura
+  com 3 algarismos e prefixo (8.00 V, 4.00 mA), antes disso mostra `--- V`.
+- **Porquê:** medir é o primeiro gesto de laboratório. Tratar os instrumentos como resistências
+  reais ensina onde se ligam (paralelo / série) sem mudar o motor.
+
 ## D-015 · 2026-11-16 · Painel de Propriedades em secções e aviso de sobreaquecimento da resistência ✅
 
 - **Painel:** três secções que se adaptam ao componente: **Identificação** (símbolo, nome, tipo),

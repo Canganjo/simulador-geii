@@ -248,6 +248,74 @@ describe('simulateDc — potência nominal da resistência', () => {
   })
 })
 
+describe('simulateDc — voltímetro e amperímetro (E10)', () => {
+  //   V1 (12 V) + ── AM1 ── R1 (1 kΩ) ──●── R2 (2 kΩ) ── GND ── V1 −
+  //                                     └── VM1 (10 MΩ) ── GND   (voltímetro aos terminais de R2)
+  function divider() {
+    const c: Component[] = []
+    part(c, 'dc-source', { voltage: 12 })
+    part(c, 'ammeter')
+    part(c, 'resistor', { resistance: 1000 })
+    part(c, 'resistor', { resistance: 2000 })
+    part(c, 'voltmeter')
+    part(c, 'ground')
+    return ok(
+      simulateDc({
+        components: c,
+        wires: [
+          wire('V1:+', 'AM1:+'),
+          wire('AM1:-', 'R1:a'),
+          wire('R1:b', 'R2:a'),
+          wire('R2:b', 'GND1:gnd'),
+          wire('VM1:+', 'R2:a'),
+          wire('VM1:-', 'GND1:gnd'),
+          wire('V1:-', 'GND1:gnd'),
+        ],
+      }),
+    )
+  }
+
+  it('o voltímetro lê a tensão de R2 e o amperímetro a corrente da malha (0,1 %)', () => {
+    // Sem instrumentos: U(R2) = 12 · 2000 / 3000 = 8 V ; I = 12 / 3000 = 4 mA.
+    // Com eles: R2 ∥ 10 MΩ = 1999,6 Ω e mais 1 mΩ em série → diferença < 0,01 % (desprezável).
+    const r = divider()
+    expectRelative(result(r, 'VM1').voltage, 8)
+    expectRelative(result(r, 'AM1').current, 0.004)
+    // O amperímetro quase não tira tensão: U = 1 mΩ · 4 mA = 4 µV.
+    expect(Math.abs(result(r, 'AM1').voltage)).toBeLessThan(1e-5)
+    // O voltímetro quase não tira corrente: I = 8 V / 10 MΩ = 0,8 µA.
+    expectRelative(result(r, 'VM1').current, 8 / 10e6, 0.01)
+    expect(r.issues).toEqual([])
+  })
+
+  it('amperímetro em paralelo com a fonte → erro de curto-circuito (via amperímetro)', () => {
+    //   V1 + ── AM1 ── V1 −  : o amperímetro (1 mΩ) liga o + ao − da fonte.
+    const c: Component[] = []
+    part(c, 'dc-source', { voltage: 12 })
+    part(c, 'ammeter')
+    part(c, 'resistor', { resistance: 1000 })
+    part(c, 'ground')
+    const r = simulateDc({
+      components: c,
+      wires: [
+        wire('V1:+', 'AM1:+'),
+        wire('AM1:-', 'V1:-'),
+        wire('V1:+', 'R1:a'),
+        wire('R1:b', 'GND1:gnd'),
+        wire('V1:-', 'GND1:gnd'),
+      ],
+    })
+    expect(r.ok).toBe(false)
+    expect(r.issues).toContainEqual(
+      expect.objectContaining({
+        code: 'source-short',
+        componentIds: ['V1'],
+        params: { name: 'V1', via: 'ammeter' },
+      }),
+    )
+  })
+})
+
 describe('simulateDc — díodo real (Shockley + Newton-Raphson, E10)', () => {
   /** V1 ── R1 1 kΩ ── díodo 1N4148 (por defeito) ── GND, direto ou ao contrário. */
   function diodeCircuit(voltage: number, reversed = false) {

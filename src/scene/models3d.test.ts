@@ -52,8 +52,9 @@ describe('nomes dos materiais do Blender', () => {
     expect(isBodyMaterial('luz')).toBe(false)
   })
 
-  it('os 9 componentes do catálogo têm modelo 3D', () => {
+  it('os 11 componentes do catálogo têm modelo 3D', () => {
     expect(Object.keys(MODEL_FILES).sort()).toEqual([
+      'ammeter',
       'capacitor',
       'dc-source',
       'diode',
@@ -63,6 +64,7 @@ describe('nomes dos materiais do Blender', () => {
       'led',
       'resistor',
       'switch',
+      'voltmeter',
     ])
   })
 
