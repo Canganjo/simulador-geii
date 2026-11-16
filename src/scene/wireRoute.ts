@@ -113,3 +113,11 @@ export function segmentMiddles(points: readonly Vec2[]): Vec2[] {
 export function wireCorners(points: readonly Vec2[]): Vec2[] {
   return points.slice(1, -1).map((p) => ({ x: p.x, y: p.y }))
 }
+
+/** As duas pontas do traçado (nos terminais): aí o fio também leva uma junta redonda. */
+export function wireEnds(points: readonly Vec2[]): Vec2[] {
+  const first = points[0]
+  const last = points.at(-1)
+  if (!first || !last) return []
+  return points.length === 1 ? [{ ...first }] : [{ ...first }, { ...last }]
+}

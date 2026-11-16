@@ -4,6 +4,7 @@ import {
   moveSegment,
   segmentMiddles,
   wireCorners,
+  wireEnds,
   simplifyRoute,
   waypointsOf,
   wireRoute,
@@ -125,5 +126,16 @@ describe('wireCorners', () => {
         { x: 4, y: 0 },
       ]),
     ).toEqual([])
+  })
+})
+
+describe('wireEnds', () => {
+  it('as duas pontas do fio (nos terminais) recebem junta, para o fio continuar a pata', () => {
+    // Fio em "L" de (1, 0) a (3, 2): pontas (1, 0) e (3, 2); o canto (3, 0) não conta.
+    expect(wireEnds([p(1, 0), p(3, 0), p(3, 2)])).toEqual([p(1, 0), p(3, 2)])
+  })
+
+  it('traçado vazio: nenhuma ponta', () => {
+    expect(wireEnds([])).toEqual([])
   })
 })

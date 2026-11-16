@@ -148,3 +148,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |
 | (squash)  | Voltímetro e amperímetro (issue #88)                                        | #89 |
 | (squash)  | Barras de deslocamento da zona livre (issue #90)                            | #91 |
+| (squash)  | Pinos de ligação ao estilo do LTspice (issue #93)                           | #94 |
