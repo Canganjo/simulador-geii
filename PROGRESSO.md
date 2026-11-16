@@ -147,3 +147,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Zona livre: sombras, grelha técnica, juntas nos fios (issue #83)            | #84 |
 | (squash)  | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |
 | (squash)  | Voltímetro e amperímetro (issue #88)                                        | #89 |
+| (squash)  | Barras de deslocamento da zona livre (issue #90)                            | #91 |
