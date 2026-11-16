@@ -5,6 +5,7 @@ import { MOUSE } from 'three'
 import type { Component, TerminalId, Vec2 } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
 import { useT } from '../ui/i18n'
+import { SourceStepper } from '../ui/SourceStepper'
 import { ComponentBox } from './ComponentBox'
 import { labelHeight } from './componentShape'
 import { NO_VISUAL, visualState } from './visualState'
@@ -80,6 +81,8 @@ export function Workspace() {
   /** Retângulo de seleção a ser desenhado (px, relativo à zona livre), ou null. */
   const [box, setBox] = useState<ScreenRect | null>(null)
   const anchorLayer = useRef<HTMLDivElement>(null)
+  /** Camada dos botões − / + em cima da fonte selecionada (esta apanha o rato). */
+  const controlLayer = useRef<HTMLDivElement>(null)
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes(COMPONENT_DRAG_TYPE)) return
@@ -370,6 +373,7 @@ export function Workspace() {
 
         <GroundPicker pickerRef={picker} projectorRef={projector} />
         <AnchorProjector layer={anchorLayer} />
+        <AnchorProjector layer={controlLayer} />
 
         <MapControls
           makeDefault
@@ -451,6 +455,33 @@ export function Workspace() {
             />
           ))
         })}
+      </div>
+
+      {/* Botões − / + da tensão por cima da fonte DC selecionada (como o botão de regulação de
+          uma fonte de bancada). Ficam à frente da fonte: em baixo se está deitada, à direita
+          se está de pé (rodada 90°/270°), para não taparem os terminais. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" ref={controlLayer}>
+        {components
+          .filter(
+            (c) => c.kind === 'dc-source' && selectedIds.length === 1 && selectedSet.has(c.id),
+          )
+          .map((c) => {
+            const upright = c.rotation === 90 || c.rotation === 270
+            const at = upright
+              ? { x: c.position.x + 0.95, y: c.position.y }
+              : { x: c.position.x, y: c.position.y - 0.8 }
+            return (
+              <span
+                key={`stepper-${c.id}`}
+                data-anchor={modelToScene(at, 0.05).join(',')}
+                className="absolute top-0 left-0"
+              >
+                <span className="absolute -translate-x-1/2 -translate-y-1/2">
+                  <SourceStepper componentId={c.id} variant="scene" />
+                </span>
+              </span>
+            )
+          })}
       </div>
 
       {box && (

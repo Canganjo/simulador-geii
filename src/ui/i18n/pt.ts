@@ -101,6 +101,11 @@ export const pt = {
   'param.initialVoltage': 'Tensão inicial',
   'param.inductance': 'Indutância',
   'param.initialCurrent': 'Corrente inicial',
+  'param.currentLimit': 'Limite de corrente (Imax)',
+  'source.increase': 'Aumentar a tensão (+0,1 V · Shift: +1 V · manter carregado repete)',
+  'source.decrease': 'Diminuir a tensão (−0,1 V · Shift: −1 V · manter carregado repete)',
+  'source.maxPower': 'Potência máxima (U × Imax): {power}',
+  'source.modeHint': 'CV = tensão constante · CC = corrente limitada a Imax (a tensão cai).',
 
   // Cores do LED (o valor guardado no projeto fica sempre em português)
   'color.vermelho': 'vermelho',
@@ -151,6 +156,10 @@ export const pt = {
   'results.ledOn': 'aceso',
   'results.ledOff': 'apagado',
   'results.diodeOn': 'conduz',
+  'results.sourceCv': 'CV',
+  'results.sourceCc': 'CC',
+  'results.sourceCvTitle': 'Tensão constante (abaixo do limite de corrente)',
+  'results.sourceCcTitle': 'Corrente limitada a Imax (a tensão caiu)',
   'results.diodeOff': 'bloqueado',
   'results.error': 'Erro',
   'results.warning': 'Aviso',
@@ -179,6 +188,10 @@ export const pt = {
   'issue.loose-terminal': '{name}: o terminal {terminal} não está ligado.',
   'issue.led-overcurrent':
     '{name}: corrente de {current} acima da corrente máxima ({max}) — o LED queimava.',
+  'issue.source-current-limit':
+    '{name}: limite de corrente atingido (CC) — a fonte dá só {limit} e a tensão cai para {voltage}.',
+  'issue.source-limit-transient':
+    '{name}: no transitório a fonte não limita a corrente — pico de {current} acima do limite ({max}).',
 
   // Bordas dos painéis e gavetas (telemóvel)
   'resize.menu': 'Redimensionar menu',

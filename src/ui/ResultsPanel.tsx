@@ -152,6 +152,23 @@ function SimulationOutput() {
                           {r.ledState === 'on' ? t('results.ledOn') : t('results.ledOff')}
                         </span>
                       )}
+                      {r.sourceMode && (
+                        <span
+                          data-source-mode={r.sourceMode}
+                          title={
+                            r.sourceMode === 'cc'
+                              ? t('results.sourceCcTitle')
+                              : t('results.sourceCvTitle')
+                          }
+                          className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
+                            r.sourceMode === 'cc'
+                              ? 'bg-amber-400/20 text-amber-300'
+                              : 'bg-emerald-400/20 text-emerald-300'
+                          }`}
+                        >
+                          {r.sourceMode === 'cc' ? t('results.sourceCc') : t('results.sourceCv')}
+                        </span>
+                      )}
                       {r.diodeState && (
                         <span
                           data-diode-state={r.diodeState}

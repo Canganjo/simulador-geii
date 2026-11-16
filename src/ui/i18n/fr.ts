@@ -92,6 +92,11 @@ export const fr: Messages = {
   'param.initialVoltage': 'Tension initiale',
   'param.inductance': 'Inductance',
   'param.initialCurrent': 'Courant initial',
+  'param.currentLimit': 'Limite de courant (Imax)',
+  'source.increase': 'Augmenter la tension (+0,1 V · Maj : +1 V · maintenir pour répéter)',
+  'source.decrease': 'Diminuer la tension (−0,1 V · Maj : −1 V · maintenir pour répéter)',
+  'source.maxPower': 'Puissance max. (U × Imax) : {power}',
+  'source.modeHint': 'CV = tension constante · CC = courant limité à Imax (la tension chute).',
 
   'color.vermelho': 'rouge',
   'color.verde': 'vert',
@@ -139,6 +144,10 @@ export const fr: Messages = {
   'results.ledOn': 'allumée',
   'results.ledOff': 'éteinte',
   'results.diodeOn': 'passante',
+  'results.sourceCv': 'CV',
+  'results.sourceCc': 'CC',
+  'results.sourceCvTitle': 'Tension constante (sous la limite de courant)',
+  'results.sourceCcTitle': 'Courant limité à Imax (la tension a chuté)',
   'results.diodeOff': 'bloquée',
   'results.error': 'Erreur',
   'results.warning': 'Avertissement',
@@ -165,6 +174,10 @@ export const fr: Messages = {
   'issue.loose-terminal': '{name} : la borne {terminal} n’est pas reliée.',
   'issue.led-overcurrent':
     '{name} : courant de {current} au-dessus du courant maximal ({max}) — la LED grillerait.',
+  'issue.source-current-limit':
+    '{name} : limite de courant atteinte (CC) — la source ne fournit que {limit} et la tension descend à {voltage}.',
+  'issue.source-limit-transient':
+    '{name} : en transitoire la source ne limite pas le courant — pic de {current} au-dessus de la limite ({max}).',
 
   'resize.menu': 'Redimensionner le menu',
   'resize.results': 'Redimensionner les résultats',

@@ -45,7 +45,11 @@ export interface Terminal {
 
 /** Parâmetros elétricos de cada tipo de componente. */
 export interface ComponentParamsByKind {
-  'dc-source': { voltage: number }
+  /**
+   * Fonte de bancada: tensão regulada e limite de corrente (Imax). Sem `currentLimit` é uma fonte
+   * ideal (sem limite). Com limite: modo CV (tensão constante) ou CC (corrente = Imax). D-013.
+   */
+  'dc-source': { voltage: number; currentLimit?: number }
   ground: Record<string, never>
   resistor: { resistance: number; ratedPower?: number }
   switch: { closed: boolean }

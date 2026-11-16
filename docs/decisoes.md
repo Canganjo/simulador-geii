@@ -7,6 +7,30 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-013 · 2026-11-16 · Fonte DC de bancada: botões + / −, limite de corrente (CV/CC) e recálculo automático ✅
+
+Pedido da maquete (prioridade 1): a fonte DC tem de se comportar como a fonte do laboratório.
+
+- **Limite de corrente** (`currentLimit`, **3 A por omissão**, de 1 mA a 100 A):
+  - **CV** (tensão constante): a fonte dá a tensão regulada enquanto a carga pedir I ≤ Imax;
+  - **CC** (corrente constante): se a carga pedir mais, a fonte dá **I = Imax** e a tensão **cai**
+    (U = R · Imax). Ex.: 12 V, Imax = 100 mA, 47 Ω → I = 100 mA, U = 4,7 V (não 255 mA).
+  - No motor: o mesmo ciclo "supor e verificar" dos LED. Em CC a fonte entra na netlist como
+    **fonte de corrente Imax**; volta a CV se a tensão passar a regulada. Aviso `source-current-limit`.
+  - Sem `currentLimit` (só no core/testes) a fonte é ideal. **Ficheiros antigos** abrem com 3 A
+    (os parâmetros em falta vêm do catálogo).
+  - **Transitório:** a fonte fica ideal (CV); só há um aviso se o pico de corrente passar Imax.
+- **Botões − / +** junto ao campo Tensão e em cima da fonte selecionada (na cena): 0,1 V por clique,
+  Shift = 1 V, manter carregado repete; tudo o que muda enquanto se carrega é **um só passo do
+  desfazer**. Potência máxima U × Imax mostrada como informação (não é um parâmetro).
+- **Recálculo automático:** depois de Simular (ou Transitório), mudar só **valores** (tensão,
+  resistência, nome…) volta a calcular logo com a mesma análise; **mover** não mexe nos números
+  (o circuito elétrico é o mesmo); mudar **ligações** (fios, juntar/apagar componentes) limpa, como antes.
+- **Visor da fonte:** antes de Simular mostra a tensão regulada; depois, a tensão de saída medida e
+  o modo (**CV** a verde, **CC** a âmbar). A tabela de resultados e o painel mostram o mesmo modo.
+- **Alternativas:** fonte sempre ideal (não ensina a limitação de corrente do laboratório);
+  limite de potência em vez de corrente (as fontes do laboratório limitam a corrente).
+
 ## D-012 · 2026-11-16 · Condensador e bobina na interface: DC e modo Transitório ✅
 
 E10-4: os componentes `capacitor` (C1, C2…) e `inductor` (L1, L2…) entram no menu (Passivos).

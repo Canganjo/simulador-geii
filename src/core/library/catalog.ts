@@ -40,6 +40,8 @@ export interface NumberParamSpec {
   unit: SiUnit
   min: number
   max: number
+  /** O parâmetro pode faltar no componente (ex.: potência nominal, limite de corrente). */
+  optional?: boolean
 }
 
 export interface BooleanParamSpec {
@@ -80,9 +82,18 @@ export const CATALOG: { readonly [K in ComponentKind]: ComponentDefinition<K> } 
       { name: '+', label: '+' },
       { name: '-', label: '−' },
     ],
-    defaultParams: { voltage: 12 },
+    // Como uma fonte de laboratório: 12 V com limite de corrente de 3 A (modo CV/CC, D-013).
+    defaultParams: { voltage: 12, currentLimit: 3 },
     params: {
       voltage: { type: 'number', label: 'Tensão', unit: 'V', min: 0, max: 1000 },
+      currentLimit: {
+        type: 'number',
+        label: 'Limite de corrente',
+        unit: 'A',
+        min: 1e-3,
+        max: 100,
+        optional: true,
+      },
     },
   },
   ground: {
@@ -106,7 +117,14 @@ export const CATALOG: { readonly [K in ComponentKind]: ComponentDefinition<K> } 
     defaultParams: { resistance: 1000, ratedPower: 0.25 },
     params: {
       resistance: { type: 'number', label: 'Resistência', unit: 'Ω', min: 1e-3, max: 1e8 },
-      ratedPower: { type: 'number', label: 'Potência nominal', unit: 'W', min: 0.01, max: 1000 },
+      ratedPower: {
+        type: 'number',
+        label: 'Potência nominal',
+        unit: 'W',
+        min: 0.01,
+        max: 1000,
+        optional: true,
+      },
     },
   },
   switch: {

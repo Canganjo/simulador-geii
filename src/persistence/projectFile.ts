@@ -107,7 +107,10 @@ export function parseProjectFile(text: string): ProjectFileResult {
   for (const c of raw.components) {
     if (ids.has(c.id)) return invalid(`componente repetido: ${c.id}`)
     ids.add(c.id)
-    const problems = validateParams(c.kind, c.params, c.name)
+    // Parâmetros novos que um ficheiro antigo não tem (ex.: limite de corrente da fonte, D-013)
+    // ficam com o valor por defeito do catálogo.
+    const params: Record<string, unknown> = { ...CATALOG[c.kind].defaultParams, ...c.params }
+    const problems = validateParams(c.kind, params, c.name)
     if (problems[0]) return invalid(problems[0].message)
     const terminals: Terminal[] = CATALOG[c.kind].terminals.map(({ name }) => ({
       id: `${c.id}:${name}` satisfies TerminalId,
@@ -115,7 +118,7 @@ export function parseProjectFile(text: string): ProjectFileResult {
       name,
     }))
     // Seguro: o tipo vem do catálogo e os parâmetros acabaram de ser validados para esse tipo.
-    components.push({ ...c, terminals } as Component)
+    components.push({ ...c, params, terminals } as Component)
   }
 
   const terminalIds = new Set(components.flatMap((c) => c.terminals.map((t) => t.id)))

@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #69 (gráfico u(t) / i(t) do transitório).
+Última atualização: 2026-11-16 — issue #73 (fonte DC regulável: + / −, CV/CC, recálculo automático).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -46,6 +46,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #65   | E10-4: condensador e bobina na interface + modo Transitório                                                              | E10   | feito  | `feature/condensador-bobina`   | PR #66              |
 | #67   | Como no mockup: câmara inclinada (~55°) e mais perto, LED/fonte/lâmpada/GND revistos, visor com a tensão, auréola de luz | E7    | feito  | `feature/como-no-desenho`      | PR #68              |
 | #69   | E10-5: gráfico u(t) / i(t) do transitório (cursor, valor final, τ)                                                       | E10   | feito  | `feature/grafico-transitorio`  | PR #70              |
+| #73   | Fonte DC de bancada: botões + / −, limite de corrente (CV/CC, 3 A), recálculo automático                                 | E10   | feito  | `feature/fonte-regulavel`      | PR #74              |
 
 ### Tarefas extra
 
@@ -135,5 +136,6 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64 |
 | `2fa047f` | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
 | `fd9e495` | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
-| (squash)  | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
+| `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
+| (squash)  | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
 | (squash)  | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |

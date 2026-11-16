@@ -49,6 +49,20 @@ describe('issueText: mensagens do motor na língua escolhida', () => {
     expect(issueText(issue, tr('en'), '.')).toContain('25.5 mA')
   })
 
+  it('fonte em limitação de corrente (CC): 100 mA e 4,7 V com prefixos', () => {
+    const issue: SimulationIssue = {
+      severity: 'warning',
+      code: 'source-current-limit',
+      message: '…',
+      componentIds: ['v1'],
+      params: { name: 'V1', limit: 0.1, voltage: 4.7 },
+    }
+    expect(issueText(issue, tr('pt'), ',')).toBe(
+      'V1: limite de corrente atingido (CC) — a fonte dá só 100 mA e a tensão cai para 4,7 V.',
+    )
+    expect(issueText(issue, tr('fr'), ',')).toContain('100 mA')
+  })
+
   it('sem dados (params) → a mensagem do core, tal como veio', () => {
     const issue: SimulationIssue = {
       severity: 'error',
