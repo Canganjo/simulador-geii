@@ -14,7 +14,13 @@ import type { ComponentKind } from '../core/model'
  *   2. Acrescentar aqui a linha  resistor: 'resistor.glb',
  */
 export const MODEL_FILES: Partial<Record<ComponentKind, string>> = {
-  // resistor: 'resistor.glb',
+  'dc-source': 'dc-source.glb',
+  ground: 'ground.glb',
+  resistor: 'resistor.glb',
+  switch: 'switch.glb',
+  led: 'led.glb',
+  diode: 'diode.glb',
+  lamp: 'lamp.glb',
 }
 
 /**
@@ -37,15 +43,16 @@ export function modelUrl(
  * Nome do material que se acende (LED, lâmpada, seleção): no Blender, o material da parte que
  * deve brilhar chama-se "luz" (ex.: a cabeça do LED, o vidro da lâmpada).
  * Aceita também "luz.001", "Luz"… (o Blender acrescenta números quando se copia um material).
+ * "corpo-luz" acende-se E recebe a cor do componente (ex.: a cúpula do LED).
  */
 export function isGlowMaterial(name: string): boolean {
-  return /^luz(\.\d+)?$/i.test(name.trim())
+  return /^(corpo-)?luz(\.\d+)?$/i.test(name.trim())
 }
 
 /**
  * Nome do material que fica com a COR do componente (ex.: a cor do LED escolhida no painel):
- * "corpo" (ou "corpo.001"…). Os outros materiais ficam como vieram do Blender.
+ * "corpo" (ou "corpo.001"…), e também "corpo-luz". Os outros materiais ficam como vieram do Blender.
  */
 export function isBodyMaterial(name: string): boolean {
-  return /^corpo(\.\d+)?$/i.test(name.trim())
+  return /^corpo(-luz)?(\.\d+)?$/i.test(name.trim())
 }

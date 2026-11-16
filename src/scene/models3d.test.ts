@@ -42,4 +42,24 @@ describe('nomes dos materiais do Blender', () => {
     expect(isBodyMaterial('Corpo.002')).toBe(true)
     expect(isBodyMaterial('terminal')).toBe(false)
   })
+
+  it('"corpo-luz" faz as duas coisas (ex.: a cúpula do LED)', () => {
+    expect(isGlowMaterial('corpo-luz')).toBe(true)
+    expect(isBodyMaterial('corpo-luz')).toBe(true)
+    expect(isBodyMaterial('Corpo-Luz.001')).toBe(true)
+    expect(isGlowMaterial('corpo')).toBe(false)
+    expect(isBodyMaterial('luz')).toBe(false)
+  })
+
+  it('os 7 componentes do catálogo têm modelo 3D', () => {
+    expect(Object.keys(MODEL_FILES).sort()).toEqual([
+      'dc-source',
+      'diode',
+      'ground',
+      'lamp',
+      'led',
+      'resistor',
+      'switch',
+    ])
+  })
 })
