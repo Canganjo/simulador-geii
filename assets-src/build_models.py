@@ -344,6 +344,43 @@ def build_switch(closed=True):
         wire([(side * 0.4, 0, 0.06), (side * 0.85, 0, 0.06), (side * 0.85, 0, LEAD_Z), (side * 1.0, 0, LEAD_Z)], m)
 
 
+def build_capacitor():
+    """Condensador eletrolítico em pé: lata azul, tampa de alumínio com a cruz de segurança e a
+    risca branca do lado do terminal b (X = +1). As patas saem por baixo e vão pelo chão."""
+    can = material("lata", "#1d4ed8", roughness=0.35)
+    cylinder(0.22, 0.5, (0, 0, 0.3), can, vertices=24)
+    alu = material("aluminio", "#c9ced6", metallic=0.5, roughness=0.3)
+    cylinder(0.205, 0.02, (0, 0, 0.56), alu, vertices=24)  # tampa
+    groove = material("ranhura", "#7c838d", metallic=0.4, roughness=0.4)
+    box((0.3, 0.025, 0.012), (0, 0, 0.572), groove)  # cruz de segurança
+    box((0.025, 0.3, 0.012), (0, 0, 0.572), groove)
+    stripe = material("risca", "#e5e7eb", roughness=0.4)
+    box((0.06, 0.2, 0.42), (0.205, 0, 0.3), stripe)  # risca do lado b
+    cylinder(0.2, 0.05, (0, 0, 0.05), material("base", "#111827", roughness=0.6), vertices=24)
+    m = metal()
+    for side in (-1, 1):
+        wire([(side * 0.09, 0, 0.06), (side * 0.09, 0, LEAD_Z), (side * 1.0, 0, LEAD_Z)], m)
+
+
+def build_inductor():
+    """Bobina: fio de cobre enrolado num núcleo de ferrite (axial, ao longo de X)."""
+    z = 0.22
+    core = material("ferrite", "#3b3f46", roughness=0.7)
+    cylinder(0.09, 0.72, (0, 0, z), core, axis="X", vertices=16)
+    for x in (-0.38, 0.38):
+        cylinder(0.17, 0.04, (x, 0, z), core, axis="X", vertices=16)  # abas do carreto
+    copper = material("cobre", "#c8742f", metallic=0.6, roughness=0.3)
+    turns, per_turn, radius = 7, 10, 0.125
+    points = []
+    for i in range(turns * per_turn + 1):
+        a = 2 * math.pi * i / per_turn
+        x = -0.32 + 0.64 * i / (turns * per_turn)
+        points.append((x, radius * math.sin(a), z + radius * math.cos(a)))
+    wire(points, copper, radius=0.028)
+    for side in (-1, 1):
+        lead(side * 0.4, z, side, copper)
+
+
 def build_ground():
     """Símbolo de massa (GND) em metal, como no mockup: três barras numa placa; terminal em Y = +1."""
     plate = material("placa", "#3a3f47", roughness=0.6)
@@ -364,6 +401,8 @@ BUILDERS = {
     "led": build_led,
     "diode": build_diode,
     "lamp": build_lamp,
+    "capacitor": build_capacitor,
+    "inductor": build_inductor,
 }
 
 
