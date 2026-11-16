@@ -114,6 +114,24 @@ test('referência 1, 2 e 5 — divisor 12 V (1 kΩ + 2 kΩ): 8 V no meio, 4 mA, 
   await expect(results(page).locator('tr[data-component="R2"]')).toContainText('32 mW')
 })
 
+test('Exportar CSV — o divisor sai em unidades SI, com ";" e vírgula decimal', async ({ page }) => {
+  // Os mesmos valores do teste anterior: I = 4 mA, U(R1) = 4 V, U(R2) = 8 V, P(R2) = 32 mW.
+  await divider(page)
+  const downloading = page.waitForEvent('download')
+  await results(page).getByRole('button', { name: 'Exportar CSV' }).click()
+  const download = await downloading
+  expect(download.suggestedFilename()).toMatch(/-resultados\.csv$/)
+  const path = await download.path()
+  const { readFile } = await import('node:fs/promises')
+  const text = await readFile(path, 'utf8')
+  expect(text.startsWith('\uFEFF')).toBe(true) // BOM: o Excel lê bem o "Ω" e os acentos
+  const lines = text.slice(1).split('\r\n')
+  expect(lines[0]).toBe('Componente;Tipo;U (V);I (A);R (Ω);P (W);Estado')
+  expect(lines).toContain('V1;Fonte DC;12;0,004;;-0,048;CV')
+  expect(lines).toContain('R1;Resistência;4;0,004;1000;0,016;')
+  expect(lines).toContain('R2;Resistência;8;0,004;2000;0,032;')
+})
+
 test('referência 3 e 4 — 1 kΩ ∥ 1 kΩ sob 10 V: I total = 20 mA, Req = 500 Ω', async ({ page }) => {
   // Cada ramo: 10 / 1000 = 10 mA → I total = 20 mA (teste 3)
   // Req = U / I total = 10 / 0,02 = 500 Ω            (teste 4)

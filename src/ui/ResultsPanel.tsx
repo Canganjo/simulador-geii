@@ -1,6 +1,7 @@
 import {
   Activity,
   CircleAlert,
+  Download,
   PanelBottomClose,
   PanelBottomOpen,
   TriangleAlert,
@@ -12,6 +13,14 @@ import { useLanguageStore } from '../store/languageStore'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
 import { useSimulationStore } from '../store/simulationStore'
 import { formatSi } from './formatSi'
+import {
+  componentResistance,
+  csvFileName,
+  csvFormat,
+  dcResultsCsv,
+  downloadCsv,
+  transientCsv,
+} from './exportCsv'
 import { decimalSeparator, useT } from './i18n'
 import { issueText } from './issueText'
 import { WaveformChart } from './WaveformChart'
@@ -39,16 +48,23 @@ export function ResultsPanel({ open, onToggle, height }: Props) {
           <Activity className="size-4" aria-hidden />
           {t('results.label')}
         </h2>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          title={label}
-          className="rounded p-1 text-slate-300 hover:bg-slate-700"
-        >
-          {open ? <PanelBottomClose className="size-5" /> : <PanelBottomOpen className="size-5" />}
-          <span className="sr-only">{label}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportCsvButton />
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={open}
+            title={label}
+            className="rounded p-1 text-slate-300 hover:bg-slate-700"
+          >
+            {open ? (
+              <PanelBottomClose className="size-5" />
+            ) : (
+              <PanelBottomOpen className="size-5" />
+            )}
+            <span className="sr-only">{label}</span>
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -57,6 +73,39 @@ export function ResultsPanel({ open, onToggle, height }: Props) {
         </div>
       )}
     </section>
+  )
+}
+
+/**
+ * "Exportar CSV": só aparece quando há resultados. Depois de um transitório exporta as curvas
+ * (t, u, i de cada componente); depois de Simular (DC), a tabela U, I, R, P.
+ */
+function ExportCsvButton() {
+  const t = useT()
+  const result = useSimulationStore((s) => s.result)
+  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
+  if (!result?.ok) return null
+
+  const exportCsv = () => {
+    const { components, projectName } = useCircuitStore.getState()
+    const { transient } = useSimulationStore.getState()
+    const format = csvFormat(decimal)
+    const text = transient
+      ? transientCsv(components, transient.times, transient.waveforms, format)
+      : dcResultsCsv(components, result.results, t, format)
+    downloadCsv(csvFileName(projectName), text)
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={exportCsv}
+      title={t('csv.exportHint')}
+      className="flex items-center gap-1.5 rounded border border-slate-600 px-2 py-0.5 text-xs text-slate-200 hover:border-sky-400 hover:bg-slate-700"
+    >
+      <Download className="size-3.5" aria-hidden />
+      {t('csv.export')}
+    </button>
   )
 }
 
@@ -233,10 +282,7 @@ function IssueRow({ issue, text }: { issue: SimulationIssue; text: string }) {
  * modelo do core). Para a fonte, o interruptor e o LED não faz sentido → "—".
  */
 function resistanceText(c: Component, decimal: ',' | '.'): string {
-  if (c.kind === 'resistor') return formatSi(c.params.resistance, 'Ω', 3, decimal)
-  if (c.kind === 'lamp') {
-    return formatSi(c.params.ratedVoltage ** 2 / c.params.ratedPower, 'Ω', 3, decimal)
-  }
+  const r = componentResistance(c)
   // Díodo, LED, fonte, interruptor: não têm uma resistência fixa (o díodo é não linear).
-  return '—'
+  return r === undefined ? '—' : formatSi(r, 'Ω', 3, decimal)
 }

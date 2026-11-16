@@ -170,6 +170,10 @@ export const pt = {
 
   // Resultados da simulação
   'results.component': 'Componente',
+  'csv.export': 'Exportar CSV',
+  'csv.exportHint': 'Descarregar os resultados num ficheiro CSV (abre no Excel)',
+  'csv.kind': 'Tipo',
+  'csv.state': 'Estado',
   'results.ledOn': 'aceso',
   'results.ledOff': 'apagado',
   'results.diodeOn': 'conduz',
