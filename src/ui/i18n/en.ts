@@ -153,6 +153,10 @@ export const en: Messages = {
     'to see the voltage (U), current (I), resistance (R) and power (P) of each component.',
 
   'results.component': 'Component',
+  'csv.export': 'Export CSV',
+  'csv.exportHint': 'Download the results as a CSV file (opens in Excel)',
+  'csv.kind': 'Type',
+  'csv.state': 'State',
   'results.ledOn': 'on',
   'results.ledOff': 'off',
   'results.diodeOn': 'conducting',
