@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #55 (Guardar / Guardar como com a janela do sistema).
+Última atualização: 2026-11-16 — issue #63 (modelos 3D dos 7 componentes).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -42,6 +42,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #55   | Guardar e Guardar como… perguntando onde guardar no disco                              | E8    | feito  | `feature/guardar-como`         | PR #58              |
 | #59   | Preparar os modelos 3D do Blender (ficha técnica + carregar .glb com caixa de recurso) | E7    | feito  | `feature/modelos-blender`      | PR #60              |
 | #61   | Organizar os fios: arrastar troços (como no Tinkercad), endireitar                     | E2    | feito  | `feature/arrastar-fios`        | PR #62              |
+| #63   | Modelos 3D dos 7 componentes (script do Blender → .blend + .glb), caixa escondida      | E7    | feito  | `feature/modelos-3d`           | PR #64              |
 | #65   | E10-4: condensador e bobina na interface + modo Transitório                            | E10   | feito  | `feature/condensador-bobina`   | PR #66              |
 
 ### Tarefas extra
@@ -129,4 +130,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `1248111` | Guardar e Guardar como… perguntando onde guardar (issue #55)                | #58 |
 | `641e6ee` | Preparar os modelos 3D do Blender (issue #59)                               | #60 |
 | `f2eb5dd` | Organizar os fios: arrastar troços (issue #61)                              | #62 |
+| `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64 |
 | (squash)  | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
