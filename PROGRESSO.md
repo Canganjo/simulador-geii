@@ -139,4 +139,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `fd9e495` | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
 | `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
 | `de03650` | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
+| `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
 | (squash)  | Ícones modernos no menu de componentes (issue #75)                          | #76 |
