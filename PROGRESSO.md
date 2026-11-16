@@ -142,3 +142,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
 | (squash)  | Ícones modernos no menu de componentes (issue #75)                          | #76 |
 | (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
+| (squash)  | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80 |

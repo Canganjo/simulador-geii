@@ -1,13 +1,20 @@
 import { Grid, Line, MapControls } from '@react-three/drei'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { MOUSE } from 'three'
 import type { Component, TerminalId, Vec2 } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
 import { useT } from '../ui/i18n'
 import { SourceStepper } from '../ui/SourceStepper'
 import { ComponentBox } from './ComponentBox'
-import { labelHeight } from './componentShape'
+import { labelBase, labelHeight } from './componentShape'
 import { NO_VISUAL, visualState } from './visualState'
 import { nodeLabels } from './nodeLabels'
 import { useUiStore } from '../store/uiStore'
@@ -17,11 +24,13 @@ import {
   findFreeCell,
   modelToScene,
   orthogonalRoute,
+  rotateOffset,
   snapToGrid,
   terminalPosition,
   terminalPositionById,
 } from './coordinates'
 import { startComponentDrag } from './dragComponent'
+import { startLabelDrag } from './dragLabel'
 import { startWireDrag } from './dragWire'
 import { GroundPicker, type ModelToScreen, type ScreenToModel } from './GroundPicker'
 import {
@@ -58,6 +67,15 @@ import { segmentMiddles, wireRoute } from './wireRoute'
  *   fio desloca-o na perpendicular (organizar as linhas, como no Tinkercad); duplo clique
  *   endireita o fio.
  */
+/** Onde se desenha a etiqueta: sítio normal do tipo (rodado com o componente) + o arrasto. */
+function labelPosition(c: Component): Vec2 {
+  const base = rotateOffset(labelBase(c.kind), c.rotation)
+  return {
+    x: c.position.x + base.x + (c.labelOffset?.x ?? 0),
+    y: c.position.y + base.y + (c.labelOffset?.y ?? 0),
+  }
+}
+
 export function Workspace() {
   const t = useT()
   const components = useCircuitStore((s) => s.components)
@@ -175,6 +193,30 @@ export function Workspace() {
       if (!moved && e.type === 'pointerup' && component.kind === 'switch') {
         useCircuitStore.getState().toggleSwitch(component.id)
       }
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+  }
+
+  // Botão esquerdo numa etiqueta (R1, D1…): arrasta-a para outro sítio (só aspeto).
+  const onGrabLabel = (e: ReactPointerEvent<HTMLSpanElement>, id: string) => {
+    if (e.button !== 0) return
+    e.stopPropagation()
+    e.preventDefault()
+    if (wiringFrom !== null) cancelWiring()
+    const grab = picker.current?.(e.clientX, e.clientY)
+    const drag = grab ? startLabelDrag(id, grab) : null
+    if (!drag) return
+    const onMove = (ev: PointerEvent) => {
+      const point = picker.current?.(ev.clientX, ev.clientY)
+      if (point) drag.moveTo(point)
+    }
+    const onUp = () => {
+      drag.end()
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
@@ -399,7 +441,7 @@ export function Workspace() {
         {components.map((c) => (
           <span
             key={`label-${c.id}`}
-            data-anchor={modelToScene(c.position, labelHeight(c.kind)).join(',')}
+            data-anchor={modelToScene(labelPosition(c), labelHeight(c.kind)).join(',')}
             className="absolute top-0 left-0"
           >
             {/* O ponto projetado é o canto do <span> de fora; este fica centrado nele. */}
@@ -409,8 +451,16 @@ export function Workspace() {
               // Para os testes E2E: brilho (0 a 1) e problema depois de Simular.
               data-glow={(visuals.get(c.id)?.glow ?? 0).toFixed(2)}
               data-issue={visuals.get(c.id)?.issue ?? 'none'}
+              // A etiqueta agarra-se e arrasta-se; duplo clique volta ao sítio normal.
+              // Só a etiqueta do componente SELECIONADO se agarra: as outras deixam passar o clique
+              // (uma etiqueta por cima de um terminal não pode atrapalhar a ligação dos fios).
+              title={selectedSet.has(c.id) ? t('workspace.labelHint') : undefined}
+              onPointerDown={(e) => onGrabLabel(e, c.id)}
+              onDoubleClick={() => useCircuitStore.getState().moveLabel(c.id, { x: 0, y: 0 })}
               className={`absolute -translate-x-1/2 -translate-y-1/2 rounded px-1 text-xs font-semibold whitespace-nowrap ${
-                selectedSet.has(c.id) ? 'bg-sky-500 text-white' : 'bg-slate-900/70 text-slate-100'
+                selectedSet.has(c.id)
+                  ? 'pointer-events-auto cursor-move bg-sky-500 text-white'
+                  : 'bg-slate-900/70 text-slate-100'
               }`}
             >
               {c.name}

@@ -7,6 +7,19 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-014 · 2026-11-16 · Etiquetas móveis e interruptor com clique na cena ✅
+
+- **Etiquetas:** cada componente pode ter `labelOffset` (opcional, em quadrados da grelha) no
+  ficheiro `.geii.json`. É só aspeto: o motor de cálculo ignora-o. Ficheiros antigos abrem sem ele
+  (etiqueta no sítio normal) e o formato continua na versão 1.
+  - Só a etiqueta do componente **selecionado** se agarra; as outras deixam passar o clique, para
+    nunca taparem um terminal na hora de ligar fios. Duplo clique repõe o sítio normal.
+  - A etiqueta do GND fica ao lado do símbolo (por cima tapava o terminal).
+- **Interruptor:** um clique sem arrastar abre/fecha (`toggleSwitch`); há dois modelos 3D
+  (`switch.glb` fechado, `switch-open.glb` aberto).
+- **Alternativas:** guardar a etiqueta em posição absoluta (perdia-se ao mover o componente);
+  abrir/fechar só no painel (o utilizador pediu clique na cena, como no Tinkercad).
+
 ## D-013 · 2026-11-16 · Fonte DC de bancada: botões + / −, limite de corrente (CV/CC) e recálculo automático ✅
 
 Pedido da maquete (prioridade 1): a fonte DC tem de se comportar como a fonte do laboratório.

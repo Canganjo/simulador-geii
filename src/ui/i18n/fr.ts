@@ -189,6 +189,7 @@ export const fr: Messages = {
   'drawer.close': 'Fermer le panneau',
 
   'workspace.label': 'Zone libre',
+  'workspace.labelHint': 'Glisse pour déplacer l’étiquette (double-clic : position normale)',
   'workspace.wiringBefore': 'Liaison de',
   'workspace.wiringAfter': '— clique sur une autre borne (Échap pour annuler)',
 

@@ -58,6 +58,19 @@ describe('guardar e abrir', () => {
   })
 })
 
+describe('etiquetas móveis', () => {
+  it('a posição da etiqueta guarda-se e abre-se igual; ficheiros antigos abrem sem ela', () => {
+    const project = sample()
+    const [v, r] = project.components
+    if (!v || !r) throw new Error('amostra incompleta')
+    const moved: Project = { ...project, components: [v, { ...r, labelOffset: { x: 1, y: -0.5 } }] }
+    expect(parseProjectFile(toProjectFile(moved))).toEqual({ ok: true, project: moved })
+    const old = parseProjectFile(toProjectFile(project))
+    if (!old.ok) throw new Error('devia abrir')
+    expect(old.project.components[1]).not.toHaveProperty('labelOffset')
+  })
+})
+
 describe('fonte DC com limite de corrente (D-013)', () => {
   it('ficheiro antigo sem currentLimit → abre com o limite por defeito (3 A)', () => {
     const text = mutated((d) => {
