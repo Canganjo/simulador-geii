@@ -206,11 +206,11 @@ def metal():
 
 def build_resistor():
     """Resistência de 1/4 W: corpo bege com o código de cores de 1 kΩ (castanho, preto, vermelho, ouro)."""
-    z = 0.2
-    body = material("ceramica", "#dcc49a", roughness=0.55)
-    cylinder(0.11, 0.6, (0, 0, z), body, axis="X")
+    z = 0.24
+    body = material("ceramica", "#e6d3a8", roughness=0.55)
+    cylinder(0.11, 0.6, (0, 0, z), body, axis="X", vertices=24)
     for x in (-0.3, 0.3):
-        sphere(0.15, (x, 0, z), body, scale=(1.2, 1, 1))
+        sphere(0.15, (x, 0, z), body, scale=(1.2, 1, 1), segments=24, rings=12)
     bands = [
         (-0.22, material("castanho", "#6b3a1e", roughness=0.5)),
         (-0.11, material("preto", "#151515", roughness=0.5)),
@@ -218,7 +218,7 @@ def build_resistor():
         (0.2, material("ouro", "#e0b33a", metallic=0.4, roughness=0.35)),
     ]
     for x, mat in bands:
-        cylinder(0.133, 0.05, (x, 0, z), mat, axis="X")
+        cylinder(0.133, 0.05, (x, 0, z), mat, axis="X", vertices=24)
     for side in (-1, 1):
         lead(side * 0.47, z, side, metal())
 
@@ -233,67 +233,87 @@ def build_diode():
 
 
 def build_led():
-    """LED de 5 mm em pé: cúpula translúcida que acende. Ânodo (pata dobrada) em X = -1."""
-    dome = material("corpo-luz", "#e11d1d", roughness=0.15, alpha=0.8)
-    cylinder(0.29, 0.06, (0, 0, 0.15), dome)  # aba da base
-    cylinder(0.25, 0.3, (0, 0, 0.33), dome)  # corpo
-    sphere(0.25, (0, 0, 0.48), dome)  # cúpula
-    cylinder(0.06, 0.06, (0, 0, 0.36), material("refletor", "#c0c7ce", metallic=0.5, roughness=0.25))
+    """LED vermelho de 5 mm, em pé sobre as patas (como no mockup): aba, corpo e cúpula translúcidos.
+
+    Material "corpo-luz": recebe a cor escolhida no painel e acende-se. Ânodo (pata mais comprida,
+    com uma dobra) em X = -1; cátodo em X = +1.
+    """
+    shell = material("corpo-luz", "#e3171b", roughness=0.12, alpha=0.88)
+    base_z = 0.3  # o LED fica levantado sobre as patas
+    cylinder(0.2, 0.045, (0, 0, base_z + 0.0225), shell, vertices=24)  # aba
+    cylinder(0.17, 0.26, (0, 0, base_z + 0.045 + 0.13), shell, vertices=24)  # corpo
+    sphere(0.17, (0, 0, base_z + 0.305), shell, scale=(1, 1, 1.05), segments=24, rings=10)  # cúpula
+    # Por dentro: os dois suportes metálicos (bigorna e poste), como num LED real.
+    inner = material("interior", "#b8bec6", metallic=0.5, roughness=0.3)
+    box((0.07, 0.025, 0.2), (0.05, 0, base_z + 0.16), inner)
+    box((0.04, 0.025, 0.24), (-0.05, 0, base_z + 0.18), inner)
     m = metal()
-    # Ânodo (+): a pata mais comprida, com uma dobra (como num LED real).
-    wire([(-0.09, 0, 0.36), (-0.09, 0, 0.08), (-0.5, 0, 0.08), (-0.5, 0, LEAD_Z), (-1, 0, LEAD_Z)], m)
-    # Cátodo (-): pata direita.
-    wire([(0.09, 0, 0.36), (0.09, 0, LEAD_Z), (1, 0, LEAD_Z)], m)
+    wire([(-0.05, 0, base_z + 0.05), (-0.05, 0, 0.12), (-0.35, 0, 0.12), (-0.35, 0, LEAD_Z), (-1, 0, LEAD_Z)], m)
+    wire([(0.05, 0, base_z + 0.05), (0.05, 0, LEAD_Z), (1, 0, LEAD_Z)], m)
 
 
 def build_dc_source():
-    """Fonte de alimentação de bancada: caixa clara, visor verde e bornes + (vermelho) e - (preto).
+    """Fonte de alimentação de bancada (como no mockup): caixa creme, frente escura virada para a
+    câmara (-Y) com o visor verde e os bornes + (vermelho) e - (preto).
 
-    O borne + está do lado X = -1 e o - do lado X = +1 (ordem do catálogo).
-    O visor não tem números: o valor real da tensão é mostrado pela aplicação.
+    O visor é um retângulo com o material "visor": a aplicação escreve lá a tensão real (ex.: 12.0 V).
+    Borne + do lado X = -1, borne - do lado X = +1 (ordem do catálogo).
     """
-    top = 0.5
-    rounded_box((1.3, 0.7, top - 0.04), (0, 0, 0.04 + (top - 0.04) / 2), material("caixa", "#d9d4c5", roughness=0.5), bevel=0.04)
+    w, d, h = 1.3, 0.56, 0.62
+    case = material("caixa", "#e4dccb", roughness=0.45)
+    rounded_box((w, d, h - 0.04), (0, 0, 0.04 + (h - 0.04) / 2), case, bevel=0.05)
     feet = material("borracha", "#1c1c1c", roughness=0.8)
-    for x in (-0.5, 0.5):
-        for y in (-0.25, 0.25):
-            cylinder(0.06, 0.04, (x, y, 0.02), feet, vertices=8)
-    # Painel escuro em cima, com o visor verde (ligeiramente luminoso) e dois botões.
-    panel = material("painel", "#2a2d33", roughness=0.45)
-    rounded_box((1.12, 0.56, 0.02), (0, 0, top + 0.01), panel, bevel=0.01)
-    screen = material("visor", "#3ddc63", roughness=0.2, emission=0.6)
-    box((0.56, 0.2, 0.02), (0, 0.12, top + 0.025), material("moldura", "#0f1a12", roughness=0.3))
-    box((0.5, 0.15, 0.01), (0, 0.12, top + 0.035), screen)
-    knob = material("botao", "#4a4f57", roughness=0.4)
+    for x in (-0.52, 0.52):
+        for y in (-0.22, 0.22):
+            cylinder(0.05, 0.04, (x, y, 0.02), feet, vertices=8)
+    front = -d / 2
+    panel = material("painel", "#2b2f36", roughness=0.4)
+    rounded_box((w - 0.12, 0.02, h - 0.14), (0, front - 0.005, 0.04 + (h - 0.04) / 2), panel, bevel=0.01)
+    # Visor: moldura preta + ecrã verde (plano com UV 0..1, virado para -Y).
+    box((0.66, 0.02, 0.24), (0, front - 0.02, 0.46), material("moldura", "#0c120e", roughness=0.3))
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, front - 0.031, 0.46), rotation=(math.pi / 2, 0, 0))
+    screen = bpy.context.active_object
+    screen.scale = (0.6, 0.19, 1)
+    screen.data.materials.append(material("visor", "#0b2e15", roughness=0.25, emission=0.4))
+    # Botões de ajuste (tensão e corrente).
+    knob = material("botao", "#3d424a", roughness=0.35)
+    mark = material("marcas", "#f5f5f5")
     for x in (-0.12, 0.12):
-        cylinder(0.07, 0.06, (x, -0.13, top + 0.05), knob, vertices=16)
-        box((0.012, 0.06, 0.01), (x, -0.1, top + 0.085), material("marcas", "#f5f5f5"))
-    # Bornes: + vermelho do lado X = -1, - preto do lado X = +1.
+        cylinder(0.07, 0.06, (x, front - 0.04, 0.2), knob, axis="Y", vertices=16)
+        box((0.012, 0.01, 0.05), (x, front - 0.075, 0.23), mark)
+    # Bornes à frente: + vermelho (X = -1), - preto (X = +1).
     m = metal()
-    for x, mat in ((-0.42, material("borne-mais", "#d62828", roughness=0.35)), (0.42, material("borne-menos", "#151515", roughness=0.35))):
-        cylinder(0.075, 0.1, (x, -0.13, top + 0.07), mat)
-        cylinder(0.03, 0.05, (x, -0.13, top + 0.14), m, vertices=8)
+    for x, mat in ((-0.45, material("borne-mais", "#d62828", roughness=0.3)), (0.45, material("borne-menos", "#141414", roughness=0.3))):
+        cylinder(0.07, 0.08, (x, front - 0.05, 0.2), mat, axis="Y", vertices=16)
+        cylinder(0.028, 0.04, (x, front - 0.09, 0.2), m, axis="Y", vertices=8)
         s = -1 if x < 0 else 1
-        wire([(x, -0.13, top + 0.15), (s * 0.85, -0.13, top + 0.15), (s * 0.85, -0.13, LEAD_Z), (s * 0.85, 0, LEAD_Z), (s * 1.0, 0, LEAD_Z)], m)
+        # Patas dentro do limite de 0,4 à frente (|Y| <= 0,4).
+        wire([(x, -0.36, 0.2), (x, -0.36, LEAD_Z), (s * 0.85, -0.36, LEAD_Z), (s * 0.85, 0, LEAD_Z), (s * 1.0, 0, LEAD_Z)], m)
 
 
 def build_lamp():
-    """Lâmpada de casquilho num suporte: o vidro acende ("luz")."""
-    wood = material("madeira", "#8a5a3c", roughness=0.6)
-    cylinder(0.38, 0.08, (0, 0, 0.04), wood, vertices=32)  # base redonda
-    cylinder(0.2, 0.12, (0, 0, 0.14), material("suporte", "#3d3d3d", roughness=0.5))
+    """Lâmpada (como no mockup): base redonda de madeira, casquilho de latão, ampola de vidro e
+    filamento. O vidro ("luz") e o filamento ("luz.001") acendem-se quando a lâmpada funciona."""
+    wood = material("madeira", "#7a4b2e", roughness=0.55)
+    cylinder(0.38, 0.07, (0, 0, 0.035), wood, vertices=32)
+    cylinder(0.3, 0.03, (0, 0, 0.085), material("madeira-clara", "#94603d", roughness=0.5), vertices=32)
+    cylinder(0.17, 0.1, (0, 0, 0.15), material("porcelana", "#ece8e0", roughness=0.4), vertices=24)
+    brass = material("latao", "#c9a24b", metallic=0.5, roughness=0.3)
+    cylinder(0.13, 0.12, (0, 0, 0.26), brass, vertices=20)
+    for z in (0.22, 0.26, 0.3):
+        cylinder(0.137, 0.018, (0, 0, z), brass, vertices=20)  # espiras da rosca
+    glass = material("luz", "#fff7dd", roughness=0.05, alpha=0.35)
+    cylinder(0.11, 0.08, (0, 0, 0.36), glass, vertices=20)  # pescoço
+    sphere(0.25, (0, 0, 0.53), glass, scale=(1, 1, 1.0), segments=24, rings=12)  # ampola
+    filament = material("luz.001", "#ffb347", metallic=0.2, roughness=0.4)
+    support = material("suporte", "#9aa3ad", metallic=0.5, roughness=0.3)
+    wire([(-0.04, 0, 0.36), (-0.07, 0, 0.55)], support, radius=0.008)
+    wire([(0.04, 0, 0.36), (0.07, 0, 0.55)], support, radius=0.008)
+    wire([(-0.07, 0, 0.55), (-0.045, 0, 0.6), (-0.02, 0, 0.55), (0.0, 0, 0.6), (0.02, 0, 0.55), (0.045, 0, 0.6), (0.07, 0, 0.55)], filament, radius=0.012)
     m = metal()
-    cylinder(0.15, 0.14, (0, 0, 0.27), m)  # rosca
-    for z in (0.23, 0.29):
-        cylinder(0.158, 0.02, (0, 0, z), m)  # espiras da rosca
-    glass = material("luz", "#fff3c4", roughness=0.05, alpha=0.55)
-    cylinder(0.13, 0.1, (0, 0, 0.38), glass)  # pescoço
-    sphere(0.24, (0, 0, 0.52), glass)  # ampola
-    filament = material("filamento", "#7a6450", metallic=0.4, roughness=0.4)
-    wire([(-0.05, 0, 0.36), (-0.06, 0, 0.52), (-0.03, 0, 0.56), (0.0, 0, 0.52), (0.03, 0, 0.56), (0.06, 0, 0.52), (0.05, 0, 0.36)], filament, radius=0.008)
     for side in (-1, 1):
-        cylinder(0.05, 0.04, (side * 0.3, 0, 0.1), m)  # parafusos dos bornes
-        wire([(side * 0.3, 0, 0.05), (side * 0.85, 0, 0.05), (side * 0.85, 0, LEAD_Z), (side * 1.0, 0, LEAD_Z)], m)
+        cylinder(0.04, 0.04, (side * 0.3, 0, 0.12), m, vertices=8)  # parafusos dos bornes
+        wire([(side * 0.3, 0, 0.1), (side * 0.3, 0, 0.05), (side * 0.85, 0, 0.05), (side * 0.85, 0, LEAD_Z), (side * 1.0, 0, LEAD_Z)], m)
 
 
 def build_switch():
@@ -315,11 +335,14 @@ def build_switch():
 
 
 def build_ground():
-    """Símbolo de massa (GND) em relevo: três barras; o terminal fica em Y = +1."""
-    earth = material("terra", "#2f9e44", metallic=0.3, roughness=0.4)
-    for y, width in ((0.15, 0.8), (-0.05, 0.52), (-0.25, 0.24)):
-        box((width, 0.08, 0.12), (0, y, 0.06), earth)
-    wire([(0, 0.19, 0.06), (0, 1.0, LEAD_Z)], metal(), radius=0.03)
+    """Símbolo de massa (GND) em metal, como no mockup: três barras numa placa; terminal em Y = +1."""
+    plate = material("placa", "#3a3f47", roughness=0.6)
+    box((0.86, 0.6, 0.03), (0, -0.05, 0.015), plate)
+    steel = material("aco", "#aab2bb", metallic=0.5, roughness=0.3)
+    for y, width in ((0.15, 0.76), (-0.05, 0.5), (-0.25, 0.24)):
+        box((width, 0.07, 0.1), (0, y, 0.08), steel)
+    box((0.06, 0.4, 0.06), (0, 0.38, 0.06), steel)  # haste até ao terminal
+    wire([(0, 0.55, 0.06), (0, 1.0, LEAD_Z)], metal(), radius=0.03)
 
 
 BUILDERS = {

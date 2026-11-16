@@ -30,6 +30,7 @@ import {
   type ScreenPoint,
   type ScreenRect,
 } from './selectionBox'
+import { CAMERA_POSITION, CAMERA_ZOOM } from './camera'
 import { AnchorProjector } from './ScreenAnchors'
 import { WireView } from './WireView'
 import { segmentMiddles, wireRoute } from './wireRoute'
@@ -290,7 +291,9 @@ export function Workspace() {
     >
       <Canvas
         orthographic
-        camera={{ position: [0, 20, 12], zoom: 40, near: 0.1, far: 1000 }}
+        // Câmara inclinada (~55°) (vê-se o lado dos componentes, como numa bancada) e já perto:
+        // ao abrir, os componentes aparecem num bom tamanho sem ser preciso dar zoom.
+        camera={{ position: CAMERA_POSITION, zoom: CAMERA_ZOOM, near: 0.1, far: 1000 }}
         aria-label={t('workspace.label')}
         // Clique (botão esquerdo) que não acertou em nada → cancela o fio e tira a seleção.
         onPointerMissed={(e) => {
@@ -299,17 +302,19 @@ export function Workspace() {
           select(null)
         }}
       >
-        <color attach="background" args={['#0f172a']} />
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[6, 12, 4]} intensity={1.2} />
+        <color attach="background" args={['#1a1f27']} />
+        {/* Luz de "sala": céu claro por cima, chão escuro; mais uma luz forte de frente-cima. */}
+        <hemisphereLight args={['#f1f5f9', '#1e293b', 0.9]} />
+        <directionalLight position={[4, 10, 8]} intensity={1.6} />
+        <directionalLight position={[-6, 6, -4]} intensity={0.35} />
 
         {/* Grelha: 1 célula = 1 unidade; linha mais forte a cada 5 células. */}
         <Grid
           infiniteGrid
           cellSize={1}
           sectionSize={5}
-          cellColor="#334155"
-          sectionColor="#64748b"
+          cellColor="#353d49"
+          sectionColor="#566070"
           cellThickness={1}
           sectionThickness={1.4}
           fadeDistance={200}

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { sx, sy } from './grelha.ts'
 
 /**
  * Organizar os fios (como no Tinkercad): arrastar um troço do fio para cima/baixo ou para os
@@ -32,7 +33,7 @@ async function wiredResistors(page: Page) {
   const box = await scene(page).boundingBox()
   if (!box) throw new Error('zona livre não encontrada')
   await menu.getByRole('button', { name: 'Resistência' }).dragTo(scene(page), {
-    targetPosition: { x: box.width / 2 + 160, y: box.height / 2 },
+    targetPosition: { x: box.width / 2 + sx(160), y: box.height / 2 },
   })
   await expect(scene(page).locator('[data-component-label="R2"]')).toBeVisible()
   const a = await anchor(page, '[data-terminal="R1:b"]')
@@ -49,8 +50,8 @@ async function dragSegment(page: Page, index: number, dy: number) {
   const start = await anchor(page, `[data-wire-segment="${id}:${index}"]`)
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
-  await page.mouse.move(start.x, start.y + dy / 2, { steps: 4 })
-  await page.mouse.move(start.x, start.y + dy, { steps: 4 })
+  await page.mouse.move(start.x, start.y + sy(dy) / 2, { steps: 4 })
+  await page.mouse.move(start.x, start.y + sy(dy), { steps: 4 })
   await page.mouse.up()
 }
 

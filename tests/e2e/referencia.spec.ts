@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { sx, sy } from './grelha.ts'
 
 /**
  * Critérios de aceitação do MVP (secção 19 do dossier) provados pela INTERFACE:
@@ -28,7 +29,9 @@ async function dropAt(page: Page, item: string, dx: number, dy: number) {
   if (!box) throw new Error('zona livre não encontrada')
   await menu(page)
     .getByRole('button', { name: item })
-    .dragTo(scene(page), { targetPosition: { x: box.width / 2 + dx, y: box.height / 2 + dy } })
+    .dragTo(scene(page), {
+      targetPosition: { x: box.width / 2 + sx(dx), y: box.height / 2 + sy(dy) },
+    })
 }
 
 /** Escreve um valor no painel de propriedades (o componente acabado de criar está selecionado). */
