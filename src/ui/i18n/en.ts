@@ -49,6 +49,9 @@ export const en: Messages = {
   'menu.search': 'Search…',
   'menu.itemHint': 'Drag onto the workspace (or click) to add: {name}',
   'menu.empty': 'No component found.',
+  'menu.summary.ground': '0 V reference',
+  'menu.summary.switch': 'open',
+  'menu.summary.diode': 'Si · 1N4148',
 
   'category.Fontes': 'Sources',
   'category.Passivos': 'Passive',
