@@ -1,8 +1,15 @@
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Component as ReactComponent, useLayoutEffect, useMemo, type ReactNode } from 'react'
-import { Mesh, MeshStandardMaterial, type Material, type Object3D } from 'three'
-import { isBodyMaterial, isGlowMaterial } from './models3d'
+import {
+  CanvasTexture,
+  Mesh,
+  MeshStandardMaterial,
+  SRGBColorSpace,
+  type Material,
+  type Object3D,
+} from 'three'
+import { isBodyMaterial, isDisplayMaterial, isGlowMaterial } from './models3d'
 
 /**
  * Modelo 3D (.glb) de um componente — só o ASPETO. Os cliques continuam na caixa invisível do
@@ -11,6 +18,7 @@ import { isBodyMaterial, isGlowMaterial } from './models3d'
  * Materiais com nomes especiais (definidos no Blender, ver public/models/LEIAME.md):
  *   "luz"   → acende-se (LED/lâmpada a funcionar, componente selecionado) e pisca em sobrecorrente;
  *   "corpo" → recebe a cor do componente (ex.: a cor do LED escolhida no painel).
+ *   "visor" → ecrã onde se escreve `display` (ex.: a tensão da fonte, "12.0 V").
  */
 
 interface Props {
@@ -21,11 +29,21 @@ interface Props {
   emissive: string
   intensity: number
   blink: boolean
+  /** Texto do visor (material "visor"), ex.: "12.0 V". */
+  display?: string
   /** Chamado quando o modelo já está na cena (a caixa pode ficar invisível). */
   onReady: (ready: boolean) => void
 }
 
-export function ComponentModel({ url, color, emissive, intensity, blink, onReady }: Props) {
+export function ComponentModel({
+  url,
+  color,
+  emissive,
+  intensity,
+  blink,
+  display,
+  onReady,
+}: Props) {
   const { scene } = useGLTF(url)
 
   // Cada componente tem a sua cópia (com materiais próprios: um LED aceso não acende os outros).
@@ -36,9 +54,26 @@ export function ComponentModel({ url, color, emissive, intensity, blink, onReady
     for (const m of body) m.color.set(color)
     for (const m of glow) {
       m.emissive.set(emissive)
-      m.emissiveIntensity = intensity
+      m.emissiveIntensity = glowIntensity(m, intensity)
     }
   }, [root, color, emissive, intensity])
+
+  // Visor (ex.: fonte de bancada): o texto é desenhado numa imagem e posto no ecrã, a brilhar.
+  useLayoutEffect(() => {
+    if (display === undefined) return
+    const screens = displayMaterials(root)
+    if (screens.length === 0) return
+    const texture = displayTexture(display)
+    for (const m of screens) {
+      m.map = texture
+      m.emissiveMap = texture
+      m.color.set('#ffffff')
+      m.emissive.set('#ffffff')
+      m.emissiveIntensity = 0.9
+      m.needsUpdate = true
+    }
+    return () => texture.dispose()
+  }, [root, display])
 
   useLayoutEffect(() => {
     onReady(true)
@@ -49,7 +84,9 @@ export function ComponentModel({ url, color, emissive, intensity, blink, onReady
   useFrame(({ clock }) => {
     if (!blink) return
     const on = Math.floor(clock.elapsedTime * 4) % 2 === 0
-    for (const m of specialMaterials(root).glow) m.emissiveIntensity = on ? intensity : 0.1
+    for (const m of specialMaterials(root).glow) {
+      m.emissiveIntensity = on ? glowIntensity(m, intensity) : 0.1
+    }
   })
 
   return <primitive object={root} />
@@ -85,6 +122,51 @@ function specialMaterials(root: Object3D): {
     }
   })
   return { glow, body }
+}
+
+/**
+ * Brilho de um material que acende. A cúpula do LED ("corpo-luz") já tem a cor da luz: com o brilho
+ * todo ficava quase branca; a meio, continua bem vermelha (a auréola faz o resto).
+ */
+function glowIntensity(material: MeshStandardMaterial, intensity: number): number {
+  return isBodyMaterial(material.name) ? intensity * 0.45 : intensity
+}
+
+/** Materiais "visor" do modelo. */
+function displayMaterials(root: Object3D): MeshStandardMaterial[] {
+  const found: MeshStandardMaterial[] = []
+  root.traverse((object) => {
+    if (!(object instanceof Mesh)) return
+    const list: unknown[] = Array.isArray(object.material) ? object.material : [object.material]
+    for (const m of list) {
+      if (m instanceof MeshStandardMaterial && isDisplayMaterial(m.name)) found.push(m)
+    }
+  })
+  return found
+}
+
+/** Imagem de um visor de cristais líquidos verde com o texto (ex.: "12.0 V"). */
+function displayTexture(text: string): CanvasTexture {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512
+  canvas.height = 160
+  const g = canvas.getContext('2d')
+  if (g) {
+    g.fillStyle = '#06210f'
+    g.fillRect(0, 0, canvas.width, canvas.height)
+    g.fillStyle = '#5dff8f'
+    g.shadowColor = '#5dff8f'
+    g.shadowBlur = 18
+    g.textAlign = 'center'
+    g.textBaseline = 'middle'
+    g.font = 'bold 104px Consolas, "Courier New", monospace'
+    g.fillText(text, canvas.width / 2, canvas.height / 2 + 4)
+  }
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  texture.flipY = false // as coordenadas UV do glTF já vêm com o eixo V para baixo
+  texture.anisotropy = 4
+  return texture
 }
 
 interface BoundaryProps {

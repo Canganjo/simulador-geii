@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { sx, sy } from './grelha.ts'
 
 /**
  * Condensador e bobina na interface + botão Transitório (E10-4).
@@ -35,7 +36,7 @@ async function dropAt(page: Page, item: string, dx: number, dy: number) {
   await menu(page)
     .getByRole('button', { name: item })
     .dragTo(scene(page), {
-      targetPosition: { x: box.width / 2 + dx, y: box.height / 2 + dy },
+      targetPosition: { x: box.width / 2 + sx(dx), y: box.height / 2 + sy(dy) },
     })
 }
 

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { sx, sy } from './grelha.ts'
 
 test('a app abre e mostra o título', async ({ page }) => {
   await page.goto('/')
@@ -246,7 +247,7 @@ test('mover: arrastar o componente muda a posição; Ctrl+Z volta atrás num só
   const { x, y } = await sceneCenter(page)
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x + 80, y, { steps: 8 }) // 80 px com zoom 40 = 2 células
+  await page.mouse.move(x + sx(80), y, { steps: 8 }) // 2 células
   await page.mouse.up()
   await expect(position).toHaveText('(2, 0)')
 
@@ -332,7 +333,7 @@ test('fios: o fio segue o componente quando este se move', async ({ page }) => {
   const center = { x: (before.x + b.x) / 2, y: (before.y + b.y) / 2 }
   await page.mouse.move(center.x, center.y)
   await page.mouse.down()
-  await page.mouse.move(center.x + 80, center.y, { steps: 8 })
+  await page.mouse.move(center.x + sx(80), center.y, { steps: 8 })
   await page.mouse.up()
 
   await expect
@@ -406,7 +407,7 @@ async function dropAt(page: import('@playwright/test').Page, item: string, dx: n
   const box = await scene.boundingBox()
   if (!box) throw new Error('zona livre não encontrada')
   await menu.getByRole('button', { name: item }).dragTo(scene, {
-    targetPosition: { x: box.width / 2 + dx, y: box.height / 2 + dy },
+    targetPosition: { x: box.width / 2 + sx(dx), y: box.height / 2 + sy(dy) },
   })
 }
 
