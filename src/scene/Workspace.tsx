@@ -21,6 +21,7 @@ import {
   terminalPositionById,
 } from './coordinates'
 import { startComponentDrag } from './dragComponent'
+import { startWireDrag } from './dragWire'
 import { GroundPicker, type ModelToScreen, type ScreenToModel } from './GroundPicker'
 import {
   idsInsideRect,
@@ -31,6 +32,7 @@ import {
 } from './selectionBox'
 import { AnchorProjector } from './ScreenAnchors'
 import { WireView } from './WireView'
+import { segmentMiddles, wireRoute } from './wireRoute'
 
 /**
  * Zona livre 2.5D.
@@ -50,7 +52,9 @@ import { WireView } from './WireView'
  *   esquerdo (ou tocar duas vezes no touchpad e arrastar) desenha um retângulo que seleciona
  *   os componentes lá dentro. Delete apaga todos (ver keyboard.ts).
  * - Fios: clique num terminal e depois noutro → fio ortogonal ("L"). Esc, botão direito ou
- *   clique no vazio cancelam. Clique num fio seleciona-o (Delete apaga).
+ *   clique no vazio cancelam. Clique num fio seleciona-o (Delete apaga). Arrastar um troço do
+ *   fio desloca-o na perpendicular (organizar as linhas, como no Tinkercad); duplo clique
+ *   endireita o fio.
  */
 export function Workspace() {
   const t = useT()
@@ -172,6 +176,41 @@ export function Workspace() {
     window.addEventListener('pointercancel', onUp)
   }
 
+  // Botão esquerdo num troço de fio: seleciona o fio e arrasta esse troço até se largar o botão.
+  const onGrabSegment = (wireId: string, index: number, clientX: number, clientY: number) => {
+    if (wiringFrom !== null) cancelWiring()
+    selectWire(wireId)
+    const grab = picker.current?.(clientX, clientY)
+    const drag = grab ? startWireDrag(wireId, index, grab) : null
+    if (!drag) return
+    const onMove = (e: PointerEvent) => {
+      const point = picker.current?.(e.clientX, e.clientY)
+      if (point) drag.moveTo(point)
+    }
+    const onUp = () => {
+      drag.end()
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+  }
+
+  const onStraighten = (wireId: string) => useCircuitStore.getState().setWireWaypoints(wireId, [])
+
+  // Traçado de cada fio (com os cantos guardados), usado na cena e nas âncoras.
+  const routes = useMemo(() => {
+    const map = new Map<string, Vec2[]>()
+    for (const w of wires) {
+      const a = terminalPositionById(components, w.from)
+      const b = terminalPositionById(components, w.to)
+      if (a && b) map.set(w.id, wireRoute(a, b, w.waypoints))
+    }
+    return map
+  }, [components, wires])
+
   // Botão esquerdo no VAZIO (o "chão" invisível): clique = tirar a seleção;
   // arrasto = retângulo de seleção. Com o dedo (ecrã tátil) só o toque conta: arrastar desloca a vista.
   const onGroundDown = (e: ThreeEvent<PointerEvent>) => {
@@ -285,16 +324,16 @@ export function Workspace() {
         </mesh>
 
         {wires.map((w) => {
-          const a = terminalPositionById(components, w.from)
-          const b = terminalPositionById(components, w.to)
-          if (!a || !b) return null
+          const points = routes.get(w.id)
+          if (!points) return null
           return (
             <WireView
               key={w.id}
               id={w.id}
-              points={orthogonalRoute(a, b)}
+              points={points}
               selected={w.id === selectedWireId}
-              onSelect={selectWire}
+              onGrabSegment={onGrabSegment}
+              onStraighten={onStraighten}
             />
           )
         })}
@@ -391,22 +430,21 @@ export function Workspace() {
             </span>
           )),
         )}
-        {wires.map((w) => {
-          const a = terminalPositionById(components, w.from)
-          const b = terminalPositionById(components, w.to)
-          if (!a || !b) return null
-          const [p0, p1] = orthogonalRoute(a, b)
-          if (!p0 || !p1) return null
-          const middle = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 }
-          return (
+        {wires.flatMap((w) => {
+          const points = routes.get(w.id)
+          if (!points) return []
+          // Uma âncora no meio de cada troço (a 1.ª tem data-wire: é a que os testes clicam).
+          return segmentMiddles(points).map((middle, i) => (
             <span
-              key={w.id}
+              key={`${w.id}:${i}`}
               data-anchor={modelToScene(middle, 0.05).join(',')}
-              data-wire={w.id}
+              data-wire={i === 0 ? w.id : undefined}
+              data-wire-segment={`${w.id}:${i}`}
               data-selected={w.id === selectedWireId}
+              data-points={points.map((p) => `${p.x},${p.y}`).join(' ')}
               className="absolute top-0 left-0 size-1"
             />
-          )
+          ))
         })}
       </div>
 

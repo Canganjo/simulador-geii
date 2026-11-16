@@ -80,6 +80,11 @@ export const fr: Messages = {
   'props.rotation': 'Rotation',
   'props.rotate': 'Tourner',
   'props.duplicate': 'Dupliquer',
+  'props.wireTitle': 'Fil',
+  'props.wireHint':
+    'Faites glisser un segment du fil pour le déplacer (haut/bas ou gauche/droite) et organiser le circuit. Double-clic sur le fil pour le redresser.',
+  'props.straighten': 'Redresser le fil',
+  'props.deleteWire': 'Supprimer le fil',
   'props.delete': 'Supprimer',
   'props.name': 'Nom',
   'props.nameEmpty': 'Le nom ne peut pas être vide.',

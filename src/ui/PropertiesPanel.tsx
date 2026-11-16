@@ -1,9 +1,11 @@
 import {
+  Cable,
   Copy,
   PanelRightClose,
   PanelRightOpen,
   RotateCw,
   SlidersHorizontal,
+  Spline,
   Trash2,
 } from 'lucide-react'
 import { CATALOG, type ParamSpec } from '../core/library'
@@ -27,6 +29,7 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
   const label = open ? t('props.collapse') : t('props.expand')
   const selected = useCircuitStore((s) => s.components.find((c) => c.id === s.selectedId) ?? null)
   const count = useCircuitStore((s) => s.selectedIds.length)
+  const wireSelected = useCircuitStore((s) => s.selectedWireId !== null)
 
   return (
     <aside
@@ -58,6 +61,8 @@ export function PropertiesPanel({ open, onToggle, width }: Props) {
           <MultiSelection />
         ) : selected ? (
           <SelectedComponent component={selected} />
+        ) : wireSelected ? (
+          <SelectedWire />
         ) : (
           <p className="px-3 text-sm text-slate-400">{t('props.empty')}</p>
         ))}
@@ -96,6 +101,49 @@ function MultiSelection() {
         <Trash2 className="size-4" aria-hidden />
         {t('props.deleteAll', { count })}
       </button>
+    </div>
+  )
+}
+
+/** Um fio selecionado: como o organizar, endireitar ou apagar. */
+function SelectedWire() {
+  const t = useT()
+  const wire = useCircuitStore((s) => s.wires.find((w) => w.id === s.selectedWireId) ?? null)
+  if (!wire) return null
+  const bent = (wire.waypoints?.length ?? 0) > 0
+  const { setWireWaypoints, removeWire } = useCircuitStore.getState()
+
+  return (
+    <div
+      className="flex flex-col gap-3 overflow-y-auto px-3 pb-3 text-sm"
+      data-testid="wire-selection"
+    >
+      <h3 className="flex items-center gap-2 text-base font-semibold text-slate-100">
+        <Cable className="size-4" aria-hidden />
+        {t('props.wireTitle')}
+      </h3>
+      <p className="text-slate-400">{t('props.wireHint')}</p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setWireWaypoints(wire.id, [])}
+          disabled={!bent}
+          title={t('props.straighten')}
+          className="flex items-center gap-1.5 rounded border border-slate-600 px-2 py-1 text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Spline className="size-4" aria-hidden />
+          {t('props.straighten')}
+        </button>
+        <button
+          type="button"
+          onClick={() => removeWire(wire.id)}
+          title={`${t('props.deleteWire')} (Delete)`}
+          className="flex items-center gap-1.5 rounded border border-red-500/60 px-2 py-1 text-red-200 hover:bg-red-500/20"
+        >
+          <Trash2 className="size-4" aria-hidden />
+          {t('props.deleteWire')}
+        </button>
+      </div>
     </div>
   )
 }
