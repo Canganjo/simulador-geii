@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #75 (ícones modernos no menu de componentes).
+Última atualização: 2026-11-16 — issue #92 (exportar resultados em CSV).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -48,6 +48,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #69   | E10-5: gráfico u(t) / i(t) do transitório (cursor, valor final, τ)                                                       | E10   | feito  | `feature/grafico-transitorio`  | PR #70              |
 | #73   | Fonte DC de bancada: botões + / −, limite de corrente (CV/CC, 3 A), recálculo automático                                 | E10   | feito  | `feature/fonte-regulavel`      | PR #74              |
 | #75   | Menu de componentes: ícones IEC em mosaicos coloridos, valor por omissão, coluna de ícones ao recolher                   | E10   | feito  | `feature/icones-menu`          | PR #76              |
+| #92   | Exportar resultados em CSV (DC e transitório, SI, ";" e vírgula decimal, BOM UTF-8)                                      | E10   | feito  | `feature/exportar-csv`         | PR #95              |
 
 ### Tarefas extra
 
@@ -140,11 +141,12 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
 | `de03650` | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
 | `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
-| (squash)  | Ícones modernos no menu de componentes (issue #75)                          | #76 |
-| (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
-| (squash)  | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80 |
-| (squash)  | Propriedades em secções + potência da resistência em lista (issue #81)      | #82 |
-| (squash)  | Zona livre: sombras, grelha técnica, juntas nos fios (issue #83)            | #84 |
-| (squash)  | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |
-| (squash)  | Voltímetro e amperímetro (issue #88)                                        | #89 |
-| (squash)  | Barras de deslocamento da zona livre (issue #90)                            | #91 |
+| `69d6475` | Ícones modernos no menu de componentes (issue #75)                          | #76 |
+| `8ed3532` | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
+| `71e5d9b` | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80 |
+| `c1aedd0` | Propriedades em secções + potência da resistência em lista (issue #81)      | #82 |
+| `925fafc` | Zona livre: sombras, grelha técnica, juntas nos fios (issue #83)            | #84 |
+| `a161ff5` | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |
+| `1e7adfd` | Voltímetro e amperímetro (issue #88)                                        | #89 |
+| `36f8293` | Barras de deslocamento da zona livre (issue #90)                            | #91 |
+| (squash)  | Exportar resultados em CSV (issue #92)                                      | #95 |
