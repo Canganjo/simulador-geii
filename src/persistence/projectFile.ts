@@ -146,3 +146,15 @@ export function projectFileName(name: string): string {
     .replace(/^-+|-+$/g, '')
   return `${slug || 'circuito'}${PROJECT_FILE_EXTENSION}`
 }
+
+/**
+ * Nome do projeto a partir do nome do ficheiro escolhido em "Guardar como":
+ * "divisor 12V.geii.json" → "divisor 12V"; "teste.json" → "teste".
+ */
+export function projectNameFromFile(fileName: string): string {
+  const name = fileName
+    .replace(/\.geii\.json$/i, '')
+    .replace(/\.json$/i, '')
+    .trim()
+  return name || 'circuito'
+}

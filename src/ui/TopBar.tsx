@@ -3,6 +3,7 @@ import {
   CircleHelp,
   FilePlus,
   FolderOpen,
+  SaveAll,
   Hash,
   Play,
   Redo2,
@@ -21,7 +22,14 @@ import { useUiStore } from '../store/uiStore'
 import { AccountMenu } from './AccountMenu'
 import { useT, type Translate } from './i18n'
 import { isTyping } from './keyboard'
-import { confirmDiscard, openProjectFile, saveProject } from './projectActions'
+import {
+  confirmDiscard,
+  forgetCurrentFile,
+  openProjectFile,
+  openWithPicker,
+  saveProject,
+  saveProjectAs,
+} from './projectActions'
 
 interface Action {
   label: string
@@ -60,21 +68,26 @@ function useUndoShortcuts() {
   }, [])
 }
 
-/** Ctrl+S guarda e Ctrl+O abre (em vez de "guardar a página" / "abrir ficheiro" do browser). */
-function useFileShortcuts(onSave: () => void, onOpen: () => void) {
-  const handlers = useRef({ onSave, onOpen })
+/**
+ * Ctrl+S guarda, Ctrl+Shift+S guarda como e Ctrl+O abre
+ * (em vez de "guardar a página" / "abrir ficheiro" do browser).
+ */
+function useFileShortcuts(onSave: () => void, onSaveAs: () => void, onOpen: () => void) {
+  const handlers = useRef({ onSave, onSaveAs, onOpen })
   useEffect(() => {
-    handlers.current = { onSave, onOpen }
+    handlers.current = { onSave, onSaveAs, onOpen }
   })
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return
       const key = event.key.toLowerCase()
       if (key !== 's' && key !== 'o') return
+      if (key === 'o' && event.shiftKey) return
       event.preventDefault()
       // Um valor a meio de ser escrito num campo é aplicado antes (o campo aplica ao sair).
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
-      if (key === 's') handlers.current.onSave()
+      if (key === 's' && event.shiftKey) handlers.current.onSaveAs()
+      else if (key === 's') handlers.current.onSave()
       else handlers.current.onOpen()
     }
     window.addEventListener('keydown', onKeyDown)
@@ -107,14 +120,25 @@ export function TopBar() {
   const onNew = () => {
     if (!confirmDiscard(t('file.confirmDiscard'))) return
     useCircuitStore.getState().newProject()
+    forgetCurrentFile()
     setFileError(null)
   }
-  const onOpen = () => {
-    if (confirmDiscard(t('file.confirmDiscard'))) fileInput?.click()
+  const onOpen = async () => {
+    if (!confirmDiscard(t('file.confirmDiscard'))) return
+    // Chrome/Edge: janela do sistema (lembra-se do ficheiro). Outros: o <input type="file">.
+    const result = await openWithPicker()
+    if (result.status === 'unsupported') fileInput?.click()
+    else if (result.status === 'error')
+      setFileError(fileErrorText(result.error, result.fileName, t))
+    else if (result.status === 'opened') setFileError(null)
   }
-  const onSave = () => {
-    saveProject()
+  const onSave = async () => {
     setFileError(null)
+    await saveProject()
+  }
+  const onSaveAs = async () => {
+    setFileError(null)
+    await saveProjectAs()
   }
   const onFileChosen = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -123,7 +147,11 @@ export function TopBar() {
     const error = await openProjectFile(file)
     setFileError(error ? fileErrorText(error, file.name, t) : null)
   }
-  useFileShortcuts(onSave, onOpen)
+  useFileShortcuts(
+    () => void onSave(),
+    () => void onSaveAs(),
+    () => void onOpen(),
+  )
 
   // Ações do dossier (secção 6).
   // Parar e RAZ limpam os resultados (no MVP só DC não há simulação a correr no tempo).
@@ -134,16 +162,23 @@ export function TopBar() {
         label: t('action.open'),
         icon: FolderOpen,
         shortcut: 'Ctrl+O',
-        onClick: onOpen,
+        onClick: () => void onOpen(),
         disabled: false,
       },
       {
         label: t('action.save'),
         icon: Save,
         shortcut: 'Ctrl+S',
-        onClick: onSave,
+        onClick: () => void onSave(),
         disabled: false,
         badge: unsaved,
+      },
+      {
+        label: t('action.saveAs'),
+        icon: SaveAll,
+        shortcut: 'Ctrl+Shift+S',
+        onClick: () => void onSaveAs(),
+        disabled: false,
       },
     ],
     [

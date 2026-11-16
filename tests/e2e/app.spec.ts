@@ -527,6 +527,13 @@ test('editar: valor inválido fica a vermelho e não muda; Ctrl+Z desfaz um valo
 })
 
 test('ficheiros: guardar o teste 6, Novo, abrir de novo e simular → 21,3 mA', async ({ page }) => {
+  // Browser SEM a janela do sistema (como o Firefox/Safari): Guardar descarrega o ficheiro.
+  // (Com a janela: ver tests/e2e/guardar.spec.ts.)
+  // (A função vem do protótipo de window: tapa-se com undefined em vez de a apagar.)
+  await page.addInitScript(
+    "for (const n of ['showSaveFilePicker', 'showOpenFilePicker']) " +
+      'Object.defineProperty(window, n, { value: undefined, configurable: true })',
+  )
   await page.goto('/')
   const scene = page.getByTestId('workspace')
   const props = page.getByRole('complementary', { name: 'Propriedades' })
@@ -548,7 +555,7 @@ test('ficheiros: guardar o teste 6, Novo, abrir de novo e simular → 21,3 mA', 
 
   // Guardar → descarrega circuito.geii.json
   const downloading = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Guardar' }).click()
+  await page.getByRole('button', { name: 'Guardar', exact: true }).click()
   const download = await downloading
   expect(download.suggestedFilename()).toBe('circuito.geii.json')
   const file = await download.path()

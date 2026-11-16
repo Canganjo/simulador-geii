@@ -8,6 +8,7 @@ export const en: Messages = {
   'action.new': 'New',
   'action.open': 'Open',
   'action.save': 'Save',
+  'action.saveAs': 'Save as…',
   'action.undo': 'Undo',
   'action.redo': 'Redo',
   'action.simulate': 'Simulate',

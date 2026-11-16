@@ -14,6 +14,7 @@ export const pt = {
   'action.new': 'Novo',
   'action.open': 'Abrir',
   'action.save': 'Guardar',
+  'action.saveAs': 'Guardar como…',
   'action.undo': 'Desfazer',
   'action.redo': 'Refazer',
   'action.simulate': 'Simular',

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { createComponent } from '../core/library'
 import type { Component, Project, Wire } from '../core/model'
-import { parseProjectFile, projectFileName, toProjectFile } from './projectFile'
+import {
+  parseProjectFile,
+  projectFileName,
+  projectNameFromFile,
+  toProjectFile,
+} from './projectFile'
 
 /** Projeto de teste: V1 (12 V) e R1 (470 Ω) ligados por dois fios. */
 function sample(): Project {
@@ -120,5 +125,13 @@ describe('projectFileName', () => {
     ['!!!', 'circuito.geii.json'],
   ])('"%s" → %s', (name, expected) => {
     expect(projectFileName(name)).toBe(expected)
+  })
+})
+
+describe('projectNameFromFile', () => {
+  it('tira a extensão .geii.json ou .json (o resto fica como o utilizador escreveu)', () => {
+    expect(projectNameFromFile('divisor 12V.geii.json')).toBe('divisor 12V')
+    expect(projectNameFromFile('Teste.JSON')).toBe('Teste')
+    expect(projectNameFromFile('.geii.json')).toBe('circuito')
   })
 })
