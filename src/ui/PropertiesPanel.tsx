@@ -12,9 +12,13 @@ import { CATALOG, type ParamSpec } from '../core/library'
 import type { Component } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
 import { COLLAPSED_SIZE } from '../store/panelSizes'
-import { useT } from './i18n'
+import { decimalSeparator, useT } from './i18n'
+import { useLanguageStore } from '../store/languageStore'
+import { useSimulationStore } from '../store/simulationStore'
+import { formatSi } from './formatSi'
 import { IecSymbol } from './IecSymbol'
 import { BooleanParamField, ChoiceParamField, NameField, NumberParamField } from './ParamFields'
+import { SourceStepper } from './SourceStepper'
 
 interface Props {
   open: boolean
@@ -198,13 +202,27 @@ function SelectedComponent({ component }: { component: Component }) {
       </dl>
 
       {/* Campos editáveis. A `key` inclui o valor guardado: se ele mudar por fora (Ctrl+Z),
-          o campo recomeça com o valor novo em vez de ficar com o rascunho antigo. */}
+          o campo recomeça com o valor novo em vez de ficar com o rascunho antigo. Os campos
+          numéricos acompanham o valor sozinhos (para os botões − / + não serem recriados a meio
+          de um clique). */}
       <div className="flex flex-col gap-2" data-testid="param-fields">
         <NameField key={`${component.id}:name:${component.name}`} component={component} />
         {Object.entries(specs).map(([param, spec]) => {
           const key = `${component.id}:${param}:${String(params[param])}`
           if (spec.type === 'number') {
-            return <NumberParamField key={key} component={component} param={param} spec={spec} />
+            const stepper =
+              component.kind === 'dc-source' && param === 'voltage' ? (
+                <SourceStepper componentId={component.id} variant="panel" />
+              ) : undefined
+            return (
+              <NumberParamField
+                key={`${component.id}:${param}`}
+                component={component}
+                param={param}
+                spec={spec}
+                after={stepper}
+              />
+            )
           }
           if (spec.type === 'boolean') {
             return <BooleanParamField key={key} component={component} param={param} spec={spec} />
@@ -212,6 +230,8 @@ function SelectedComponent({ component }: { component: Component }) {
           return <ChoiceParamField key={key} component={component} param={param} spec={spec} />
         })}
       </div>
+
+      {component.kind === 'dc-source' && <SourceInfo component={component} />}
 
       <div className="flex flex-wrap gap-1">
         {actions.map(({ label, shortcut, icon: Icon, run }) => (
@@ -227,6 +247,45 @@ function SelectedComponent({ component }: { component: Component }) {
           </button>
         ))}
       </div>
+    </div>
+  )
+}
+
+/**
+ * Informação derivada da fonte (não é um parâmetro): potência máxima U × Imax e, depois de
+ * Simular, o modo em que está (CV = tensão constante, CC = no limite de corrente).
+ */
+function SourceInfo({ component }: { component: Extract<Component, { kind: 'dc-source' }> }) {
+  const t = useT()
+  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
+  const mode = useSimulationStore((s) =>
+    s.result?.ok ? s.result.results.get(component.id)?.sourceMode : undefined,
+  )
+  const { voltage, currentLimit } = component.params
+  return (
+    <div className="flex flex-col gap-1 rounded border border-slate-700 bg-slate-900/50 px-2 py-1.5 text-xs text-slate-400">
+      {currentLimit !== undefined && (
+        <p data-testid="source-max-power">
+          {t('source.maxPower', { power: formatSi(voltage * currentLimit, 'W', 3, decimal) })}
+        </p>
+      )}
+      <p className="flex items-center gap-2">
+        {mode && (
+          <span
+            data-testid="source-mode"
+            data-mode={mode}
+            title={mode === 'cc' ? t('results.sourceCcTitle') : t('results.sourceCvTitle')}
+            className={`rounded px-1.5 py-0.5 font-semibold ${
+              mode === 'cc'
+                ? 'bg-amber-400/20 text-amber-300'
+                : 'bg-emerald-400/20 text-emerald-300'
+            }`}
+          >
+            {mode === 'cc' ? t('results.sourceCc') : t('results.sourceCv')}
+          </span>
+        )}
+        {t('source.modeHint')}
+      </p>
     </div>
   )
 }

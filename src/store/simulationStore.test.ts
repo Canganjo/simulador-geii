@@ -7,7 +7,7 @@ const simulation = () => useSimulationStore.getState()
 
 beforeEach(() => {
   useCircuitStore.setState({ components: [], wires: [], selectedId: null, selectedWireId: null })
-  useSimulationStore.setState({ result: null })
+  useSimulationStore.setState({ result: null, transient: null, lastRun: null })
 })
 
 /** Muda um parâmetro diretamente no estado (a edição de valores ainda não existe na interface). */
@@ -71,13 +71,55 @@ describe('simulationStore', () => {
     expect(simulation().result).toBeNull()
   })
 
-  it('mexer no circuito limpa os resultados; mudar só a seleção não', () => {
+  it('mudar ligações limpa os resultados; mudar só a seleção ou mover não', () => {
     const { r } = test6()
     simulation().run()
     circuit().select(null)
     expect(simulation().result).not.toBeNull()
 
+    // Mover não muda o circuito elétrico: os números continuam certos.
+    const before = simulation().result
     circuit().moveComponent(r, { x: 5, y: 1 })
+    expect(simulation().result).toBe(before)
+
+    // Tirar um fio muda as ligações → limpa.
+    const firstWire = circuit().wires[0]
+    if (!firstWire) throw new Error('faltam fios')
+    circuit().removeWire(firstWire.id)
     expect(simulation().result).toBeNull()
+    expect(simulation().lastRun).toBeNull()
+  })
+
+  it('mudar um valor depois de Simular recalcula sozinho (fonte 12 V → 7 V)', () => {
+    //   Teste 6 com V1 = 7 V: I = (7 − 2) / 470 = 10,638 mA
+    const { v, r } = test6()
+    simulation().run()
+    expect(circuit().updateParams(v, { voltage: 7 })).toEqual([])
+    const result = simulation().result
+    if (!result?.ok) throw new Error('devia ter recalculado')
+    expect(result.results.get(r)?.current).toBeCloseTo(5 / 470, 9)
+    expect(result.results.get(v)?.voltage).toBeCloseTo(7, 9)
+  })
+
+  it('sem Simular antes (ou depois de Parar), mudar um valor não calcula nada', () => {
+    const { v } = test6()
+    circuit().updateParams(v, { voltage: 7 })
+    expect(simulation().result).toBeNull()
+    simulation().run()
+    simulation().clear()
+    circuit().updateParams(v, { voltage: 9 })
+    expect(simulation().result).toBeNull()
+  })
+
+  it('transitório: mudar um valor repete o transitório com a mesma duração e passo', () => {
+    const { v } = test6()
+    // O LED simples não entra no transitório → o resultado é um erro, mas a análise fica guardada.
+    simulation().runTransient({ duration: 0.01, step: 0.001 })
+    circuit().updateParams(v, { voltage: 7 })
+    expect(simulation().lastRun).toEqual({
+      mode: 'transient',
+      options: { duration: 0.01, step: 0.001 },
+    })
+    expect(simulation().result?.issues.map((i) => i.code)).toContain('led-in-transient')
   })
 })

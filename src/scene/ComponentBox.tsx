@@ -40,10 +40,16 @@ function bodyColor(component: Component): string {
   return COLORS[component.kind]
 }
 
-/** Texto do visor do modelo 3D: a fonte DC mostra a sua tensão (ex.: "12.0 V"). */
-function displayText(component: Component): string | undefined {
+/**
+ * Texto do visor do modelo 3D da fonte DC, como numa fonte de bancada: antes de Simular, a
+ * tensão regulada ("12.0 V"); depois, a tensão de saída medida e o modo ("4.70 V" + "CC").
+ */
+function displayText(component: Component, visual: VisualState): string | undefined {
   if (component.kind !== 'dc-source') return undefined
-  return `${component.params.voltage.toFixed(1)} V`
+  const voltage = visual.source?.voltage ?? component.params.voltage
+  // 3 algarismos significativos: 4.70 V, 12.0 V, 230 V.
+  const size = Math.abs(voltage)
+  return `${voltage.toFixed(size >= 100 ? 0 : size >= 10 ? 1 : 2)} V`
 }
 
 /** Onde fica a auréola (altura do centro da luz no modelo) e o seu tamanho máximo. */
@@ -154,7 +160,8 @@ export function ComponentBox({
                 emissive={emissive ?? '#000000'}
                 intensity={intensity}
                 blink={visual.blink}
-                display={displayText(component)}
+                display={displayText(component, visual)}
+                displayTag={visual.source?.mode === 'cc' ? 'CC' : visual.source ? 'CV' : undefined}
                 onReady={setModelReady}
               />
             </Suspense>

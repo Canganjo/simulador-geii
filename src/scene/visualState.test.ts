@@ -90,6 +90,7 @@ describe('visualState', () => {
       glowColor: LED_LIGHT.azul,
       issue: 'warning',
       blink: true,
+      source: null,
     })
   })
 

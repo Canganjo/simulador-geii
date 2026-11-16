@@ -12,6 +12,10 @@
  *   3. um LED bloqueado com U ≥ Vf aos terminais teria de conduzir → passa a conduzir;
  *   4. repete-se (um LED de cada vez) até nenhum mudar.
  *
+ * Fonte DC com limite de corrente (D-013), como uma fonte de bancada — o mesmo ciclo:
+ *   - em CV (tensão constante) a fornecer mais do que Imax → passa a CC (corrente = Imax);
+ *   - em CC com U = V+ − V− acima da tensão regulada → volta a CV.
+ *
  * Díodo real (E10): não precisa deste ciclo — a curva de Shockley é resolvida dentro de
  * `solveDcNonlinear` (Newton-Raphson, newton.ts). Sem díodos, é o `solveDc` de sempre.
  */
@@ -39,6 +43,8 @@ export interface ComponentResult {
   ledState?: 'on' | 'off'
   /** Só para os díodos reais: conduz (I ≥ 1 µA) ou bloqueado. */
   diodeState?: 'conducting' | 'blocked'
+  /** Só para as fontes DC: CV (tensão regulada) ou CC (no limite de corrente). */
+  sourceMode?: 'cv' | 'cc'
 }
 
 export type SimulationIssue =
@@ -49,6 +55,24 @@ export type SimulationIssue =
       message: string
       componentIds: string[]
       /** { name, current, max } — correntes em A. */
+      params?: Readonly<Record<string, string | number>>
+    }
+  | {
+      /** Fonte em CC: atingiu o limite de corrente e a tensão caiu abaixo da regulada. */
+      severity: 'warning'
+      code: 'source-current-limit'
+      message: string
+      componentIds: string[]
+      /** { name, limit, voltage } — A e V. */
+      params?: Readonly<Record<string, string | number>>
+    }
+  | {
+      /** Transitório: a fonte não limita a corrente no tempo; houve um pico acima de Imax. */
+      severity: 'warning'
+      code: 'source-limit-transient'
+      message: string
+      componentIds: string[]
+      /** { name, current, max } — A. */
       params?: Readonly<Record<string, string | number>>
     }
   | {
@@ -84,11 +108,15 @@ export function simulateDc(project: Pick<Project, 'components' | 'wires'>): Simu
 
   const leds = project.components.filter((c) => c.kind === 'led')
   const ledOff = new Set<string>()
-  // Cada LED muda no máximo poucas vezes; este limite só existe para nunca ficar preso.
-  const maxIterations = 2 * leds.length + 10
+  const limited = project.components.filter(
+    (c) => c.kind === 'dc-source' && c.params.currentLimit !== undefined,
+  )
+  const sourceCc = new Set<string>()
+  // Cada LED/fonte muda no máximo poucas vezes; este limite só existe para nunca ficar preso.
+  const maxIterations = 2 * (leds.length + limited.length) + 10
 
   for (let iteration = 0; iteration < maxIterations; iteration++) {
-    const built = buildNetlist(project, { ledOff })
+    const built = buildNetlist(project, { ledOff, sourceCc })
     if (!built.ok) return { ok: false, issues: validation.issues, message: 'Falta o GND.' }
     const solution = solveDcNonlinear(built.netlist)
     if (!solution.ok) {
@@ -115,13 +143,40 @@ export function simulateDc(project: Pick<Project, 'components' | 'wires'>): Simu
       continue
     }
 
+    // O mesmo para as fontes com limite: CV a dar demais → CC; CC acima da tensão regulada → CV.
+    const wrongSource = limited.find((s) => {
+      if (s.kind !== 'dc-source' || s.params.currentLimit === undefined) return false
+      if (sourceCc.has(s.id)) {
+        const u = voltageAcross(vAt, s, '+', '-')
+        return u !== undefined && u > s.params.voltage + VOLTAGE_EPSILON
+      }
+      const supplied = solution.elements.get(s.id)?.current ?? 0
+      return supplied > s.params.currentLimit * (1 + 1e-9) + CURRENT_EPSILON
+    })
+    if (wrongSource) {
+      if (sourceCc.has(wrongSource.id)) sourceCc.delete(wrongSource.id)
+      else sourceCc.add(wrongSource.id)
+      continue
+    }
+
     // Tudo coerente → resultados por componente.
     const results = new Map<string, ComponentResult>()
     const issues: SimulationIssue[] = [...validation.issues]
     for (const c of project.components) {
-      const r = componentResult(c, solution, vAt, ledOff)
+      const r = componentResult(c, solution, vAt, ledOff, sourceCc)
       if (!r) continue
       results.set(c.id, r)
+      if (c.kind === 'dc-source' && r.sourceMode === 'cc') {
+        issues.push({
+          severity: 'warning',
+          code: 'source-current-limit',
+          message:
+            `${c.name}: limite de corrente atingido (CC) — a fonte dá só ${round(r.current)} A ` +
+            `e a tensão cai para ${round(r.voltage)} V.`,
+          componentIds: [c.id],
+          params: { name: c.name, limit: r.current, voltage: r.voltage },
+        })
+      }
       if (c.kind === 'led' && r.current > c.params.maxCurrent) {
         issues.push({
           severity: 'warning',
@@ -144,7 +199,8 @@ export function simulateDc(project: Pick<Project, 'components' | 'wires'>): Simu
   return {
     ok: false,
     issues: validation.issues,
-    message: 'O cálculo dos LED não estabilizou (os LED mudam de estado sem parar).',
+    message:
+      'O cálculo dos LED/fontes não estabilizou (os LED ou as fontes mudam de estado sem parar).',
   }
 }
 
@@ -168,11 +224,20 @@ function componentResult(
   solution: Solved,
   vAt: VoltageAt,
   ledOff: ReadonlySet<string>,
+  sourceCc: ReadonlySet<string>,
 ): ComponentResult | undefined {
   switch (c.kind) {
     case 'ground':
       return undefined
-    case 'dc-source':
+    case 'dc-source': {
+      const r = solution.elements.get(c.id)
+      if (!r) return undefined
+      if (!sourceCc.has(c.id)) return { ...r, sourceMode: 'cv' }
+      // Em CC é uma fonte de corrente na netlist (de − para +): reescreve-se como fonte DC,
+      // U = V+ − V−, I = Imax fornecida, P = −U·I (fornece).
+      const voltage = voltageAcross(vAt, c, '+', '-') ?? 0
+      return { voltage, current: r.current, power: -voltage * r.current, sourceMode: 'cc' }
+    }
     case 'resistor':
     case 'lamp':
     case 'inductor': // em DC é um fio de 1 mΩ: a corrente é a que passa por ele

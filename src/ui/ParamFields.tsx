@@ -74,13 +74,25 @@ interface ParamProps<S extends ParamSpec> {
   spec: S
 }
 
-export function NumberParamField({ component, param, spec }: ParamProps<NumberParamSpec>) {
+interface NumberParamProps extends ParamProps<NumberParamSpec> {
+  /** Algo à direita da unidade (ex.: os botões − / + da tensão da fonte). */
+  after?: ReactNode
+}
+
+export function NumberParamField({ component, param, spec, after }: NumberParamProps) {
   const t = useT()
   const decimal = decimalSeparator(useLanguageStore((s) => s.language))
   const stored = (component.params as Readonly<Record<string, unknown>>)[param]
   const shown = typeof stored === 'number' ? formatSiInput(stored, decimal) : ''
   const [draft, setDraft] = useState(shown)
   const [error, setError] = useState<string | null>(null)
+  // O valor guardado mudou por fora (botões + / −, Ctrl+Z): o campo passa a mostrar o novo.
+  const [syncedWith, setSyncedWith] = useState(shown)
+  if (syncedWith !== shown) {
+    setSyncedWith(shown)
+    setDraft(shown)
+    setError(null)
+  }
   const label = paramLabel(param, spec, t)
 
   const apply = () => {
@@ -120,6 +132,7 @@ export function NumberParamField({ component, param, spec }: ParamProps<NumberPa
           className={`${INPUT} ${error ? INPUT_ERROR : ''}`}
         />
         <span className="w-4 shrink-0 text-slate-400">{spec.unit}</span>
+        {after}
       </div>
     </Field>
   )

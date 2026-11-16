@@ -32,8 +32,8 @@ export function validateParams(
       issues.push({ param, reason, message: `${where} ${message}` })
 
     if (value === undefined) {
-      // A potência nominal da resistência é opcional no modelo; o resto é obrigatório.
-      if (!(kind === 'resistor' && param === 'ratedPower')) issue('missing', 'em falta')
+      // Alguns parâmetros são opcionais (potência nominal, limite de corrente); o resto é obrigatório.
+      if (!(spec.type === 'number' && spec.optional)) issue('missing', 'em falta')
       continue
     }
 
