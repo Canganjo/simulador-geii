@@ -21,6 +21,8 @@ export const MODEL_FILES: Partial<Record<ComponentKind, string>> = {
   led: 'led.glb',
   diode: 'diode.glb',
   lamp: 'lamp.glb',
+  capacitor: 'capacitor.glb',
+  inductor: 'inductor.glb',
 }
 
 /**

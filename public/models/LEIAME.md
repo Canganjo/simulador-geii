@@ -5,7 +5,7 @@ Os ficheiros fonte `.blend` ficam em `assets-src/` (ver `assets-src/LEIAME.md`).
 
 Responsável: Pessoa 3.
 
-Os 7 modelos atuais são **gerados por um script do Blender**: `assets-src/build_models.py`
+Os 9 modelos atuais (+ o interruptor aberto) são **gerados por um script do Blender**: `assets-src/build_models.py`
 (ver `assets-src/LEIAME.md`). Para mudar um modelo, alterar o script e voltar a corrê-lo, ou abrir
 o `.blend` em `assets-src/`, melhorar à mão e exportar como na secção 5.
 
@@ -23,6 +23,8 @@ Se um `.glb` faltar ou estiver estragado, também volta à caixa — nada se par
 | LED         | `led.glb`       |
 | Díodo       | `diode.glb`     |
 | Lâmpada     | `lamp.glb`      |
+| Condensador | `capacitor.glb` |
+| Bobina      | `inductor.glb`  |
 
 ## 2. Medidas e posição (o mais importante)
 

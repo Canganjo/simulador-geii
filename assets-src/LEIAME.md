@@ -18,7 +18,7 @@ Resumo rápido:
 
 ## Gerar os modelos com o script
 
-`build_models.py` constrói os 7 componentes no Blender a partir de código (formas simples:
+`build_models.py` constrói os 9 componentes (e o interruptor aberto) no Blender a partir de código (formas simples:
 cilindros, esferas, caixas e tubos para as patas), guarda cada `.blend` aqui e exporta cada `.glb`
 para `public/models/`. No fim mostra, para cada modelo, os triângulos, o tamanho e as medidas.
 
