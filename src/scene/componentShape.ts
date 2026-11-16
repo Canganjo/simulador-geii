@@ -20,3 +20,11 @@ export function labelHeight(kind: ComponentKind): number {
 export function labelBase(kind: ComponentKind): Vec2 {
   return kind === 'ground' ? { x: 0.9, y: -0.5 } : { x: 0, y: 0 }
 }
+
+/**
+ * Tamanho da sombra no chão (antes de rodar): [ao longo do componente, de lado].
+ * Um pouco menor do que o modelo com as patas (as patas finas quase não fazem sombra).
+ */
+export function shadowSize(kind: ComponentKind): [number, number] {
+  return kind === 'ground' ? [1.05, 0.9] : [1.6, 0.85]
+}
