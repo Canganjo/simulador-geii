@@ -3,7 +3,7 @@ import { readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { ComponentKind } from '../core/model'
-import { isBodyMaterial, isGlowMaterial, MODEL_FILES } from './models3d'
+import { isBodyMaterial, isGlowMaterial, MODEL_FILES, STATE_MODEL_FILES } from './models3d'
 
 /**
  * Verifica os ficheiros .glb de public/models contra a ficha técnica (public/models/LEIAME.md).
@@ -60,9 +60,12 @@ function triangles(gltf: Gltf): number {
   return total
 }
 
-const entries = Object.entries(MODEL_FILES) as [ComponentKind, string][]
+const entries = [...Object.entries(MODEL_FILES), ...Object.entries(STATE_MODEL_FILES)] as [
+  ComponentKind,
+  string,
+][]
 
-describe.each(entries)('modelo %s', (kind, file) => {
+describe.each(entries)('modelo %s (%s)', (kind, file) => {
   const gltf = readGlb(file)
   const { min, max } = bounds(gltf)
   const [minX = 0, minY = 0, minZ = 0] = min

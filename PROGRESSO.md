@@ -141,3 +141,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `de03650` | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
 | `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
 | (squash)  | Ícones modernos no menu de componentes (issue #75)                          | #76 |
+| (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |

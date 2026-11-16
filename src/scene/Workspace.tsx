@@ -168,9 +168,13 @@ export function Workspace() {
       const point = picker.current?.(e.clientX, e.clientY)
       if (point) drag.moveTo(point)
     }
-    const onUp = () => {
-      drag.end()
+    const onUp = (e: PointerEvent) => {
+      const moved = drag.end()
       document.body.style.cursor = ''
+      // Clique (sem arrastar) num interruptor: abre/fecha, como no Tinkercad.
+      if (!moved && e.type === 'pointerup' && component.kind === 'switch') {
+        useCircuitStore.getState().toggleSwitch(component.id)
+      }
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)

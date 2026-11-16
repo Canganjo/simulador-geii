@@ -316,19 +316,29 @@ def build_lamp():
         wire([(side * 0.3, 0, 0.1), (side * 0.3, 0, 0.05), (side * 0.85, 0, 0.05), (side * 0.85, 0, LEAD_Z), (side * 1.0, 0, LEAD_Z)], m)
 
 
-def build_switch():
-    """Interruptor de alavanca: base, casquilho metálico e alavanca."""
+def build_switch(closed=True):
+    """Interruptor de alavanca: base, casquilho metálico e alavanca.
+
+    Há dois modelos: switch.glb (FECHADO: alavanca para a direita, sinal verde) e
+    switch-open.glb (ABERTO: alavanca para a esquerda, sinal vermelho). A cena troca-os
+    conforme o parâmetro `closed`.
+    """
     box((0.8, 0.45, 0.22), (0, 0, 0.11), material("plastico", "#1e3a8a", roughness=0.45))
     m = metal()
     cylinder(0.1, 0.08, (0, 0, 0.26), m)  # casquilho
     cylinder(0.12, 0.02, (0, 0, 0.23), m, vertices=6)  # porca
-    tilt = math.radians(25)
+    tilt = math.radians(35 if closed else -35)
     length = 0.3
     cx = math.sin(tilt) * length / 2
     cz = 0.3 + math.cos(tilt) * length / 2
     bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.035, depth=length, location=(cx, 0, cz), rotation=(0, tilt, 0))
     _finish(bpy.context.active_object, m)
     sphere(0.05, (2 * cx, 0, 0.3 + math.cos(tilt) * length), m, segments=12, rings=6)
+    # Sinal do estado em cima da base (vê-se com qualquer rotação) (verde = fechado / passa corrente; vermelho = aberto).
+    color = "#22c55e" if closed else "#ef4444"
+    signal = material("estado", color, roughness=0.4, emission=0.8)
+    box((0.12, 0.12, 0.02), (-0.27, -0.12, 0.225), signal)
+    box((0.12, 0.12, 0.02), (0.27, 0.12, 0.225), signal)
     for side in (-1, 1):
         cylinder(0.04, 0.06, (side * 0.3, 0, 0.25), m, vertices=8)  # bornes
         wire([(side * 0.4, 0, 0.06), (side * 0.85, 0, 0.06), (side * 0.85, 0, LEAD_Z), (side * 1.0, 0, LEAD_Z)], m)
@@ -350,6 +360,7 @@ BUILDERS = {
     "ground": build_ground,
     "resistor": build_resistor,
     "switch": build_switch,
+    "switch-open": lambda: build_switch(closed=False),
     "led": build_led,
     "diode": build_diode,
     "lamp": build_lamp,

@@ -281,6 +281,24 @@ describe('updateParams', () => {
   })
 })
 
+describe('toggleSwitch', () => {
+  it('abre e fecha o interruptor; cada clique é um passo do desfazer; ignora outros tipos', () => {
+    const s = actions().addComponent('switch', { x: 0, y: 0 })
+    const r = actions().addComponent('resistor', { x: 4, y: 0 })
+    const closed = () => actions().components.find((c) => c.id === s)?.params
+    const start = closed()
+    actions().toggleSwitch(s)
+    expect(closed()).not.toEqual(start)
+    actions().toggleSwitch(s)
+    expect(closed()).toEqual(start)
+    useCircuitStore.temporal.getState().undo()
+    expect(closed()).not.toEqual(start)
+    const before = actions().components.find((c) => c.id === r)?.params
+    actions().toggleSwitch(r)
+    expect(actions().components.find((c) => c.id === r)?.params).toBe(before)
+  })
+})
+
 describe('renameComponent', () => {
   it('muda o nome (sem espaços à volta); recusa vazio e nomes repetidos', () => {
     const r1 = actions().addComponent('resistor', { x: 0, y: 0 })

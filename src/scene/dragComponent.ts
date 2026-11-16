@@ -16,8 +16,8 @@ import { snapToGrid } from './coordinates'
 export interface ComponentDrag {
   /** Posição do rato (no chão, em coordenadas do modelo) → move o componente. */
   moveTo: (pointer: Vec2) => void
-  /** Larga o componente e grava o passo de Desfazer (se mexeu). */
-  end: () => void
+  /** Larga o componente e grava o passo de Desfazer (se mexeu). Devolve true se mexeu. */
+  end: () => boolean
 }
 
 /**
@@ -48,6 +48,7 @@ export function startComponentDrag(id: string, grab: Vec2): ComponentDrag | null
       if (moved) useCircuitStore.getState().moveComponent(id, start) // volta ao início, em pausa
       history.resume()
       if (moved) useCircuitStore.getState().moveComponent(id, final) // um só passo gravado
+      return moved
     },
   }
 }
