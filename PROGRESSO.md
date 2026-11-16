@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #73 (fonte DC regulável: + / −, CV/CC, recálculo automático).
+Última atualização: 2026-11-16 — issue #75 (ícones modernos no menu de componentes).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -47,6 +47,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #67   | Como no mockup: câmara inclinada (~55°) e mais perto, LED/fonte/lâmpada/GND revistos, visor com a tensão, auréola de luz | E7    | feito  | `feature/como-no-desenho`      | PR #68              |
 | #69   | E10-5: gráfico u(t) / i(t) do transitório (cursor, valor final, τ)                                                       | E10   | feito  | `feature/grafico-transitorio`  | PR #70              |
 | #73   | Fonte DC de bancada: botões + / −, limite de corrente (CV/CC, 3 A), recálculo automático                                 | E10   | feito  | `feature/fonte-regulavel`      | PR #74              |
+| #75   | Menu de componentes: ícones IEC em mosaicos coloridos, valor por omissão, coluna de ícones ao recolher                   | E10   | feito  | `feature/icones-menu`          | PR #76              |
 
 ### Tarefas extra
 
@@ -137,6 +138,7 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `2fa047f` | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
 | `fd9e495` | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
 | `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
-| (squash)  | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
-| (squash)  | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
+| `de03650` | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
+| `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
+| (squash)  | Ícones modernos no menu de componentes (issue #75)                          | #76 |
 | (squash)  | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
