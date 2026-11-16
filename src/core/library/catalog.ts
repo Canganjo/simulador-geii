@@ -21,8 +21,11 @@ export const COMPONENT_CATEGORIES = [
 
 export type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number]
 
-/** Unidades SI usadas pelos parâmetros ('' = sem unidade, ex.: o coeficiente n do díodo). */
-export type SiUnit = 'V' | 'A' | 'Ω' | 'W' | ''
+/**
+ * Unidades SI usadas pelos parâmetros ('' = sem unidade, ex.: o coeficiente n do díodo).
+ * F = farad (condensador), H = henry (bobina).
+ */
+export type SiUnit = 'V' | 'A' | 'Ω' | 'W' | 'F' | 'H' | ''
 
 /** Um terminal do catálogo: nome técnico (vai para o ID, ex.: "c3:+") e nome para mostrar. */
 export interface TerminalDefinition {
@@ -180,6 +183,51 @@ export const CATALOG: { readonly [K in ComponentKind]: ComponentDefinition<K> } 
         unit: '',
         min: 0.5,
         max: 4,
+      },
+    },
+  },
+  capacitor: {
+    kind: 'capacitor',
+    label: 'Condensador',
+    category: 'Passivos',
+    namePrefix: 'C',
+    terminals: [
+      { name: 'a', label: 'a' },
+      { name: 'b', label: 'b' },
+    ],
+    // 100 µF com 1 kΩ → τ = R·C = 0,1 s (carga visível em meio segundo). Descarregado.
+    defaultParams: { capacitance: 100e-6, initialVoltage: 0 },
+    params: {
+      capacitance: { type: 'number', label: 'Capacidade', unit: 'F', min: 1e-12, max: 1 },
+      initialVoltage: {
+        type: 'number',
+        label: 'Tensão inicial',
+        unit: 'V',
+        min: -1000,
+        max: 1000,
+      },
+    },
+  },
+  inductor: {
+    kind: 'inductor',
+    label: 'Bobina',
+    category: 'Passivos',
+    // L como nas normas (partilhado com a lâmpada: os nomes continuam únicos, L1, L2…)
+    namePrefix: 'L',
+    terminals: [
+      { name: 'a', label: 'a' },
+      { name: 'b', label: 'b' },
+    ],
+    // 10 mH com 10 Ω → τ = L/R = 1 ms. Sem corrente no início.
+    defaultParams: { inductance: 10e-3, initialCurrent: 0 },
+    params: {
+      inductance: { type: 'number', label: 'Indutância', unit: 'H', min: 1e-9, max: 100 },
+      initialCurrent: {
+        type: 'number',
+        label: 'Corrente inicial',
+        unit: 'A',
+        min: -100,
+        max: 100,
       },
     },
   },

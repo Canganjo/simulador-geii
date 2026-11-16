@@ -7,6 +7,24 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-012 · 2026-11-16 · Condensador e bobina na interface: DC e modo Transitório ✅
+
+E10-4: os componentes `capacitor` (C1, C2…) e `inductor` (L1, L2…) entram no menu (Passivos).
+
+- **Botão Simular (DC, regime permanente):**
+  - condensador = **circuito aberto** (fica fora da netlist, como um interruptor aberto): I = 0 e a
+    tensão aos terminais é a do circuito;
+  - bobina = **fio** (resistência de 1 mΩ, como o interruptor fechado). Uma bobina diretamente entre o
+    + e o − de uma fonte é um **curto-circuito** (erro, como um fio).
+- **Botão Transitório:** janela com duração e passo (por defeito 0,5 s e 1 ms). Usa o motor da D-010.
+  O painel mostra os valores no **instante final**; as curvas ficam guardadas para o gráfico (E10-5).
+- **LED simples fora do transitório:** o modelo "conduz/bloqueado" (supor e verificar) não tem
+  sentido passo a passo; no transitório pede-se o **díodo real** (D-009). Erro claro se houver um LED.
+- **Prefixo L partilhado** pela lâmpada e pela bobina (como o D do LED e do díodo): os nomes
+  continuam únicos (L1, L2…). Substitui a ideia antiga de mudar a lâmpada para `LP`.
+- **Porquê:** reutiliza a validação, a netlist e o painel do DC; o regime permanente coincide com o
+  fim de um transitório longo (verificado nos testes).
+
 ## D-010 · 2026-11-16 · Transitório: Euler implícito com passo fixo ✅
 
 Fase 4 do motor (E10): condensador e bobina ao longo do tempo.
@@ -157,5 +175,5 @@ Detalha e alarga a D-004.
 | Formato de gravação e exportações      | Ver D-008 (`.geii.json`, sem resultados, `.cir` primeiro) |
 | Distribuição de funções e calendário   | Pessoa 1/2/3 conforme README; plano de 14 sem. |
 
-Nota sobre os nomes: no SPICE, `L` é a letra das bobinas. Se o simulador ganhar bobinas (fase futura),
-será preciso escolher outro prefixo para uma delas (ex.: `LP` para a lâmpada).
+Nota sobre os nomes: no SPICE, `L` é a letra das bobinas. Decidido em D-012: a lâmpada e a bobina
+partilham o prefixo `L` (os nomes continuam únicos).

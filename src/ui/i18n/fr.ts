@@ -13,6 +13,19 @@ export const fr: Messages = {
   'action.redo': 'Rétablir',
   'action.simulate': 'Simuler',
   'action.stop': 'Arrêter',
+  'action.transient': 'Transitoire',
+  'transient.title': 'Simulation temporelle (transitoire)',
+  'transient.hint':
+    'Condensateurs et bobines évoluent de t = 0 jusqu’à la fin (Euler implicite, pas fixe).',
+  'transient.duration': 'Durée',
+  'transient.step': 'Pas',
+  'transient.run': 'Simuler dans le temps',
+  'transient.cancel': 'Annuler',
+  'transient.invalid': 'Entrez un temps supérieur à 0, ex. : 0,5 s ou 1 ms.',
+  'transient.tooMany':
+    '{steps} pas, c’est trop (maximum {max}). Augmentez le pas ou réduisez la durée.',
+  'results.transientInfo':
+    'Transitoire de 0 à {duration} ({steps} pas) : valeurs à l’instant final.',
   'action.reset': 'RAZ', // remise à zéro
   'action.nodes': 'Nœuds',
   'action.nodesHint': 'Afficher le numéro du nœud de chaque borne (débogage)',
@@ -48,6 +61,8 @@ export const fr: Messages = {
   'kind.led': 'LED',
   'kind.lamp': 'Lampe',
   'kind.diode': 'Diode',
+  'kind.capacitor': 'Condensateur',
+  'kind.inductor': 'Bobine',
 
   'param.voltage': 'Tension',
   'param.resistance': 'Résistance',
@@ -60,6 +75,10 @@ export const fr: Messages = {
   'param.ratedVoltage': 'Tension nominale',
   'param.saturationCurrent': 'Courant de saturation (Is)',
   'param.emissionCoefficient': 'Coefficient d’émission (n)',
+  'param.capacitance': 'Capacité',
+  'param.initialVoltage': 'Tension initiale',
+  'param.inductance': 'Inductance',
+  'param.initialCurrent': 'Courant initial',
 
   'color.vermelho': 'rouge',
   'color.verde': 'vert',
@@ -122,6 +141,10 @@ export const fr: Messages = {
   'issue.source-short-wire': '{name} est en court-circuit : le + et le − sont reliés par un fil.',
   'issue.source-short-switch':
     '{name} est en court-circuit : le + et le − sont reliés par un interrupteur fermé.',
+  'issue.source-short-inductor':
+    '{name} est en court-circuit : en continu une bobine est un fil entre le + et le −.',
+  'issue.led-in-transient':
+    '{name} : la LED simple n’est pas prise en compte en transitoire. Utilisez une diode (menu Semi-conducteurs).',
   'issue.parallel-sources':
     '{a} et {b} sont en parallèle (deux sources reliées aux deux mêmes nœuds).',
   'issue.floating-part': '{name} n’est pas relié au reste du circuit avec la masse.',
