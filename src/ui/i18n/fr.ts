@@ -60,6 +60,9 @@ export const fr: Messages = {
   'menu.search': 'Rechercher…',
   'menu.itemHint': 'Glisse vers la zone libre (ou clique) pour ajouter : {name}',
   'menu.empty': 'Aucun composant trouvé.',
+  'menu.summary.ground': 'référence 0 V',
+  'menu.summary.switch': 'ouvert',
+  'menu.summary.diode': 'Si · 1N4148',
 
   'category.Fontes': 'Sources',
   'category.Passivos': 'Passifs',

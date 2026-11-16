@@ -78,13 +78,20 @@ const PATHS: Record<ComponentKind, ReactNode> = {
   ),
 }
 
-export function IecSymbol({ kind, className }: { kind: ComponentKind; className?: string }) {
+interface Props {
+  kind: ComponentKind
+  className?: string
+  /** Espessura do traço (1,5 por defeito; o menu usa 1,75 para ficar mais nítido em pequeno). */
+  strokeWidth?: number
+}
+
+export function IecSymbol({ kind, className, strokeWidth = 1.5 }: Props) {
   return (
     <svg
       viewBox="0 0 40 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}

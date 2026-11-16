@@ -66,6 +66,9 @@ export const pt = {
   'menu.search': 'Pesquisar…',
   'menu.itemHint': 'Arrasta para a zona livre (ou clica) para adicionar: {name}',
   'menu.empty': 'Nenhum componente encontrado.',
+  'menu.summary.ground': 'referência 0 V',
+  'menu.summary.switch': 'aberto',
+  'menu.summary.diode': 'Si · 1N4148',
 
   // Categorias (o nome técnico vem do catálogo, em src/core/library)
   'category.Fontes': 'Fontes',
