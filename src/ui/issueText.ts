@@ -17,7 +17,13 @@ export function issueText(issue: SimulationIssue, t: Translate, decimal: ',' | '
 
   switch (issue.code) {
     case 'source-short':
-      return text(params.via === 'switch' ? 'issue.source-short-switch' : 'issue.source-short-wire')
+      return text(
+        params.via === 'switch'
+          ? 'issue.source-short-switch'
+          : params.via === 'inductor'
+            ? 'issue.source-short-inductor'
+            : 'issue.source-short-wire',
+      )
     case 'invalid-params':
       return text('issue.invalid-params', {
         ...params,

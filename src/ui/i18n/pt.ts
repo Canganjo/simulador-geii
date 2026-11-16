@@ -19,6 +19,19 @@ export const pt = {
   'action.redo': 'Refazer',
   'action.simulate': 'Simular',
   'action.stop': 'Parar',
+  'action.transient': 'Transitório',
+  'transient.title': 'Simulação no tempo (transitório)',
+  'transient.hint':
+    'Condensadores e bobinas evoluem de t = 0 até ao fim (Euler implícito, passo fixo).',
+  'transient.duration': 'Duração',
+  'transient.step': 'Passo',
+  'transient.run': 'Simular no tempo',
+  'transient.cancel': 'Cancelar',
+  'transient.invalid': 'Escreve um tempo maior que 0, ex.: 0,5 s ou 1 ms.',
+  'transient.tooMany':
+    '{steps} passos é demais (máximo {max}). Aumenta o passo ou reduz a duração.',
+  'results.transientInfo':
+    'Transitório de 0 a {duration} ({steps} passos): valores no instante final.',
   'action.reset': 'Reset',
   'action.nodes': 'Nós',
   'action.nodesHint': 'Mostrar o número do nó de cada terminal (debug)',
@@ -56,6 +69,8 @@ export const pt = {
   'kind.led': 'LED',
   'kind.lamp': 'Lâmpada',
   'kind.diode': 'Díodo',
+  'kind.capacitor': 'Condensador',
+  'kind.inductor': 'Bobina',
 
   // Parâmetros (pelo nome técnico no catálogo)
   'param.voltage': 'Tensão',
@@ -69,6 +84,10 @@ export const pt = {
   'param.ratedVoltage': 'Tensão nominal',
   'param.saturationCurrent': 'Corrente de saturação (Is)',
   'param.emissionCoefficient': 'Coeficiente de emissão (n)',
+  'param.capacitance': 'Capacidade',
+  'param.initialVoltage': 'Tensão inicial',
+  'param.inductance': 'Indutância',
+  'param.initialCurrent': 'Corrente inicial',
 
   // Cores do LED (o valor guardado no projeto fica sempre em português)
   'color.vermelho': 'vermelho',
@@ -136,6 +155,10 @@ export const pt = {
   'issue.source-short-wire': '{name} está em curto-circuito: o + e o − estão ligados por um fio.',
   'issue.source-short-switch':
     '{name} está em curto-circuito: o + e o − estão ligados por um interruptor fechado.',
+  'issue.source-short-inductor':
+    '{name} está em curto-circuito: em DC uma bobina é um fio entre o + e o −.',
+  'issue.led-in-transient':
+    '{name}: o LED simples não entra no transitório. Usa um díodo (menu Semicondutores).',
   'issue.parallel-sources':
     '{a} e {b} estão em paralelo (duas fontes ligadas aos mesmos dois nós).',
   'issue.floating-part': '{name} não está ligado ao resto do circuito com GND.',

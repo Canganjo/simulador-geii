@@ -23,6 +23,8 @@ const COLORS: Record<ComponentKind, string> = {
   led: '#22c55e',
   lamp: '#facc15',
   diode: '#a855f7', // violeta: distingue-se do LED e vê-se bem no fundo escuro
+  capacitor: '#0ea5e9', // azul-claro (condensador eletrolítico)
+  inductor: '#b45309', // cor de cobre (fio enrolado)
 }
 
 const SELECTION_COLOR = '#38bdf8'
