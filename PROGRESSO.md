@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #54 (selecionar e apagar vários componentes).
+Última atualização: 2026-11-16 — issue #55 (Guardar / Guardar como com a janela do sistema).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -39,6 +39,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #51   | Díodo na interface: menu, cena, propriedades, resultados e JSON                       | E10   | feito  | `feature/diodo-interface`      | PR #52              |
 | #53   | Motor do transitório: condensador e bobina (Euler implícito)                          | E10   | feito  | `feature/transitorio-motor`    | PR #56              |
 | #54   | Selecionar vários componentes (retângulo, Ctrl+clique, Ctrl+A) e apagá-los de uma vez | E2    | feito  | `feature/selecao-multipla`     | PR #57              |
+| #55   | Guardar e Guardar como… perguntando onde guardar no disco                             | E8    | feito  | `feature/guardar-como`         | PR #58              |
 
 ### Tarefas extra
 
@@ -121,4 +122,5 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `56054e8` | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)               | #50 |
 | `a0a99ef` | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52 |
 | `1f80066` | Motor do transitório: condensador e bobina (issue #53)                      | #56 |
-| (squash)  | Selecionar vários componentes e apagá-los de uma vez (issue #54)            | #57 |
+| `d158115` | Selecionar vários componentes e apagá-los de uma vez (issue #54)            | #57 |
+| (squash)  | Guardar e Guardar como… perguntando onde guardar (issue #55)                | #58 |
