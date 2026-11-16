@@ -62,6 +62,9 @@ test('1.º Guardar pergunta onde; os seguintes gravam no mesmo ficheiro sem perg
   await page.goto('/')
   await addResistor(page)
   await expect(page.getByTestId('unsaved-badge')).toBeVisible()
+  // Projeto novo: ainda sem ficheiro (a barra diz), e a dica do Guardar explica que vai perguntar.
+  await expect(page.getByTestId('current-file')).toHaveText('Ainda não guardado')
+  await expect(button(page, 'Guardar')).toHaveAttribute('title', /pergunta onde guardar/)
 
   // 1.º Guardar → abre a janela (nome sugerido: circuito.geii.json) e grava lá.
   await button(page, 'Guardar').click()
@@ -72,6 +75,10 @@ test('1.º Guardar pergunta onde; os seguintes gravam no mesmo ficheiro sem perg
   // O projeto passa a chamar-se como o ficheiro escolhido.
   expect(JSON.parse(d.writes[0]?.text ?? '{}')).toMatchObject({ name: 'divisor 12V' })
   await expect(page.getByTestId('unsaved-badge')).toHaveCount(0)
+  // A barra mostra o ficheiro onde o Guardar passa a gravar, e um aviso confirma.
+  await expect(page.getByTestId('current-file')).toHaveText('divisor 12V.geii.json')
+  await expect(page.getByTestId('save-notice')).toHaveText('Guardado como divisor 12V.geii.json')
+  await expect(button(page, 'Guardar')).toHaveAttribute('title', /por cima de divisor 12V/)
 
   // Mais uma alteração + Ctrl+S → grava no MESMO ficheiro, sem abrir a janela.
   await addResistor(page)
@@ -81,6 +88,7 @@ test('1.º Guardar pergunta onde; os seguintes gravam no mesmo ficheiro sem perg
   expect(d.saveDialogs).toHaveLength(1)
   expect(d.writes[1]?.file).toBe('divisor 12V.geii.json')
   expect(JSON.parse(d.writes[1]?.text ?? '{}').components).toHaveLength(2)
+  await expect(page.getByTestId('save-notice')).toHaveText('Guardado em divisor 12V.geii.json')
 
   // Guardar como… → pergunta outra vez (sugere o nome atual) e grava no ficheiro novo.
   await page.evaluate("window.__answer = 'copia.geii.json'")
@@ -89,6 +97,8 @@ test('1.º Guardar pergunta onde; os seguintes gravam no mesmo ficheiro sem perg
   d = await disk(page)
   expect(d.saveDialogs).toEqual(['circuito.geii.json', 'divisor-12v.geii.json'])
   expect(d.writes[2]?.file).toBe('copia.geii.json')
+  // Daqui para a frente o Guardar grava na cópia.
+  await expect(page.getByTestId('current-file')).toHaveText('copia.geii.json')
 })
 
 test('Cancelar na janela não grava nada e as alterações continuam por guardar', async ({
@@ -119,11 +129,13 @@ test('Abrir com a janela: depois, Guardar grava no ficheiro aberto', async ({ pa
     'data-component-count',
     '0',
   )
+  await expect(page.getByTestId('current-file')).toHaveText('Ainda não guardado')
   await button(page, 'Abrir').click()
   await expect(page.getByTestId('workspace').locator('[data-component-count]')).toHaveAttribute(
     'data-component-count',
     '1',
   )
+  await expect(page.getByTestId('current-file')).toHaveText('aberto.geii.json')
 
   await addResistor(page)
   await page.keyboard.press('Control+s')

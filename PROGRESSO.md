@@ -134,3 +134,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64 |
 | (squash)  | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
 | (squash)  | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
+| (squash)  | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |

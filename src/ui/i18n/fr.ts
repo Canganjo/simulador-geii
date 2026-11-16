@@ -38,6 +38,15 @@ export const fr: Messages = {
   'file.errorNewer':
     'Impossible d’ouvrir {file} : il a été créé par une version plus récente du simulateur (format {version}).',
   'file.errorInvalid': 'Impossible d’ouvrir {file} : le projet a un problème ({detail}).',
+  'file.none': 'Pas encore enregistré',
+  'file.current': 'Fichier actuel : {file}',
+  'file.saveHint': 'Écrase {file}, sans rien demander',
+  'file.saveHintNew': 'Pas encore de fichier : la 1re fois, demande où enregistrer',
+  'file.saveAsHint': 'Demande toujours le dossier et le nom (ex. : pour faire une copie)',
+  'file.downloadHint': 'Ce navigateur ne permet pas de choisir le dossier : télécharge le fichier',
+  'file.saved': 'Enregistré dans {file}',
+  'file.savedAs': 'Enregistré sous {file}',
+  'file.downloaded': 'Téléchargé : {file} (dossier Téléchargements)',
   'file.close': 'Fermer',
 
   'menu.label': 'Menu des composants',
