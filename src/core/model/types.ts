@@ -73,6 +73,11 @@ interface ComponentBase<K extends ComponentKind> {
   name: string
   position: Vec2
   rotation: Rotation
+  /**
+   * Onde fica a etiqueta (R1, D1…) em relação ao sítio normal, em quadrados da grelha.
+   * Só aspeto (o utilizador arrasta-a para não tapar fios). Sem este campo: sítio normal.
+   */
+  labelOffset?: Vec2
   terminals: Terminal[]
   params: ComponentParamsByKind[K]
 }

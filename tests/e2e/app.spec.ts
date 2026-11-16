@@ -715,3 +715,43 @@ test('debug: o botão Nós mostra o número do nó de cada terminal (GND = 0)', 
   await button.click()
   await expect(node('V1:+')).not.toHaveAttribute('data-node')
 })
+
+test('a etiqueta (R1) arrasta-se para outro sítio; Ctrl+Z e duplo clique repõem', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const scene = page.getByTestId('workspace')
+  await page
+    .getByRole('complementary', { name: 'Menu de componentes' })
+    .getByRole('button', { name: 'Resistência' })
+    .click()
+  const label = scene.locator('[data-component-label="R1"]')
+  const terminal = scene.locator('[data-terminal="R1:a"]')
+  const before = await label.boundingBox()
+  const pinBefore = await terminal.boundingBox()
+  if (!before || !pinBefore) throw new Error('R1 não encontrado')
+
+  // Arrastar a etiqueta 2 quadrados para a direita (pelo rato, como um estudante).
+  const x = before.x + before.width / 2
+  const y = before.y + before.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + sx(40), y, { steps: 5 })
+  await page.mouse.move(x + sx(80), y, { steps: 5 })
+  await page.mouse.up()
+
+  const after = await label.boundingBox()
+  expect((after?.x ?? 0) - before.x).toBeGreaterThan(sx(60))
+  // O componente e os terminais não mexeram.
+  expect((await terminal.boundingBox())?.x).toBeCloseTo(pinBefore.x, 0)
+
+  // Ctrl+Z: a etiqueta volta ao sítio normal.
+  await page.keyboard.press('Control+z')
+  await expect.poll(async () => (await label.boundingBox())?.x ?? 0).toBeCloseTo(before.x, 0)
+
+  // Ctrl+Y volta a pô-la ao lado; duplo clique repõe-na.
+  await page.keyboard.press('Control+y')
+  await expect.poll(async () => (await label.boundingBox())?.x ?? 0).toBeGreaterThan(before.x + 20)
+  await label.dblclick()
+  await expect.poll(async () => (await label.boundingBox())?.x ?? 0).toBeCloseTo(before.x, 0)
+})

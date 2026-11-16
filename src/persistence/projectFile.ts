@@ -32,6 +32,8 @@ const componentSchema = z.object({
   name: z.string().trim().min(1).max(40),
   position: vec2,
   rotation: z.union([z.literal(0), z.literal(90), z.literal(180), z.literal(270)]),
+  // Posição da etiqueta (opcional: ficheiros antigos não a têm).
+  labelOffset: vec2.optional(),
   // Os terminais podem vir no ficheiro, mas são sempre refeitos a partir do catálogo.
   terminals: z.array(z.unknown()).optional(),
   params: z.record(z.string(), z.unknown()),

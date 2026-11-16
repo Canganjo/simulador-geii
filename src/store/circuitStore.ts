@@ -48,6 +48,8 @@ export interface CircuitState {
   /** Cria um componente do catálogo (nome livre: R1, R2…), seleciona-o e devolve o seu ID. */
   addComponent: (kind: ComponentKind, position: Vec2) => string
   moveComponent: (id: string, position: Vec2) => void
+  /** Muda o sítio da etiqueta (nome) do componente, relativo ao sítio normal. */
+  moveLabel: (id: string, offset: Vec2) => void
   /** Roda +90° (270° → 0°). */
   rotateComponent: (id: string) => void
   /** Copia com os mesmos parâmetros, nome e ID novos, posição +1/+1. Os fios não são copiados. */
@@ -143,6 +145,20 @@ export const useCircuitStore = create<CircuitState>()(
           components: s.components.map((c) =>
             c.id === id ? { ...c, position: { x: position.x, y: position.y } } : c,
           ),
+        })),
+
+      moveLabel: (id, offset) =>
+        set((s) => ({
+          components: s.components.map((c) => {
+            if (c.id !== id) return c
+            // Sítio normal: tira o campo (o ficheiro fica igual ao de antes).
+            if (offset.x === 0 && offset.y === 0) {
+              const copy = { ...c }
+              delete copy.labelOffset
+              return copy
+            }
+            return { ...c, labelOffset: { x: offset.x, y: offset.y } }
+          }),
         })),
 
       rotateComponent: (id) =>
