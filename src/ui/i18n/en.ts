@@ -202,6 +202,8 @@ export const en: Messages = {
   'drawer.close': 'Close panel',
 
   'workspace.label': 'Workspace',
+  'workspace.scrollX': 'Scroll the view left or right',
+  'workspace.scrollY': 'Scroll the view up or down',
   'workspace.labelHint': 'Drag to move the label (double-click: back to normal)',
   'workspace.wiringBefore': 'Wiring',
   'workspace.wiringAfter': '— click another terminal (Esc to cancel)',

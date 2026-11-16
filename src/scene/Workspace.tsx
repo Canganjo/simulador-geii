@@ -32,6 +32,7 @@ import {
 import { startComponentDrag } from './dragComponent'
 import { startLabelDrag } from './dragLabel'
 import { startWireDrag } from './dragWire'
+import { ViewScrollBars, ViewTracker, type PanView, type ViewRect } from './ViewScrollBars'
 import { GroundPicker, type ModelToScreen, type ScreenToModel } from './GroundPicker'
 import {
   idsInsideRect,
@@ -53,7 +54,8 @@ import { segmentMiddles, wireRoute } from './wireRoute'
  *   para se ver o volume dos componentes (ver docs/decisoes.md, D-006).
  * - O plano do circuito é o plano XZ do Three.js (Y aponta para cima).
  *   Conversão: posição do modelo (x, y) → cena (x, 0, −y) (ver coordinates.ts).
- * - Navegação: roda do rato = zoom; botão direito ou do meio = deslocar (pan).
+ * - Navegação: roda do rato = zoom; botão direito ou do meio = deslocar (pan); barras de
+ *   deslocamento em baixo (esquerda/direita) e à direita (cima/baixo), ver ViewScrollBars.tsx.
  *   O botão esquerdo fica livre para selecionar/arrastar componentes.
  * - Criar componentes: arrastar um item do menu e largá-lo aqui (fica no ponto da grelha
  *   mais próximo), ou clicar no item (fica no centro da vista, numa célula livre).
@@ -101,6 +103,13 @@ export function Workspace() {
   const anchorLayer = useRef<HTMLDivElement>(null)
   /** Camada dos botões − / + em cima da fonte selecionada (esta apanha o rato). */
   const controlLayer = useRef<HTMLDivElement>(null)
+  /** Barras de deslocamento: o que a câmara mostra agora e a função que desloca a vista. */
+  const [view, setView] = useState<ViewRect | null>(null)
+  const pan = useRef<PanView | null>(null)
+  const occupied = useMemo(
+    () => components.map((c) => ({ x: c.position.x, z: -c.position.y })),
+    [components],
+  )
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes(COMPONENT_DRAG_TYPE)) return
@@ -422,6 +431,7 @@ export function Workspace() {
         <GroundPicker pickerRef={picker} projectorRef={projector} />
         <AnchorProjector layer={anchorLayer} />
         <AnchorProjector layer={controlLayer} />
+        <ViewTracker onView={setView} panRef={pan} />
 
         <MapControls
           makeDefault
@@ -557,6 +567,15 @@ export function Workspace() {
         >
           {t('workspace.wiringBefore')} <strong>{wiringLabel}</strong> {t('workspace.wiringAfter')}
         </p>
+      )}
+
+      {view && (
+        <ViewScrollBars
+          view={view}
+          content={occupied}
+          panRef={pan}
+          labels={{ horizontal: t('workspace.scrollX'), vertical: t('workspace.scrollY') }}
+        />
       )}
     </div>
   )

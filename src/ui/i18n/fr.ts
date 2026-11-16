@@ -208,6 +208,8 @@ export const fr: Messages = {
   'drawer.close': 'Fermer le panneau',
 
   'workspace.label': 'Zone libre',
+  'workspace.scrollX': 'Déplacer la vue vers la gauche ou la droite',
+  'workspace.scrollY': 'Déplacer la vue vers le haut ou le bas',
   'workspace.labelHint': 'Glisse pour déplacer l’étiquette (double-clic : position normale)',
   'workspace.wiringBefore': 'Liaison de',
   'workspace.wiringAfter': '— clique sur une autre borne (Échap pour annuler)',

@@ -223,6 +223,8 @@ export const pt = {
 
   // Zona livre ("A ligar [R1:a] — clica…")
   'workspace.label': 'Zona livre',
+  'workspace.scrollX': 'Deslocar a vista para a esquerda ou para a direita',
+  'workspace.scrollY': 'Deslocar a vista para cima ou para baixo',
   'workspace.labelHint':
     'Arrasta para mudar a etiqueta de sítio (duplo clique: volta ao sítio normal)',
   'workspace.wiringBefore': 'A ligar',
