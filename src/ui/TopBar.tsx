@@ -50,6 +50,35 @@ interface Action {
   badge?: boolean
   /** Só o ícone até ecrãs muito largos (≥ 1536 px), para a barra caber a 1366 px. */
   compact?: boolean
+  /** Cor do ícone (cada grupo tem a sua, para a barra não parecer "apagada"). */
+  tone: Tone
+  /** Botão principal (Simular): fundo cheio, para se ver logo. */
+  primary?: boolean
+}
+
+type Tone = 'sky' | 'amber' | 'emerald' | 'violet' | 'cyan' | 'red' | 'orange' | 'fuchsia'
+
+/**
+ * Cores vivas de cada ícone e do fundo ao passar o rato (classes escritas por extenso, para o
+ * Tailwind as encontrar). Os botões desativados ficam esbatidos, mas com a mesma cor.
+ */
+const TONES: Readonly<Record<Tone, { icon: string; hover: string; pressed: string }>> = {
+  sky: { icon: 'text-sky-400', hover: 'hover:bg-sky-500/15', pressed: 'bg-sky-500/20' },
+  amber: { icon: 'text-amber-400', hover: 'hover:bg-amber-500/15', pressed: 'bg-amber-500/20' },
+  emerald: {
+    icon: 'text-emerald-400',
+    hover: 'hover:bg-emerald-500/15',
+    pressed: 'bg-emerald-500/20',
+  },
+  violet: { icon: 'text-violet-400', hover: 'hover:bg-violet-500/15', pressed: 'bg-violet-500/20' },
+  cyan: { icon: 'text-cyan-400', hover: 'hover:bg-cyan-500/15', pressed: 'bg-cyan-500/25' },
+  red: { icon: 'text-red-400', hover: 'hover:bg-red-500/15', pressed: 'bg-red-500/20' },
+  orange: { icon: 'text-orange-400', hover: 'hover:bg-orange-500/15', pressed: 'bg-orange-500/20' },
+  fuchsia: {
+    icon: 'text-fuchsia-400',
+    hover: 'hover:bg-fuchsia-500/15',
+    pressed: 'bg-fuchsia-500/25',
+  },
 }
 
 const undo = () => useCircuitStore.temporal.getState().undo()
@@ -190,13 +219,14 @@ export function TopBar() {
   // Parar e RAZ limpam os resultados. Transitório abre a janela com a duração e o passo (E10).
   const groups: Action[][] = [
     [
-      { label: t('action.new'), icon: FilePlus, onClick: onNew, disabled: false },
+      { label: t('action.new'), icon: FilePlus, onClick: onNew, disabled: false, tone: 'sky' },
       {
         label: t('action.open'),
         icon: FolderOpen,
         shortcut: 'Ctrl+O',
         onClick: () => void onOpen(),
         disabled: false,
+        tone: 'amber',
       },
       {
         label: t('action.save'),
@@ -205,6 +235,7 @@ export function TopBar() {
         onClick: () => void onSave(),
         disabled: false,
         badge: unsaved,
+        tone: 'sky',
         hint: `${t('action.save')}: ${saveHint}`,
       },
       {
@@ -214,6 +245,7 @@ export function TopBar() {
         onClick: () => void onSaveAs(),
         disabled: false,
         hint: `${t('action.saveAs')}: ${saveAsHint}`,
+        tone: 'sky',
       },
     ],
     [
@@ -223,6 +255,7 @@ export function TopBar() {
         shortcut: 'Ctrl+Z',
         onClick: undo,
         disabled: !canUndo,
+        tone: 'violet',
       },
       {
         label: t('action.redo'),
@@ -230,10 +263,18 @@ export function TopBar() {
         shortcut: 'Ctrl+Y',
         onClick: redo,
         disabled: !canRedo,
+        tone: 'violet',
       },
     ],
     [
-      { label: t('action.simulate'), icon: Play, onClick: run, disabled: !hasComponents },
+      {
+        label: t('action.simulate'),
+        icon: Play,
+        onClick: run,
+        disabled: !hasComponents,
+        tone: 'emerald',
+        primary: true,
+      },
       {
         label: t('action.transient'),
         icon: Activity,
@@ -241,6 +282,7 @@ export function TopBar() {
         disabled: !hasComponents,
         pressed: transientOpen,
         hint: t('transient.title'),
+        tone: 'cyan',
       },
       {
         label: t('action.stop'),
@@ -248,6 +290,7 @@ export function TopBar() {
         onClick: clear,
         disabled: !hasResult,
         compact: true,
+        tone: 'red',
       },
       {
         label: t('action.reset'),
@@ -255,6 +298,7 @@ export function TopBar() {
         onClick: clear,
         disabled: !hasResult,
         compact: true,
+        tone: 'orange',
       },
     ],
     [
@@ -265,6 +309,7 @@ export function TopBar() {
         onClick: toggleNodes,
         disabled: false,
         pressed: showNodes,
+        tone: 'fuchsia',
       },
     ],
   ]
@@ -309,6 +354,8 @@ export function TopBar() {
                 pressed,
                 hint,
                 compact,
+                tone,
+                primary,
               }) => (
                 <button
                   key={label}
@@ -318,12 +365,18 @@ export function TopBar() {
                   title={shortcut ? `${hint ?? label} (${shortcut})` : (hint ?? label)}
                   disabled={disabled}
                   onClick={onClick}
-                  className={`flex items-center gap-1.5 rounded px-2 py-1 text-sm hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 ${
-                    pressed ? 'bg-sky-500/20 text-sky-300' : 'text-slate-300'
+                  className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                    primary
+                      ? 'bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30 enabled:hover:bg-emerald-400'
+                      : `text-slate-100 ${TONES[tone].hover} ${pressed ? TONES[tone].pressed : ''}`
                   }`}
                 >
                   <span className="relative">
-                    <Icon className="size-4" aria-hidden />
+                    <Icon
+                      className={`size-4 ${primary ? 'fill-current' : TONES[tone].icon}`}
+                      strokeWidth={2.25}
+                      aria-hidden
+                    />
                     {badge && (
                       <span
                         data-testid="unsaved-badge"
@@ -346,9 +399,9 @@ export function TopBar() {
         <button
           type="button"
           title={t('topbar.help')}
-          className="rounded p-1.5 text-slate-300 hover:bg-slate-700"
+          className="rounded-md p-1.5 text-sky-400 hover:bg-sky-500/15"
         >
-          <CircleHelp className="size-5" aria-hidden />
+          <CircleHelp className="size-5" strokeWidth={2.25} aria-hidden />
           <span className="sr-only">{t('topbar.help')}</span>
         </button>
         <AccountMenu />
