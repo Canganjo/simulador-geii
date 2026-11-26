@@ -49,7 +49,7 @@ interface Action {
   hint?: string
   /** Bolinha âmbar no ícone (ex.: Guardar com alterações por guardar). */
   badge?: boolean
-  /** Só o ícone até ecrãs muito largos (≥ 1536 px), para a barra caber a 1366 px. */
+  /** Botão menos usado: só o ícone até ecrãs muito largos (ver `labelClass`). */
   compact?: boolean
   /** Cor do ícone (cada grupo tem a sua, para a barra não parecer "apagada"). */
   tone: Tone
@@ -80,6 +80,26 @@ const TONES: Readonly<Record<Tone, { icon: string; hover: string; pressed: strin
     hover: 'hover:bg-fuchsia-500/15',
     pressed: 'bg-fuchsia-500/25',
   },
+}
+
+/**
+ * A partir de que largura de ecrã o botão mostra o nome ao lado do ícone. Abaixo disso fica só o
+ * ícone, e o nome continua na dica (title) e no aria-label.
+ *
+ * A barra de ações desliza para o lado quando não cabe, mas a barra de deslocamento está
+ * escondida: um botão cortado ficava fora de vista sem sinal nenhum (issue #104). Os limites
+ * foram medidos nas três línguas (o francês é o mais comprido), com folga para outras fontes:
+ * - Simular (principal): nome a partir de 1024 px;
+ * - Novo, Abrir, Guardar, Transitório: a partir de 1280 px;
+ * - os outros (compact): só a partir de 1860 px (em francês precisam de ~1790 px).
+ * O teste tests/e2e/barra.spec.ts confirma que a barra cabe em várias larguras.
+ * O nome do ficheiro aberto, à esquerda, só aparece a partir de 1440 px (em francês, a 1280 px,
+ * não cabia tudo); abaixo disso está na dica do Guardar.
+ */
+function labelClass(primary: boolean | undefined, compact: boolean | undefined): string {
+  if (primary) return 'hidden lg:inline'
+  if (compact) return 'hidden min-[1860px]:inline'
+  return 'hidden xl:inline'
 }
 
 const undo = () => useCircuitStore.temporal.getState().undo()
@@ -248,6 +268,7 @@ export function TopBar() {
         onClick: () => void onSaveAs(),
         disabled: false,
         hint: `${t('action.saveAs')}: ${saveAsHint}`,
+        compact: true,
         tone: 'sky',
       },
     ],
@@ -258,6 +279,7 @@ export function TopBar() {
         shortcut: 'Ctrl+Z',
         onClick: undo,
         disabled: !canUndo,
+        compact: true,
         tone: 'violet',
       },
       {
@@ -266,6 +288,7 @@ export function TopBar() {
         shortcut: 'Ctrl+Y',
         onClick: redo,
         disabled: !canRedo,
+        compact: true,
         tone: 'violet',
       },
     ],
@@ -312,6 +335,7 @@ export function TopBar() {
         onClick: toggleNodes,
         disabled: false,
         pressed: showNodes,
+        compact: true,
         tone: 'fuchsia',
       },
       {
@@ -321,6 +345,7 @@ export function TopBar() {
         onClick: toggleCurrent,
         disabled: false,
         pressed: showCurrent,
+        compact: true,
         tone: 'amber',
       },
     ],
@@ -337,7 +362,7 @@ export function TopBar() {
       <span
         data-testid="current-file"
         title={fileName ? t('file.current', { file: fileName }) : t('file.none')}
-        className={`hidden max-w-44 shrink-0 truncate rounded px-1.5 py-0.5 text-xs xl:inline ${
+        className={`hidden max-w-44 shrink-0 truncate rounded px-1.5 py-0.5 text-xs min-[1440px]:inline ${
           fileName ? 'bg-slate-700/60 text-slate-300' : 'text-slate-500 italic'
         }`}
       >
@@ -397,9 +422,7 @@ export function TopBar() {
                       />
                     )}
                   </span>
-                  <span className={compact ? 'hidden 2xl:inline' : 'hidden lg:inline'}>
-                    {label}
-                  </span>
+                  <span className={labelClass(primary, compact)}>{label}</span>
                 </button>
               ),
             )}
