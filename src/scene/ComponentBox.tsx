@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { MeshStandardMaterial } from 'three'
 import type { Component, ComponentKind, TerminalId } from '../core/model'
 import { boxSize, shadowSize } from './componentShape'
+import { terminalHit } from './terminalPick'
 import { ComponentModel, ModelErrorBoundary } from './ComponentModel'
 import { Halo } from './Halo'
 import { meterDisplay } from './meterDisplay'
@@ -130,6 +131,8 @@ export function ComponentBox({
 
   const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
     if (e.button !== 0) return // direito/meio: deslocar a vista
+    // Pino escondido atrás do corpo (componente na vertical): o clique passa para o pino.
+    if (terminalHit(e.intersections) !== null) return
     e.stopPropagation() // só o componente da frente reage
     onGrab(component, e.clientX, e.clientY, e.ctrlKey || e.shiftKey || e.metaKey)
   }
@@ -142,6 +145,7 @@ export function ComponentBox({
         rotation={[0, (rotation * Math.PI) / 180, 0]}
         onPointerDown={onPointerDown}
         onPointerOver={(e) => {
+          if (terminalHit(e.intersections) !== null) return // o pino de trás fica com o realce
           e.stopPropagation()
           document.body.style.cursor = 'grab'
         }}
@@ -269,6 +273,8 @@ function TerminalDot({ id, position, mark, wiringFrom, onClick }: TerminalDotPro
   return (
     <group position={position}>
       <mesh
+        // Marca de pino: o corpo do componente deixa passar o clique (ver terminalPick.ts).
+        userData={{ terminalId: id }}
         onPointerDown={(e) => {
           if (e.button !== 0) return
           e.stopPropagation() // não arrasta o componente
