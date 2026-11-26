@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-26 — issue #102 (corrente nos fios com cargas animadas).
+Última atualização: 2026-11-26 — issue #104 (barra de cima cabe sem deslizar).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -53,6 +53,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #98   | Pino de trás da resistência rodada (90°/270°) volta a ligar o fio                                                        | E2    | feito  | `fix/pino-rodado`              | PR #99              |
 | #100  | Testes E2E esperam que a cena pare antes de medir (gráfico, barra vertical, etiqueta, mover)                             | E9    | feito  | `fix/teste-grafico`            | PR #101             |
 | #102  | Corrente nos fios: cargas animadas (KCL no core, InstancedMesh, sentido, velocidade, valor no fio)                       | E10   | feito  | `feature/corrente-fios`        | PR #103             |
+| #104  | Barra de cima cabe sem deslizar (1024–1920 px, PT/FR/EN): botões menos usados só com ícone                               | E1    | feito  | `fix/barra-cima`               | PR #105             |
 
 ### Tarefas extra
 
@@ -159,3 +160,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Pino de trás da resistência rodada volta a ligar-se (issue #98)             | #99  |
 | (squash)  | Testes E2E esperam que a cena pare antes de medir (issue #100)              | #101 |
 | (squash)  | Corrente nos fios com cargas animadas (issue #102)                          | #103 |
+| (squash)  | Barra de cima cabe sem deslizar (issue #104)                                | #105 |
