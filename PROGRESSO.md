@@ -151,3 +151,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `36f8293` | Barras de deslocamento da zona livre (issue #90)                            | #91 |
 | `a1214a3` | Pinos de ligação ao estilo do LTspice (issue #93)                           | #94 |
 | (squash)  | Exportar resultados em CSV (issue #92)                                      | #95 |
+| (squash)  | Pino de trás da resistência na vertical volta a ligar-se (issue #ISSUE)     | #PR |
