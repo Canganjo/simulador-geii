@@ -119,9 +119,12 @@ test('gráfico (E10-5): u(t) e i(t) do C1, τ ≈ 0,1 s, cursor e troca para R1'
   await expect(chart).toHaveAttribute('data-component', 'C1')
   await expect(chart.locator('[data-plot="voltage"]')).toBeVisible()
   await expect(chart.locator('[data-plot="current"]')).toBeVisible()
-  // O painel cresceu para o gráfico caber.
-  const panel = await page.getByRole('region', { name: 'Resultados' }).boundingBox()
-  expect(panel?.height ?? 0).toBeGreaterThanOrEqual(300)
+  // O painel cresceu para o gráfico caber. A altura muda com uma animação (transition-[height]):
+  // medir uma só vez logo a seguir apanhava o painel a meio (190–240 px). Espera-se pelo fim.
+  const panel = page.getByRole('region', { name: 'Resultados' })
+  await expect
+    .poll(async () => (await panel.boundingBox())?.height ?? 0)
+    .toBeGreaterThanOrEqual(300)
 
   // τ medido na curva: R·C = 1000 × 100e-6 = 0,1 s (Euler com h = 1 ms dá ≈ 0,1005 s).
   const tau = Number(await chart.getByTestId('chart-tau').getAttribute('data-tau'))
