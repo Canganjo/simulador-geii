@@ -33,6 +33,18 @@ export const en: Messages = {
   'action.reset': 'Reset',
   'action.nodes': 'Nodes',
   'action.nodesHint': 'Show the node number of each terminal (debug)',
+  'action.current': 'Show current',
+  'action.currentHint':
+    'Charges moving along the wires, using the computed current (hover a wire to see its value)',
+
+  // Corrente nos fios (cargas animadas)
+  'current.overcurrent': 'short circuit?',
+  'current.time': 't = {time}',
+  'current.controls': 'Current in wires',
+  'current.conventional': 'Conventional current',
+  'current.electron': 'Electron flow',
+  'current.speed': 'Animation speed',
+  'current.needsRun': 'Click Simulate (or Transient) to see the current.',
 
   'file.confirmDiscard': 'Unsaved changes will be lost. Do you really want to continue?',
   'file.unsaved': 'Unsaved changes',

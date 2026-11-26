@@ -11,8 +11,10 @@ import {
 import { MOUSE } from 'three'
 import type { Component, TerminalId, Vec2 } from '../core/model'
 import { useCircuitStore } from '../store/circuitStore'
-import { useT } from '../ui/i18n'
+import { decimalSeparator, useT } from '../ui/i18n'
+import { useLanguageStore } from '../store/languageStore'
 import { SourceStepper } from '../ui/SourceStepper'
+import { CurrentControls } from '../ui/CurrentControls'
 import { ComponentBox } from './ComponentBox'
 import { terminalMark, wireCounts } from './terminalMarks'
 import { labelBase, labelHeight } from './componentShape'
@@ -45,6 +47,8 @@ import {
 import { CAMERA_POSITION, CAMERA_ZOOM } from './camera'
 import { AnchorProjector } from './ScreenAnchors'
 import { WireView } from './WireView'
+import { ChargeFlow } from './ChargeFlow'
+import { LiveCurrents } from './liveCurrents'
 import { segmentMiddles, wireRoute } from './wireRoute'
 
 /**
@@ -86,6 +90,22 @@ export function Workspace() {
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds])
   // Depois de Simular: LED/lâmpada acendem, componentes com problemas ficam com contorno.
   const simulation = useSimulationStore((s) => s.result)
+  const transient = useSimulationStore((s) => s.transient)
+  // Opção "Mostrar corrente": cargas animadas nos fios, com a corrente calculada pelo solver.
+  const showCurrent = useUiStore((s) => s.showCurrent)
+  const flowDirection = useUiStore((s) => s.flowDirection)
+  const animationSpeed = useUiStore((s) => s.animationSpeed)
+  const currentResults = showCurrent && simulation?.ok ? simulation.results : null
+  const live = useMemo(() => new LiveCurrents(), [])
+  /** Fio (e troço) debaixo do rato: mostra o valor da corrente por cima. */
+  const [hovered, setHovered] = useState<{ wireId: string; segment: number } | null>(null)
+  const currentTip = useRef<HTMLSpanElement>(null)
+  const playbackClock = useRef<HTMLSpanElement>(null)
+  const decimal = decimalSeparator(useLanguageStore((s) => s.language))
+  const onWireHover = (wireId: string, segment: number | null) =>
+    setHovered((now) =>
+      segment !== null ? { wireId, segment } : now?.wireId === wireId ? null : now,
+    )
   const addComponent = useCircuitStore((s) => s.addComponent)
   const select = useCircuitStore((s) => s.select)
   const wires = useCircuitStore((s) => s.wires)
@@ -401,6 +421,8 @@ export function Workspace() {
               selected={w.id === selectedWireId}
               onGrabSegment={onGrabSegment}
               onStraighten={onStraighten}
+              live={currentResults ? live : null}
+              onHover={onWireHover}
             />
           )
         })}
@@ -429,6 +451,27 @@ export function Workspace() {
             visual={visuals.get(c.id) ?? NO_VISUAL}
           />
         ))}
+
+        {currentResults && (
+          <ChargeFlow
+            components={components}
+            wires={wires}
+            routes={routes}
+            results={currentResults}
+            transient={transient}
+            direction={flowDirection}
+            speed={animationSpeed}
+            live={live}
+            hoveredWireId={hovered?.wireId ?? null}
+            tooltip={currentTip}
+            clock={playbackClock}
+            text={{
+              decimal,
+              overcurrent: t('current.overcurrent'),
+              time: t('current.time', { time: '{time}' }),
+            }}
+          />
+        )}
 
         <GroundPicker pickerRef={picker} projectorRef={projector} />
         <AnchorProjector layer={anchorLayer} />
@@ -526,6 +569,26 @@ export function Workspace() {
             />
           ))
         })}
+        {currentResults &&
+          hovered &&
+          (() => {
+            const points = routes.get(hovered.wireId)
+            const middle = points && segmentMiddles(points)[hovered.segment]
+            if (!middle) return null
+            return (
+              <span
+                key={`tip-${hovered.wireId}`}
+                data-anchor={modelToScene(middle, 0.1).join(',')}
+                className="absolute top-0 left-0"
+              >
+                <span
+                  ref={currentTip}
+                  data-testid="wire-current"
+                  className="absolute bottom-2 left-0 -translate-x-1/2 rounded bg-slate-900/90 px-1.5 py-0.5 font-mono text-[11px] whitespace-nowrap text-amber-200 shadow"
+                />
+              </span>
+            )
+          })()}
       </div>
 
       {/* Botões − / + da tensão por cima da fonte DC selecionada (como o botão de regulação de
@@ -570,6 +633,17 @@ export function Workspace() {
         >
           {t('workspace.wiringBefore')} <strong>{wiringLabel}</strong> {t('workspace.wiringAfter')}
         </p>
+      )}
+
+      {showCurrent && <CurrentControls hasResult={currentResults !== null} />}
+
+      {/* Transitório com a corrente à vista: o instante que as cargas estão a mostrar. */}
+      {currentResults && transient && (
+        <span
+          ref={playbackClock}
+          data-testid="current-clock"
+          className="pointer-events-none absolute top-2 right-6 rounded bg-slate-900/85 px-2 py-1 font-mono text-xs text-cyan-200"
+        />
       )}
 
       {view && (

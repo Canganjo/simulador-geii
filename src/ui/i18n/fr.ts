@@ -33,6 +33,18 @@ export const fr: Messages = {
   'action.reset': 'RAZ', // remise à zéro
   'action.nodes': 'Nœuds',
   'action.nodesHint': 'Afficher le numéro du nœud de chaque borne (débogage)',
+  'action.current': 'Afficher le courant',
+  'action.currentHint':
+    'Charges qui circulent dans les fils, avec le courant calculé (survole un fil pour voir la valeur)',
+
+  // Corrente nos fios (cargas animadas)
+  'current.overcurrent': 'court-circuit ?',
+  'current.time': 't = {time}',
+  'current.controls': 'Courant dans les fils',
+  'current.conventional': 'Sens conventionnel',
+  'current.electron': 'Sens des électrons',
+  'current.speed': 'Vitesse de l’animation',
+  'current.needsRun': 'Clique sur Simuler (ou Transitoire) pour voir le courant.',
 
   'file.confirmDiscard':
     'Des modifications non enregistrées vont être perdues. Continuer quand même ?',
