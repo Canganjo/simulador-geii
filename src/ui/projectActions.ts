@@ -95,7 +95,15 @@ export async function saveProjectAs(): Promise<SaveOutcome> {
   }
   // O nome muda ANTES de gravar, para o ficheiro levar o nome novo.
   useCircuitStore.setState({ projectName: projectNameFromFile(handle.name) })
-  await writeText(handle, toProjectFile(currentProject()))
+  try {
+    await writeText(handle, toProjectFile(currentProject()))
+  } catch {
+    // O ficheiro foi escolhido mas não deu para gravar nele (pode ter ficado vazio no disco).
+    // Esquece-o e descarrega uma cópia, com um aviso que diz o que aconteceu.
+    setCurrentFile(null)
+    download('write-failed')
+    return 'downloaded'
+  }
   setCurrentFile(handle)
   useCircuitStore.getState().markSaved()
   useFileStore.getState().notify('saved-as', handle.name)
@@ -103,7 +111,7 @@ export async function saveProjectAs(): Promise<SaveOutcome> {
 }
 
 /** Descarrega `<nome>.geii.json` (vai para a pasta de Transferências do browser). */
-function download(): void {
+function download(kind: 'downloaded' | 'write-failed' = 'downloaded'): void {
   const project = currentProject()
   const blob = new Blob([toProjectFile(project)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -115,7 +123,7 @@ function download(): void {
   // lento, o download chegava a ser cancelado).
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
   useCircuitStore.getState().markSaved()
-  useFileStore.getState().notify('downloaded', link.download)
+  useFileStore.getState().notify(kind, link.download)
 }
 
 /** O browser tem a janela "Guardar como" do sistema? (Sem ela, guardar = descarregar.) */

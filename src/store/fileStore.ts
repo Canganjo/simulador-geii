@@ -9,8 +9,8 @@ import { create } from 'zustand'
  * aqui só fica o nome, que é o que a interface precisa de desenhar.
  */
 
-/** Como acabou o último Guardar. */
-export type SaveNoticeKind = 'saved' | 'saved-as' | 'downloaded'
+/** Como acabou o último Guardar ('write-failed': não gravou no ficheiro escolhido, descarregou uma cópia). */
+export type SaveNoticeKind = 'saved' | 'saved-as' | 'downloaded' | 'write-failed'
 
 export interface SaveNotice {
   kind: SaveNoticeKind

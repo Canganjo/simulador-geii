@@ -63,6 +63,8 @@ export const fr: Messages = {
   'file.saved': 'Enregistré dans {file}',
   'file.savedAs': 'Enregistré sous {file}',
   'file.downloaded': 'Téléchargé : {file} (dossier Téléchargements)',
+  'file.writeFailed':
+    "Impossible d'écrire dans le fichier choisi. Une copie a été téléchargée : {file} (dossier Téléchargements)",
   'file.close': 'Fermer',
 
   'menu.label': 'Menu des composants',

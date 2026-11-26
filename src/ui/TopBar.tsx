@@ -173,10 +173,12 @@ export function TopBar() {
   const unsaved = useCircuitStore(hasUnsavedChanges)
   const fileName = useFileStore((s) => s.fileName)
   const notice = useFileStore((s) => s.notice)
-  // O aviso "Guardado em …" some sozinho ao fim de uns segundos.
+  // O aviso "Guardado em …" some sozinho ao fim de uns segundos; o de falha fica mais tempo.
+  const writeFailed = notice?.kind === 'write-failed'
   useEffect(() => {
     if (!notice) return
-    const timer = setTimeout(() => useFileStore.getState().clearNotice(), 3500)
+    const ms = notice.kind === 'write-failed' ? 10_000 : 3500
+    const timer = setTimeout(() => useFileStore.getState().clearNotice(), ms)
     return () => clearTimeout(timer)
   }, [notice])
   // Dicas que explicam a diferença entre Guardar e Guardar como.
@@ -193,7 +195,9 @@ export function TopBar() {
           ? 'file.saved'
           : notice.kind === 'saved-as'
             ? 'file.savedAs'
-            : 'file.downloaded',
+            : notice.kind === 'write-failed'
+              ? 'file.writeFailed'
+              : 'file.downloaded',
         { file: notice.file },
       )
     : null
@@ -457,9 +461,13 @@ export function TopBar() {
       {noticeText && !fileError && (
         <div
           key={notice?.id}
-          role="status"
+          role={writeFailed ? 'alert' : 'status'}
           data-testid="save-notice"
-          className="absolute top-full left-1/2 z-40 mt-2 -translate-x-1/2 rounded border border-emerald-500/50 bg-slate-900 px-3 py-1.5 text-sm text-emerald-200 shadow-xl shadow-black/40"
+          className={`absolute top-full left-1/2 z-40 mt-2 -translate-x-1/2 rounded border bg-slate-900 px-3 py-1.5 text-sm shadow-xl shadow-black/40 ${
+            writeFailed
+              ? 'border-amber-500/60 text-amber-200'
+              : 'border-emerald-500/50 text-emerald-200'
+          }`}
         >
           {noticeText}
         </div>

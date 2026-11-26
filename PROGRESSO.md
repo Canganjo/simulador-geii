@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-26 — issue #104 (barra de cima cabe sem deslizar).
+Última atualização: 2026-11-26 — issue #106 (Guardar avisa e descarrega uma cópia se a gravação falhar).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -54,6 +54,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #100  | Testes E2E esperam que a cena pare antes de medir (gráfico, barra vertical, etiqueta, mover)                             | E9    | feito  | `fix/teste-grafico`            | PR #101             |
 | #102  | Corrente nos fios: cargas animadas (KCL no core, InstancedMesh, sentido, velocidade, valor no fio)                       | E10   | feito  | `feature/corrente-fios`        | PR #103             |
 | #104  | Barra de cima cabe sem deslizar (1024–1920 px, PT/FR/EN): botões menos usados só com ícone                               | E1    | feito  | `fix/barra-cima`               | PR #105             |
+| #106  | Guardar: se a gravação falhar, aviso âmbar + cópia descarregada (antes ficava um ficheiro vazio)                         | E1    | feito  | `fix/guardar-falha`            | PR #107             |
 
 ### Tarefas extra
 
@@ -161,3 +162,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Testes E2E esperam que a cena pare antes de medir (issue #100)              | #101 |
 | (squash)  | Corrente nos fios com cargas animadas (issue #102)                          | #103 |
 | (squash)  | Barra de cima cabe sem deslizar (issue #104)                                | #105 |
+| (squash)  | Guardar avisa se a gravação falhar (issue #106)                             | #107 |
