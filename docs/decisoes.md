@@ -93,6 +93,59 @@ E10-4: os componentes `capacitor` (C1, C2…) e `inductor` (L1, L2…) entram no
 - **Porquê:** reutiliza a validação, a netlist e o painel do DC; o regime permanente coincide com o
   fim de um transitório longo (verificado nos testes).
 
+## D-011 · 2026-11-16 · Assistente de circuitos (chat que monta o circuito) 🟡 (proposta, validar em reunião)
+
+Ideia: o estudante escreve o que quer, em português, e o circuito aparece sozinho, sem mexer nos fios.
+
+- **Onde fica:** um botão **Assistente** (ícone de mensagem) na barra superior abre uma **janela pequena
+  ao lado da zona livre** (à direita, como o painel de propriedades; no telemóvel, uma gaveta).
+- **Exemplo:** o estudante escreve "três bobinas em série". O assistente responde com o plano ("Vou criar
+  L1, L2 e L3 de 10 mH, ligadas em série") e uma pré-visualização. Botão **Aplicar** → as 3 bobinas e os
+  2 fios aparecem na grelha. Tudo entra num **só passo de desfazer** (Ctrl+Z apaga o que o assistente fez).
+- **Continuar o circuito:** depois pode escrever "acrescenta uma fonte de 12 V, uma resistência de 100 Ω
+  e o GND". O assistente liga as peças novas aos terminais livres do circuito que já existe.
+- **Explicar:** o assistente explica o circuito. Ex.: bobinas em série somam-se, Leq = 10 + 10 + 10 =
+  30 mH. Com 12 V e 100 Ω: τ = L / R = 0,030 / 100 = 0,3 ms; a corrente final é 12 / 100 = 120 mA; ao fim
+  de τ vale 63 % disso, 75,9 mA. Em DC, depois do transitório, a bobina é um fio.
+- **Regra de ouro:** a IA **nunca mexe diretamente no circuito** e **nunca inventa números**.
+  - Ela só propõe uma **lista de ações** em JSON: `addComponent`, `addWire`, `updateParams`,
+    `removeComponent`.
+  - A app verifica a lista com **Zod** e com as regras que já existem (`validateParams`,
+    `validateProject`). Uma ação inválida é recusada, com mensagem.
+  - Os valores U, I, P das explicações vêm sempre do **solver**, nunca do texto da IA.
+- **Plano em duas fases:**
+  1. **Fase 1 – sem IA (regras).** Um intérprete simples reconhece frases previstas: "N <componente> em
+     série / em paralelo", "de <valor>" ("4k7", "10 mH"), "acrescenta …", "liga ao GND". Funciona sem
+     internet, é grátis e é 100 % testável com Vitest. Se não perceber, responde com exemplos de frases.
+  2. **Fase 2 – modelo de IA já existente (LLM, ex.: Claude).** O modelo recebe a frase, o circuito
+     atual (JSON) e o catálogo, e devolve as mesmas ações (por *tool use*). Precisa de um **pequeno
+     servidor intermediário** (ex.: Cloudflare Worker), porque o GitHub Pages só serve ficheiros e a chave
+     da API não pode ficar no código do browser. Limite de pedidos por dia e aviso de que a frase e o
+     circuito são enviados para o serviço de IA.
+- **Código previsto:**
+  - `src/core/assistant/` (puro, sem React): tipos das ações, validação Zod, intérprete da fase 1 e
+    posicionamento automático na grelha;
+  - `src/store/assistantStore.ts`: mensagens do chat e aplicar as ações no `circuitStore`;
+  - `src/ui/AssistantPanel.tsx`: a janela do chat.
+- **Testes previstos:** frase → ações esperadas. Ex.: "três bobinas em série" → 3 bobinas + 2 fios;
+  "fonte de 10 V e duas resistências de 1 kΩ em paralelo com GND" → Simular → 20 mA (teste de referência 3).
+- **Porquê:** é muito mais rápido montar um circuito a escrever do que a arrastar fios, sobretudo no
+  telemóvel. Começar pelas regras dá já uma demonstração que funciona sempre; o LLM vem depois e reutiliza
+  tudo (as mesmas ações, as mesmas validações).
+- **Alternativas consideradas:**
+  - só um chatbot de regras — fácil, mas só percebe frases previstas;
+  - treinar um modelo de *machine learning* nosso — ❌ precisava de milhares de exemplos frase → circuito
+    e semanas de treino, e ficava pior do que um LLM que já existe; não é o foco de um projeto GEII;
+  - deixar o LLM escrever o ficheiro do circuito diretamente — ❌ pode criar circuitos inválidos ou
+    "inventados"; a lista de ações verificadas é mais segura.
+- **Trabalho do Claude Code:** 7 tarefas pequenas (uma issue e um ramo cada), com o prompt pronto, em
+  `docs/plano-simulador-geii.md` (secção "Trabalhar com Claude, Claude Code e outras IAs").
+- **A decidir em reunião:** que serviço de IA (custo), quem paga a chave, e se a fase 2 entra no projeto
+  ou fica como evolução.
+- **Atenção aos nomes:** a bobina e a lâmpada usam as duas o prefixo `L`. Para o assistente perceber
+  "L2" sem confusão, convém dar outro prefixo à lâmpada (ex.: `LP`), como já dizia a nota no fim deste
+  ficheiro.
+
 ## D-010 · 2026-11-16 · Transitório: Euler implícito com passo fixo ✅
 
 Fase 4 do motor (E10): condensador e bobina ao longo do tempo.
@@ -241,6 +294,7 @@ Detalha e alarga a D-004.
 | Fios ortogonais ou curvos              | Ortogonais                                      |
 | Convenções de nomes                    | V1…, GND1…, R1…, S1… (interr.), D1… (LED), L1… (lâmpada) |
 | Formato de gravação e exportações      | Ver D-008 (`.geii.json`, sem resultados, `.cir` primeiro) |
+| Assistente de circuitos (chat)         | Ver D-011 (regras primeiro, depois LLM com servidor intermediário) |
 | Distribuição de funções e calendário   | Pessoa 1/2/3 conforme README; plano de 14 sem. |
 
 Nota sobre os nomes: no SPICE, `L` é a letra das bobinas. Decidido em D-012: a lâmpada e a bobina
