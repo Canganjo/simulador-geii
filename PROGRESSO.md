@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-16 — issue #92 (exportar resultados em CSV).
+Última atualização: 2026-11-26 — issue #98 (pino de trás da resistência rodada).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -49,6 +49,8 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #73   | Fonte DC de bancada: botões + / −, limite de corrente (CV/CC, 3 A), recálculo automático                                 | E10   | feito  | `feature/fonte-regulavel`      | PR #74              |
 | #75   | Menu de componentes: ícones IEC em mosaicos coloridos, valor por omissão, coluna de ícones ao recolher                   | E10   | feito  | `feature/icones-menu`          | PR #76              |
 | #92   | Exportar resultados em CSV (DC e transitório, SI, ";" e vírgula decimal, BOM UTF-8)                                      | E10   | feito  | `feature/exportar-csv`         | PR #95              |
+| #96   | Barra de cima: ícones com cores vivas e Simular com fundo verde                                                          | E10   | feito  | `feature/barra-cores`          | PR #97              |
+| #98   | Pino de trás da resistência rodada (90°/270°) volta a ligar o fio                                                        | E2    | feito  | `fix/pino-rodado`              | PR #99              |
 
 ### Tarefas extra
 
@@ -150,5 +152,6 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | `1e7adfd` | Voltímetro e amperímetro (issue #88)                                        | #89 |
 | `36f8293` | Barras de deslocamento da zona livre (issue #90)                            | #91 |
 | `a1214a3` | Pinos de ligação ao estilo do LTspice (issue #93)                           | #94 |
-| (squash)  | Exportar resultados em CSV (issue #92)                                      | #95 |
-| (squash)  | Pino de trás da resistência na vertical volta a ligar-se (issue #ISSUE)     | #PR |
+| `1b118c2` | Exportar resultados em CSV (issue #92)                                      | #95 |
+| (squash)  | Barra de cima com ícones coloridos (issue #96)                              | #97 |
+| (squash)  | Pino de trás da resistência rodada volta a ligar-se (issue #98)             | #99 |
