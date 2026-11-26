@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { settledBox } from './estavel.ts'
 import { sx, sy } from './grelha.ts'
 
 test('a app abre e mostra o título', async ({ page }) => {
@@ -243,6 +244,8 @@ test('mover: arrastar o componente muda a posição; Ctrl+Z volta atrás num só
   const props = page.getByRole('complementary', { name: 'Propriedades' })
   const position = props.getByTestId('selected-position')
   await expect(position).toHaveText('(0, 0)')
+  // Agarrar a R1 só depois de ela parar no centro (num PC lento ainda pode estar a chegar).
+  await settledBox(page.getByTestId('workspace').locator('[data-terminal="R1:a"]'))
 
   const { x, y } = await sceneCenter(page)
   await page.mouse.move(x, y)
@@ -727,9 +730,9 @@ test('a etiqueta (R1) arrasta-se para outro sítio; Ctrl+Z e duplo clique repõe
     .click()
   const label = scene.locator('[data-component-label="R1"]')
   const terminal = scene.locator('[data-terminal="R1:a"]')
-  const before = await label.boundingBox()
-  const pinBefore = await terminal.boundingBox()
-  if (!before || !pinBefore) throw new Error('R1 não encontrado')
+  // Medir só depois de a R1 acabar de chegar ao lugar (senão o pino "anda" sem lhe tocarem).
+  const pinBefore = await settledBox(terminal)
+  const before = await settledBox(label)
 
   // Arrastar a etiqueta 2 quadrados para a direita (pelo rato, como um estudante).
   const x = before.x + before.width / 2
