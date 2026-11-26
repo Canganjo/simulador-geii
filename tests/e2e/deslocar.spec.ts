@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { settledBox } from './estavel.ts'
 
 /**
  * Barras de deslocamento da zona livre: a horizontal (em baixo) leva a vista para a esquerda ou
@@ -15,6 +16,12 @@ async function labelCenter(page: Page, name: string) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
+/** Como `labelCenter`, mas espera que a etiqueta pare de mexer (ver `settledBox`). */
+async function settledLabelCenter(page: Page, name: string) {
+  const box = await settledBox(scene(page).locator(`[data-component-label="${name}"]`))
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+}
+
 async function thumbCenter(page: Page, axis: 'x' | 'z') {
   const box = await page.locator(`[data-scrollbar="${axis}"] [data-scrollbar-thumb]`).boundingBox()
   if (!box) throw new Error(`cursor da barra ${axis} não encontrado`)
@@ -28,7 +35,7 @@ test('barra horizontal: arrastar para a direita leva os componentes para a esque
   await menu(page).getByRole('button', { name: 'Resistência' }).click()
   const bar = page.getByRole('scrollbar', { name: /esquerda ou para a direita/ })
   await expect(bar).toBeVisible()
-  const before = await labelCenter(page, 'R1')
+  const before = await settledLabelCenter(page, 'R1')
   const value = Number(await bar.getAttribute('aria-valuenow'))
 
   const t = await thumbCenter(page, 'x')
@@ -55,7 +62,8 @@ test('barra vertical: clique na calha por baixo do cursor leva os componentes pa
   await page.goto('/')
   await menu(page).getByRole('button', { name: 'Resistência' }).click()
   const bar = page.getByRole('scrollbar', { name: /cima ou para baixo/ })
-  const before = await labelCenter(page, 'R1')
+  await expect(bar).toBeVisible()
+  const before = await settledLabelCenter(page, 'R1')
 
   const track = await bar.boundingBox()
   const thumb = await page.locator('[data-scrollbar="z"] [data-scrollbar-thumb]').boundingBox()
