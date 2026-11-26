@@ -20,18 +20,23 @@ interface FakeDisk {
  * Instala as janelas falsas (código que corre no browser, por isso vai como texto).
  * window.__answer = nome escolhido pelo "utilizador", ou 'cancel' para carregar em Cancelar.
  * window.__openText = conteúdo do ficheiro que a janela "Abrir" devolve.
+ * window.__failWrite = true faz a gravação falhar (disco cheio, ficheiro bloqueado…).
  */
 const FAKE_PICKERS = `
   const disk = { saveDialogs: [], writes: [] }
   window.__disk = disk
   window.__answer = 'divisor 12V.geii.json'
   window.__openText = ''
+  window.__failWrite = false
   const handle = (name) => ({
     name,
     createWritable: async () => {
       let text = ''
       return {
-        write: async (data) => { text += data },
+        write: async (data) => {
+          if (window.__failWrite) throw new DOMException('sem espaço', 'QuotaExceededError')
+          text += data
+        },
         close: async () => { disk.writes.push({ file: name, text }) },
       }
     },
@@ -112,6 +117,37 @@ test('Cancelar na janela não grava nada e as alterações continuam por guardar
   await expect.poll(async () => (await disk(page)).saveDialogs.length).toBe(1)
   expect((await disk(page)).writes).toEqual([])
   await expect(page.getByTestId('unsaved-badge')).toBeVisible()
+})
+
+test('Se a gravação falhar: aviso, cópia descarregada, e o próximo Guardar volta a perguntar', async ({
+  page,
+}) => {
+  await fakePickers(page)
+  await page.goto('/')
+  await addResistor(page)
+  await page.evaluate('window.__failWrite = true')
+  const download = page.waitForEvent('download')
+  await button(page, 'Guardar').click()
+  // A cópia descarregada leva o nome do ficheiro escolhido, e o aviso diz o que aconteceu.
+  expect((await download).suggestedFilename()).toBe('divisor-12v.geii.json')
+  const notice = page.getByTestId('save-notice')
+  await expect(notice).toHaveText(
+    'Não foi possível gravar no ficheiro escolhido. Foi descarregada uma cópia: divisor-12v.geii.json (pasta Transferências)',
+  )
+  await expect(notice).toHaveAttribute('role', 'alert')
+  expect((await disk(page)).writes).toEqual([])
+  // O ficheiro que falhou é esquecido: a barra não o mostra como atual.
+  await expect(page.getByTestId('current-file')).toHaveText('Ainda não guardado')
+
+  // Com o disco bom outra vez, o Guardar pergunta de novo onde guardar e grava.
+  await page.evaluate("window.__failWrite = false; window.__answer = 'outro.geii.json'")
+  await addResistor(page)
+  await button(page, 'Guardar').click()
+  await expect.poll(async () => (await disk(page)).writes.length).toBe(1)
+  const d = await disk(page)
+  expect(d.saveDialogs).toHaveLength(2)
+  expect(d.writes[0]?.file).toBe('outro.geii.json')
+  await expect(page.getByTestId('current-file')).toHaveText('outro.geii.json')
 })
 
 test('Abrir com a janela: depois, Guardar grava no ficheiro aberto', async ({ page }) => {

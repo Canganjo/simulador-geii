@@ -68,6 +68,8 @@ export const pt = {
   'file.saved': 'Guardado em {file}',
   'file.savedAs': 'Guardado como {file}',
   'file.downloaded': 'Descarregado: {file} (pasta Transferências)',
+  'file.writeFailed':
+    'Não foi possível gravar no ficheiro escolhido. Foi descarregada uma cópia: {file} (pasta Transferências)',
   'file.close': 'Fechar',
 
   // Menu de componentes

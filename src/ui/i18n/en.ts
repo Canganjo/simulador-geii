@@ -61,6 +61,8 @@ export const en: Messages = {
   'file.saved': 'Saved to {file}',
   'file.savedAs': 'Saved as {file}',
   'file.downloaded': 'Downloaded: {file} (Downloads folder)',
+  'file.writeFailed':
+    'Could not write to the chosen file. A copy was downloaded: {file} (Downloads folder)',
   'file.close': 'Close',
 
   'menu.label': 'Components menu',
