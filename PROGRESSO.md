@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-26 — issue #98 (pino de trás da resistência rodada).
+Última atualização: 2026-11-26 — issue #100 (testes E2E esperam que a cena pare antes de medir).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -51,6 +51,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #92   | Exportar resultados em CSV (DC e transitório, SI, ";" e vírgula decimal, BOM UTF-8)                                      | E10   | feito  | `feature/exportar-csv`         | PR #95              |
 | #96   | Barra de cima: ícones com cores vivas e Simular com fundo verde                                                          | E10   | feito  | `feature/barra-cores`          | PR #97              |
 | #98   | Pino de trás da resistência rodada (90°/270°) volta a ligar o fio                                                        | E2    | feito  | `fix/pino-rodado`              | PR #99              |
+| #100  | Testes E2E esperam que a cena pare antes de medir (gráfico, barra vertical, etiqueta, mover)                             | E9    | feito  | `fix/teste-grafico`            | PR #101             |
 
 ### Tarefas extra
 
@@ -100,58 +101,59 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 
 ## Já integrado no `main`
 
-| Commit    | O quê                                                                       | PR  |
-| --------- | --------------------------------------------------------------------------- | --- |
-| `e4e23e2` | Tipos base, netlist, Gauss, solver MNA DC + testes                          | #1  |
-| `66b7a66` | Layout E1: barra, menu recolhível, cena ortográfica, botão de conta         | #2  |
-| `7ff0fcd` | `.gitignore` + PROGRESSO.md → tag `v0.1` (fim da E0)                        | #8  |
-| `d175b3a` | Painéis de propriedades e resultados recolhíveis (Tarefa 3)                 | #9  |
-| `e18e08f` | Testes de referência 1 a 5 com tolerância de 0,1 % (Tarefa 4)               | #10 |
-| `4c05f6c` | Licença "todos os direitos reservados" (tarefa extra)                       | #11 |
-| `ba0a3de` | Decisão D-008: formatos de ficheiro e distribuição (Tarefa 5)               | #12 |
-| `8c622d7` | Biblioteca MVP: catálogo, createComponent, validateParams (T6)              | #13 |
-| `ad6ec46` | Grafo: terminais ligados → nós elétricos (Tarefa 7)                         | #14 |
-| `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)               | #18 |
-| `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)                     | #19 |
-| `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17)         | #20 |
-| `2d4617e` | Painéis redimensionáveis (tarefa extra)                                     | #21 |
-| `44e3b7e` | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)            | #22 |
-| `207fe51` | Arrastar componentes do menu para a zona livre (issue #5)                   | #23 |
-| `ff127e2` | Selecionar, mover, rodar, duplicar e apagar (issue #6)                      | #24 |
-| `74e8349` | Ligar fios entre terminais (issue #25)                                      | #26 |
-| `ff4c1af` | Layout em telemóvel (issue #27)                                             | #28 |
-| `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                                  | #30 |
-| `213cf77` | Plano do botão Simular no PROGRESSO (docs)                                  | #31 |
-| `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                           | #33 |
-| `49897f0` | Editar os valores e o nome dos componentes (issue #35)                      | #36 |
-| `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)                       | #38 |
-| `a7dfb8c` | O nome por cima do componente aparece sempre (issue #39)                    | #40 |
-| `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)                 | #42 |
-| `5a7140e` | Opção de debug: número do nó em cada terminal (issue #43)                   | #44 |
-| `8149abd` | Critérios v1.0: testes de referência e demonstração (issue #45)             | #46 |
-| `83a2341` | Versão v1.0 do MVP DC: tag e Release (issue #47)                            | #48 |
-| `56054e8` | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)               | #50 |
-| `a0a99ef` | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52 |
-| `1f80066` | Motor do transitório: condensador e bobina (issue #53)                      | #56 |
-| `d158115` | Selecionar vários componentes e apagá-los de uma vez (issue #54)            | #57 |
-| `1248111` | Guardar e Guardar como… perguntando onde guardar (issue #55)                | #58 |
-| `641e6ee` | Preparar os modelos 3D do Blender (issue #59)                               | #60 |
-| `f2eb5dd` | Organizar os fios: arrastar troços (issue #61)                              | #62 |
-| `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64 |
-| `2fa047f` | E10-4: condensador e bobina + Transitório (issue #65)                       | #66 |
-| `fd9e495` | Câmara inclinada e modelos como no mockup (issue #67)                       | #68 |
-| `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70 |
-| `de03650` | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74 |
-| `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72 |
-| `69d6475` | Ícones modernos no menu de componentes (issue #75)                          | #76 |
-| `8ed3532` | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78 |
-| `71e5d9b` | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80 |
-| `c1aedd0` | Propriedades em secções + potência da resistência em lista (issue #81)      | #82 |
-| `925fafc` | Zona livre: sombras, grelha técnica, juntas nos fios (issue #83)            | #84 |
-| `a161ff5` | Modelos 3D do condensador e da bobina (issue #85)                           | #86 |
-| `1e7adfd` | Voltímetro e amperímetro (issue #88)                                        | #89 |
-| `36f8293` | Barras de deslocamento da zona livre (issue #90)                            | #91 |
-| `a1214a3` | Pinos de ligação ao estilo do LTspice (issue #93)                           | #94 |
-| `1b118c2` | Exportar resultados em CSV (issue #92)                                      | #95 |
-| (squash)  | Barra de cima com ícones coloridos (issue #96)                              | #97 |
-| (squash)  | Pino de trás da resistência rodada volta a ligar-se (issue #98)             | #99 |
+| Commit    | O quê                                                                       | PR   |
+| --------- | --------------------------------------------------------------------------- | ---- |
+| `e4e23e2` | Tipos base, netlist, Gauss, solver MNA DC + testes                          | #1   |
+| `66b7a66` | Layout E1: barra, menu recolhível, cena ortográfica, botão de conta         | #2   |
+| `7ff0fcd` | `.gitignore` + PROGRESSO.md → tag `v0.1` (fim da E0)                        | #8   |
+| `d175b3a` | Painéis de propriedades e resultados recolhíveis (Tarefa 3)                 | #9   |
+| `e18e08f` | Testes de referência 1 a 5 com tolerância de 0,1 % (Tarefa 4)               | #10  |
+| `4c05f6c` | Licença "todos os direitos reservados" (tarefa extra)                       | #11  |
+| `ba0a3de` | Decisão D-008: formatos de ficheiro e distribuição (Tarefa 5)               | #12  |
+| `8c622d7` | Biblioteca MVP: catálogo, createComponent, validateParams (T6)              | #13  |
+| `ad6ec46` | Grafo: terminais ligados → nós elétricos (Tarefa 7)                         | #14  |
+| `9c7feb4` | Netlist: projeto → netlist, teste de referência 7 (issue #15)               | #18  |
+| `1121d00` | Validações: erros e avisos antes do cálculo (issue #16)                     | #19  |
+| `67328b4` | LED (Vf + Rs) e simulateDc: testes de referência 1–7 OK (issue #17)         | #20  |
+| `2d4617e` | Painéis redimensionáveis (tarefa extra)                                     | #21  |
+| `44e3b7e` | Estado do circuito: Zustand + zundo, Desfazer/Refazer (issue #4)            | #22  |
+| `207fe51` | Arrastar componentes do menu para a zona livre (issue #5)                   | #23  |
+| `ff127e2` | Selecionar, mover, rodar, duplicar e apagar (issue #6)                      | #24  |
+| `74e8349` | Ligar fios entre terminais (issue #25)                                      | #26  |
+| `ff4c1af` | Layout em telemóvel (issue #27)                                             | #28  |
+| `7515b09` | Trocar de língua: PT · FR · EN (issue #29)                                  | #30  |
+| `213cf77` | Plano do botão Simular no PROGRESSO (docs)                                  | #31  |
+| `618d566` | Botão Simular e resultados U, I, R, P (issue #32)                           | #33  |
+| `49897f0` | Editar os valores e o nome dos componentes (issue #35)                      | #36  |
+| `057d724` | Novo, Abrir e Guardar projetos .geii.json (issue #37)                       | #38  |
+| `a7dfb8c` | O nome por cima do componente aparece sempre (issue #39)                    | #40  |
+| `f64c041` | LED e lâmpada acendem na cena; erros destacados (issue #41)                 | #42  |
+| `5a7140e` | Opção de debug: número do nó em cada terminal (issue #43)                   | #44  |
+| `8149abd` | Critérios v1.0: testes de referência e demonstração (issue #45)             | #46  |
+| `83a2341` | Versão v1.0 do MVP DC: tag e Release (issue #47)                            | #48  |
+| `56054e8` | Díodo real (Shockley) com Newton-Raphson no motor (issue #49)               | #50  |
+| `a0a99ef` | Díodo na interface: menu, cena, propriedades, resultados e JSON (issue #51) | #52  |
+| `1f80066` | Motor do transitório: condensador e bobina (issue #53)                      | #56  |
+| `d158115` | Selecionar vários componentes e apagá-los de uma vez (issue #54)            | #57  |
+| `1248111` | Guardar e Guardar como… perguntando onde guardar (issue #55)                | #58  |
+| `641e6ee` | Preparar os modelos 3D do Blender (issue #59)                               | #60  |
+| `f2eb5dd` | Organizar os fios: arrastar troços (issue #61)                              | #62  |
+| `eea4a3e` | Modelos 3D dos 7 componentes feitos no Blender (issue #63)                  | #64  |
+| `2fa047f` | E10-4: condensador e bobina + Transitório (issue #65)                       | #66  |
+| `fd9e495` | Câmara inclinada e modelos como no mockup (issue #67)                       | #68  |
+| `72f497b` | E10-5: gráfico u(t) / i(t) (issue #69)                                      | #70  |
+| `de03650` | Fonte DC regulável: + / −, CV/CC (issue #73)                                | #74  |
+| `102b4d5` | Guardar vs Guardar como: ficheiro atual na barra + avisos (issue #71)       | #72  |
+| `69d6475` | Ícones modernos no menu de componentes (issue #75)                          | #76  |
+| `8ed3532` | Clicar no interruptor abre/fecha + modelo aberto/fechado (issue #77)        | #78  |
+| `71e5d9b` | Etiquetas móveis (arrastar o nome do componente) (issue #79)                | #80  |
+| `c1aedd0` | Propriedades em secções + potência da resistência em lista (issue #81)      | #82  |
+| `925fafc` | Zona livre: sombras, grelha técnica, juntas nos fios (issue #83)            | #84  |
+| `a161ff5` | Modelos 3D do condensador e da bobina (issue #85)                           | #86  |
+| `1e7adfd` | Voltímetro e amperímetro (issue #88)                                        | #89  |
+| `36f8293` | Barras de deslocamento da zona livre (issue #90)                            | #91  |
+| `a1214a3` | Pinos de ligação ao estilo do LTspice (issue #93)                           | #94  |
+| `1b118c2` | Exportar resultados em CSV (issue #92)                                      | #95  |
+| (squash)  | Barra de cima com ícones coloridos (issue #96)                              | #97  |
+| (squash)  | Pino de trás da resistência rodada volta a ligar-se (issue #98)             | #99  |
+| (squash)  | Testes E2E esperam que a cena pare antes de medir (issue #100)              | #101 |
