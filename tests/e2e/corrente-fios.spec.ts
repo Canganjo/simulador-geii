@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { settledBox } from './estavel.ts'
 import { sx, sy } from './grelha.ts'
 
 /**
@@ -10,8 +11,7 @@ const scene = (page: Page) => page.getByTestId('workspace')
 const menu = (page: Page) => page.getByRole('complementary', { name: 'Menu de componentes' })
 
 async function anchor(page: Page, selector: string) {
-  const box = await scene(page).locator(selector).first().boundingBox()
-  if (!box) throw new Error(`âncora ${selector} não encontrada`)
+  const box = await settledBox(scene(page).locator(selector).first())
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
