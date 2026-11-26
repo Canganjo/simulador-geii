@@ -1,6 +1,16 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { FlowDirection } from '../core/wires'
 import { clampPanelSize, PANEL_LIMITS, type ResizablePanel } from './panelSizes'
+
+/** Limites do cursor "Velocidade da animação" (1 = normal). */
+export const ANIMATION_SPEED_LIMITS = { min: 0.25, max: 4, default: 1 } as const
+
+/** Velocidade da animação sempre dentro dos limites (valor estranho → normal). */
+export function clampAnimationSpeed(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return ANIMATION_SPEED_LIMITS.default
+  return Math.min(Math.max(value, ANIMATION_SPEED_LIMITS.min), ANIMATION_SPEED_LIMITS.max)
+}
 
 /**
  * Estado da INTERFACE (não do circuito): que painéis estão abertos e com que tamanho.
@@ -22,6 +32,15 @@ interface UiState {
   /** Opção de debug (E3): mostrar o número do nó elétrico ao lado de cada terminal. */
   showNodes: boolean
   toggleNodes: () => void
+  /** Mostrar a corrente nos fios: cargas animadas, cor do fio e valor ao passar o rato. */
+  showCurrent: boolean
+  toggleCurrent: () => void
+  /** Sentido das cargas: convencional (+ → −) ou dos eletrões (− → +). */
+  flowDirection: FlowDirection
+  setFlowDirection: (direction: FlowDirection) => void
+  /** Cursor "Velocidade da animação" (multiplica a velocidade das cargas). */
+  animationSpeed: number
+  setAnimationSpeed: (speed: number) => void
 }
 
 const DEFAULT_SIZES: Record<ResizablePanel, number> = {
@@ -38,6 +57,9 @@ export const useUiStore = create<UiState>()(
       resultsOpen: true,
       sizes: { ...DEFAULT_SIZES },
       showNodes: false,
+      showCurrent: false,
+      flowDirection: 'conventional',
+      animationSpeed: ANIMATION_SPEED_LIMITS.default,
       toggleMenu: () => set((s) => ({ menuOpen: !s.menuOpen })),
       toggleProperties: () => set((s) => ({ propertiesOpen: !s.propertiesOpen })),
       toggleResults: () => set((s) => ({ resultsOpen: !s.resultsOpen })),
@@ -48,16 +70,31 @@ export const useUiStore = create<UiState>()(
       resetPanelSize: (panel) =>
         set((s) => ({ sizes: { ...s.sizes, [panel]: PANEL_LIMITS[panel].default } })),
       toggleNodes: () => set((s) => ({ showNodes: !s.showNodes })),
+      toggleCurrent: () => set((s) => ({ showCurrent: !s.showCurrent })),
+      setFlowDirection: (flowDirection) => set({ flowDirection }),
+      setAnimationSpeed: (speed) => set({ animationSpeed: clampAnimationSpeed(speed) }),
     }),
     {
       name: 'simulador-geii:interface',
       // Só se guardam os valores, não as funções.
-      partialize: ({ menuOpen, propertiesOpen, resultsOpen, sizes, showNodes }) => ({
+      partialize: ({
         menuOpen,
         propertiesOpen,
         resultsOpen,
         sizes,
         showNodes,
+        showCurrent,
+        flowDirection,
+        animationSpeed,
+      }) => ({
+        menuOpen,
+        propertiesOpen,
+        resultsOpen,
+        sizes,
+        showNodes,
+        showCurrent,
+        flowDirection,
+        animationSpeed,
       }),
       // Um valor guardado estranho (ficheiro antigo, mexido à mão) volta aos limites.
       merge: (persisted, current) => {
@@ -67,7 +104,15 @@ export const useUiStore = create<UiState>()(
           const value = saved.sizes?.[panel]
           if (typeof value === 'number') sizes[panel] = clampPanelSize(panel, value)
         }
-        return { ...current, ...saved, sizes, showNodes: saved.showNodes === true }
+        return {
+          ...current,
+          ...saved,
+          sizes,
+          showNodes: saved.showNodes === true,
+          showCurrent: saved.showCurrent === true,
+          flowDirection: saved.flowDirection === 'electron' ? 'electron' : 'conventional',
+          animationSpeed: clampAnimationSpeed(saved.animationSpeed),
+        }
       },
     },
   ),

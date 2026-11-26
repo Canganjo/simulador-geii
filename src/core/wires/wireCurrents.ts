@@ -186,18 +186,34 @@ export function wireCurrentsAt(
   model: WireFlowModel,
   currentOf: (componentId: string) => number | undefined,
 ): Map<string, number> {
-  const injection = model.sources.map((s) =>
-    s.componentId === null ? 0 : s.sign * (currentOf(s.componentId) ?? 0),
-  )
+  const out = new Float64Array(model.wires.length)
+  wireCurrentsInto(model, currentOf, new Float64Array(model.sources.length), out)
   const result = new Map<string, number>()
-  for (const flow of model.wires) {
+  model.wires.forEach((flow, i) => result.set(flow.wireId, out[i] ?? 0))
+  return result
+}
+
+/**
+ * O mesmo que `wireCurrentsAt`, mas escreve em vetores já criados (`out[i]` = fio
+ * `model.wires[i]`) e não cria nenhum objeto: é o que a animação chama a cada imagem.
+ * `injection` é um vetor de trabalho com `model.sources.length` posições.
+ */
+export function wireCurrentsInto(
+  model: WireFlowModel,
+  currentOf: (componentId: string) => number | undefined,
+  injection: Float64Array,
+  out: Float64Array,
+): void {
+  model.sources.forEach((s, k) => {
+    injection[k] = s.componentId === null ? 0 : s.sign * (currentOf(s.componentId) ?? 0)
+  })
+  model.wires.forEach((flow, i) => {
     let current = 0
     for (let k = 0; k < flow.terms.length; k++) {
       current += (flow.weights[k] ?? 0) * (injection[flow.terms[k] ?? -1] ?? 0)
     }
-    result.set(flow.wireId, current + 0) // + 0: −0 → 0
-  }
-  return result
+    out[i] = current + 0 // + 0: −0 → 0
+  })
 }
 
 /** Atalho: modelo + resultados de uma simulação DC (ou do último instante do transitório). */
