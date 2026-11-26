@@ -13,6 +13,7 @@ import {
   Square,
   Undo2,
   X,
+  Zap,
   type LucideIcon,
 } from 'lucide-react'
 import { useStore } from 'zustand'
@@ -146,6 +147,8 @@ export function TopBar() {
   const hasResult = useSimulationStore((s) => s.result !== null)
   const showNodes = useUiStore((s) => s.showNodes)
   const toggleNodes = useUiStore((s) => s.toggleNodes)
+  const showCurrent = useUiStore((s) => s.showCurrent)
+  const toggleCurrent = useUiStore((s) => s.toggleCurrent)
   const { run, clear } = useSimulationStore.getState()
   const unsaved = useCircuitStore(hasUnsavedChanges)
   const fileName = useFileStore((s) => s.fileName)
@@ -310,6 +313,15 @@ export function TopBar() {
         disabled: false,
         pressed: showNodes,
         tone: 'fuchsia',
+      },
+      {
+        label: t('action.current'),
+        hint: t('action.currentHint'),
+        icon: Zap,
+        onClick: toggleCurrent,
+        disabled: false,
+        pressed: showCurrent,
+        tone: 'amber',
       },
     ],
   ]

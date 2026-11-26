@@ -39,6 +39,18 @@ export const pt = {
   'action.reset': 'Reset',
   'action.nodes': 'Nós',
   'action.nodesHint': 'Mostrar o número do nó de cada terminal (debug)',
+  'action.current': 'Mostrar corrente',
+  'action.currentHint':
+    'Cargas a andar nos fios, com a corrente calculada (passa o rato num fio para ver o valor)',
+
+  // Corrente nos fios (cargas animadas)
+  'current.overcurrent': 'curto-circuito?',
+  'current.time': 't = {time}',
+  'current.controls': 'Corrente nos fios',
+  'current.conventional': 'Sentido convencional',
+  'current.electron': 'Sentido dos eletrões',
+  'current.speed': 'Velocidade da animação',
+  'current.needsRun': 'Clica em Simular (ou Transitório) para ver a corrente.',
 
   // Ficheiros de projeto (Novo, Abrir, Guardar)
   'file.confirmDiscard': 'Há alterações por guardar que se vão perder. Queres mesmo continuar?',

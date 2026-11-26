@@ -2,7 +2,7 @@
 
 Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/Acompanhamento_Simulador_GEII.xlsx`.
 
-Última atualização: 2026-11-26 — issue #100 (testes E2E esperam que a cena pare antes de medir).
+Última atualização: 2026-11-26 — issue #102 (corrente nos fios com cargas animadas).
 
 | #   | Tarefa                                             | Etapa | Estado | Ramo                          | PR / issue                       |
 | --- | -------------------------------------------------- | ----- | ------ | ----------------------------- | -------------------------------- |
@@ -52,6 +52,7 @@ Atualizado no fim de cada tarefa (regra do CLAUDE.md). Visão por etapa: `docs/A
 | #96   | Barra de cima: ícones com cores vivas e Simular com fundo verde                                                          | E10   | feito  | `feature/barra-cores`          | PR #97              |
 | #98   | Pino de trás da resistência rodada (90°/270°) volta a ligar o fio                                                        | E2    | feito  | `fix/pino-rodado`              | PR #99              |
 | #100  | Testes E2E esperam que a cena pare antes de medir (gráfico, barra vertical, etiqueta, mover)                             | E9    | feito  | `fix/teste-grafico`            | PR #101             |
+| #102  | Corrente nos fios: cargas animadas (KCL no core, InstancedMesh, sentido, velocidade, valor no fio)                       | E10   | feito  | `feature/corrente-fios`        | PR #103             |
 
 ### Tarefas extra
 
@@ -157,3 +158,4 @@ Valores confirmados pelos testes `referencia.spec.ts` (circuito montado pela int
 | (squash)  | Barra de cima com ícones coloridos (issue #96)                              | #97  |
 | (squash)  | Pino de trás da resistência rodada volta a ligar-se (issue #98)             | #99  |
 | (squash)  | Testes E2E esperam que a cena pare antes de medir (issue #100)              | #101 |
+| (squash)  | Corrente nos fios com cargas animadas (issue #102)                          | #103 |

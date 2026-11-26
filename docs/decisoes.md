@@ -7,6 +7,22 @@ Estados: ✅ decidido · 🟡 a validar em reunião · ❌ abandonado.
 
 ---
 
+## D-017 · 2026-11-26 · Corrente nos fios: KCL no core e velocidade em escala logarítmica ✅
+
+- **Corrente de cada fio:** o motor MNA não a dá (os fios são um só nó). Deduz-se em
+  `src/core/wires` pela lei dos nós. Numa malha só de fios, a repartição é a de fios reais com
+  resistência proporcional ao comprimento. Tudo é linear: a matriz "correntes dos componentes →
+  correntes nos fios" calcula-se uma vez por circuito e, no transitório, aplica-se a cada instante.
+- **Velocidade das cargas:** escala logarítmica de |I| (1 µA → 0,4 células/s, 10 A → 4 células/s,
+  limite máximo), sem a secção do fio nem a tensão. A velocidade real de deriva (frações de mm/s) não
+  se veria; a escala é pedagógica e está explicada em `docs/corrente-nos-fios.md`.
+- **Curto-circuito:** o fio pisca acima de 1 A (valor fixo).
+- **Porquê:** a app tem de ficar simples para o estudante. Só há duas opções (sentido convencional
+  ou dos eletrões, e velocidade da animação).
+- **Alternativas consideradas:** velocidade proporcional a I (1 mA ficava parado e 10 A saía do
+  ecrã); velocidade baseada em I / secção, com a secção escolhida em cada fio (mais fiel à física,
+  mas mais uma coisa para o estudante configurar; recusado).
+
 ## D-016 · 2026-11-16 · Voltímetro e amperímetro como resistências (10 MΩ e 1 mΩ) ✅
 
 - **Modelo:** o voltímetro entra na netlist como uma resistência de 10 MΩ entre + e − (valor típico
